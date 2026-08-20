@@ -1,0 +1,51 @@
+.historial h2 {
+  margin: 0 0 1.25rem 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.historial-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #ffffff;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+}
+
+.historial-table th {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  background-color: #f9fafb;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #6b7280;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.historial-table td {
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+  color: #111827;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.historial-table tr:last-child td {
+  border-bottom: none;
+}
+
+.severity-tag {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  color: #ffffff;
+}
+
+.severity-verde { background-color: #22c55e; }
+.severity-amarillo { background-color: #eab308; }
+.severity-naranja { background-color: #f97316; }
+.severity-rojo { background-color: #ef4444; }

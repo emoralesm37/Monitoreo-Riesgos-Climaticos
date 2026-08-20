@@ -1,1 +1,37 @@
-<p>sensores works!</p>
+<div class="sensores">
+  <div class="sensores-header">
+    <h2>Sensores</h2>
+    <button type="button" class="btn-primary">+ Nuevo sensor</button>
+  </div>
+
+  <table class="sensores-table">
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Tipo</th>
+        <th>Comunidad</th>
+        <th>Último valor</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (sensor of sensores; track sensor.sensorId) {
+        <tr>
+          <td>{{ sensor.name }}</td>
+          <td>{{ sensor.sensorType }}</td>
+          <td>{{ sensor.community }}</td>
+          <td>{{ sensor.lastValue }} {{ sensor.unit }}</td>
+          <td>
+            <span class="status" [class.active]="sensor.isActive">
+              {{ sensor.isActive ? 'Activo' : 'Inactivo' }}
+            </span>
+          </td>
+          <td>
+            <button type="button" class="btn-link">Editar</button>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

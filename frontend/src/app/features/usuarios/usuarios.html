@@ -1,1 +1,45 @@
-<p>usuarios works!</p>
+<div class="usuarios">
+  <div class="usuarios-header">
+    <h2>Usuarios</h2>
+    <button type="button" class="btn-primary">+ Nuevo usuario</button>
+  </div>
+
+  <table class="usuarios-table">
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Email</th>
+        <th>Rol</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (usuario of usuarios; track usuario.id) {
+        <tr>
+          <td>{{ usuario.nombre }}</td>
+          <td>{{ usuario.email }}</td>
+          <td>
+            <span class="rol-tag" [class.admin]="usuario.rol === 'Admin'">
+              {{ usuario.rol }}
+            </span>
+          </td>
+          <td>
+            <button type="button" class="btn-link">Editar</button>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+
+  <div class="bitacora-section">
+    <h2>Bitácora reciente</h2>
+    <ul class="bitacora-list">
+      @for (log of bitacora; track log.id) {
+        <li>
+          <span class="bitacora-fecha">{{ log.fecha }}</span>
+          <span>{{ log.usuario }} — {{ log.accion }}</span>
+        </li>
+      }
+    </ul>
+  </div>
+</div>

@@ -1,1 +1,30 @@
-<p>historial works!</p>
+<div class="historial">
+  <h2>Historial de eventos</h2>
+
+  <table class="historial-table">
+    <thead>
+      <tr>
+        <th>Fecha y hora</th>
+        <th>Fenómeno</th>
+        <th>Sensor</th>
+        <th>Comunidad</th>
+        <th>Severidad</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (evento of eventos; track evento.id) {
+        <tr>
+          <td>{{ evento.fecha }}</td>
+          <td>{{ evento.fenomeno }}</td>
+          <td>{{ evento.sensorName }}</td>
+          <td>{{ evento.community }}</td>
+          <td>
+            <span class="severity-tag" [class]="'severity-' + evento.severity.toLowerCase()">
+              {{ evento.severity }}
+            </span>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
