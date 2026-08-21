@@ -16,18 +16,47 @@ public sealed class GlobalExceptionHandler(
             "Ocurrió una excepción no controlada. TraceId: {TraceId}",
             httpContext.TraceIdentifier);
 
-        httpContext.Response.StatusCode =
-            StatusCodes.Status500InternalServerError;
+        var statusCode = exception switch
+        {
+            ArgumentException =>
+                StatusCodes.Status400BadRequest,
+
+            KeyNotFoundException =>
+                StatusCodes.Status404NotFound,
+
+            _ =>
+                StatusCodes.Status500InternalServerError
+        };
+
+        var title = statusCode switch
+        {
+            StatusCodes.Status400BadRequest =>
+                "Solicitud inválida",
+
+            StatusCodes.Status404NotFound =>
+                "Recurso no encontrado",
+
+            _ =>
+                "Error interno del servidor"
+        };
+
+        var detail = statusCode ==
+                     StatusCodes.Status500InternalServerError
+            ? "Ocurrió un error inesperado al procesar la solicitud."
+            : exception.Message;
+
+        httpContext.Response.StatusCode = statusCode;
 
         var problem = new ProblemDetails
         {
-            Status = StatusCodes.Status500InternalServerError,
-            Title = "Error interno del servidor",
-            Detail = "Ocurrió un error inesperado al procesar la solicitud.",
+            Status = statusCode,
+            Title = title,
+            Detail = detail,
             Instance = httpContext.Request.Path
         };
 
-        problem.Extensions["traceId"] = httpContext.TraceIdentifier;
+        problem.Extensions["traceId"] =
+            httpContext.TraceIdentifier;
 
         await httpContext.Response.WriteAsJsonAsync(
             problem,
