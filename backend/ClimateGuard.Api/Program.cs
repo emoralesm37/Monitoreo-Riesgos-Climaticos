@@ -1,4 +1,5 @@
 using ClimateGuard.Api.Exceptions;
+using ClimateGuard.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,16 +11,17 @@ var allowedOrigins =
         .Get<string[]>()
     ?? ["http://localhost:4200"];
 
+// Servicios de ASP.NET Core
 builder.Services.AddControllers();
+builder.Services.AddAuthorization();
 
+// OpenAPI, salud y errores
 builder.Services.AddOpenApi();
-
 builder.Services.AddHealthChecks();
-
 builder.Services.AddProblemDetails();
-
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
+// CORS para Angular
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(frontendCorsPolicy, policy =>
@@ -32,10 +34,17 @@ builder.Services.AddCors(options =>
     });
 });
 
+// Infrastructure: AppDbContext y SQL Server
+builder.Services.AddInfrastructure(
+    builder.Configuration);
+
+// La aplicación se construye después de registrar servicios
 var app = builder.Build();
 
+// Manejo global de errores
 app.UseExceptionHandler();
 
+// OpenAPI y Swagger solo en desarrollo
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
