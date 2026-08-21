@@ -2,6 +2,8 @@ using ClimateGuard.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using ClimateGuard.Application.Abstractions.Sensors;
+using ClimateGuard.Infrastructure.Services.Sensors;
 
 namespace ClimateGuard.Infrastructure;
 
@@ -28,7 +30,7 @@ public static class DependencyInjection
                         errorNumbersToAdd: null);
                 });
         });
-
+        services.AddScoped<ISensorService, SensorService>();
         return services;
     }
 }
