@@ -4,6 +4,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ClimateGuard.Application.Abstractions.Sensors;
 using ClimateGuard.Infrastructure.Services.Sensors;
+using ClimateGuard.Application.Abstractions.Catalogs;
+using ClimateGuard.Application.Abstractions.Communities;
+using ClimateGuard.Infrastructure.Services.Catalogs;
+using ClimateGuard.Infrastructure.Services.Communities;
 
 namespace ClimateGuard.Infrastructure;
 
@@ -31,6 +35,8 @@ public static class DependencyInjection
                 });
         });
         services.AddScoped<ISensorService, SensorService>();
+        services.AddScoped<ICommunityService, CommunityService>();
+        services.AddScoped<ICatalogService, CatalogService>();
         return services;
     }
 }
