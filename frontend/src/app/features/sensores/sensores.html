@@ -1,0 +1,74 @@
+<div class="sensores">
+  <div class="sensores-header">
+    <h2>Sensores</h2>
+@if (authSimulado.isAdmin()) {
+  <button type="button" class="btn-primary" (click)="toggleForm()">
+    {{ showForm ? 'Cancelar' : '+ Nuevo sensor' }}
+  </button>
+}
+
+  @if (showForm) {
+    <form class="sensor-form" (ngSubmit)="submitNewSensor()">
+      <div class="form-row">
+        <label>Nombre</label>
+        <input type="text" [(ngModel)]="newSensor.name" name="name" required placeholder="Sensor de temperatura" />
+      </div>
+      <div class="form-row">
+        <label>Tipo</label>
+        <select [(ngModel)]="newSensor.sensorTypeId" name="sensorTypeId">
+          <option [value]="1">Temperatura</option>
+          <option [value]="2">Humedad</option>
+          <option [value]="3">Viento</option>
+          <option [value]="4">Lluvia</option>
+          <option [value]="5">Nivel de río</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Comunidad (ID)</label>
+        <input type="number" [(ngModel)]="newSensor.communityId" name="communityId" min="1" placeholder="Ej: 1 (Comunidad El Progreso)" />
+      </div>
+      <button type="submit" class="btn-primary" [disabled]="saving">
+        {{ saving ? 'Guardando...' : 'Guardar sensor' }}
+      </button>
+    </form>
+  }
+
+  @if (loading) {
+    <p>Cargando sensores...</p>
+  } @else if (error) {
+    <p class="error-msg">{{ error }}</p>
+  } @else {
+    <table class="sensores-table">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Tipo</th>
+          <th>Comunidad</th>
+          <th>Último valor</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (sensor of sensores; track sensor.sensorId) {
+          <tr>
+            <td>{{ sensor.name }}</td>
+            <td>{{ sensor.sensorType }}</td>
+            <td>{{ sensor.community }}</td>
+            <td>{{ sensor.lastValue ?? '—' }} {{ sensor.unit }}</td>
+            <td>
+              <span class="status" [class.active]="sensor.isActive">
+                {{ sensor.isActive ? 'Activo' : 'Inactivo' }}
+              </span>
+            </td>
+            <td>
+              <button type="button" class="btn-link" (click)="toggleStatus(sensor)">
+                {{ sensor.isActive ? 'Desactivar' : 'Activar' }}
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

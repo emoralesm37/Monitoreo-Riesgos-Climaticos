@@ -1,0 +1,19 @@
+<div class="alertas">
+  <h2>Alertas activas</h2>
+
+  <div class="alertas-list">
+    @for (alerta of alertas; track alerta.alertId) {
+      <div class="alerta-card" [class]="'severity-' + alerta.severity.toLowerCase()">
+        <div class="alerta-info">
+          <span class="alerta-severity">{{ alerta.severity }}</span>
+          <h3>{{ alerta.sensorName }}</h3>
+          <p class="alerta-message">{{ alerta.message }}</p>
+          <span class="alerta-meta">{{ alerta.community }} · {{ alerta.phenomenon }}</span>
+        </div>
+        <button type="button" class="btn-resolve">Resolver</button>
+      </div>
+    } @empty {
+      <p class="no-alertas">No hay alertas activas por el momento.</p>
+    }
+  </div>
+</div>
