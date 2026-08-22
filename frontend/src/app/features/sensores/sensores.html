@@ -1,8 +1,36 @@
 <div class="sensores">
   <div class="sensores-header">
     <h2>Sensores</h2>
-    <button type="button" class="btn-primary">+ Nuevo sensor</button>
+    <button type="button" class="btn-primary" (click)="toggleForm()">
+      {{ showForm ? 'Cancelar' : '+ Nuevo sensor' }}
+    </button>
   </div>
+
+  @if (showForm) {
+    <form class="sensor-form" (ngSubmit)="submitNewSensor()">
+      <div class="form-row">
+        <label>Nombre</label>
+        <input type="text" [(ngModel)]="newSensor.name" name="name" required placeholder="Sensor de temperatura" />
+      </div>
+      <div class="form-row">
+        <label>Tipo</label>
+        <select [(ngModel)]="newSensor.sensorTypeId" name="sensorTypeId">
+          <option [value]="1">Temperatura</option>
+          <option [value]="2">Humedad</option>
+          <option [value]="3">Viento</option>
+          <option [value]="4">Lluvia</option>
+          <option [value]="5">Nivel de río</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Comunidad (ID)</label>
+        <input type="number" [(ngModel)]="newSensor.communityId" name="communityId" min="1" placeholder="Ej: 1 (Comunidad El Progreso)" />
+      </div>
+      <button type="submit" class="btn-primary" [disabled]="saving">
+        {{ saving ? 'Guardando...' : 'Guardar sensor' }}
+      </button>
+    </form>
+  }
 
   @if (loading) {
     <p>Cargando sensores...</p>
