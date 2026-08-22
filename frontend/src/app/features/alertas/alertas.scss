@@ -1,0 +1,93 @@
+.alertas h2 {
+  margin: 0 0 1.25rem 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.alertas-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.alerta-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-left: 6px solid #9ca3af;
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+}
+
+.alerta-severity {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  margin-bottom: 0.4rem;
+  color: #ffffff;
+  background-color: #9ca3af;
+}
+
+.alerta-info h3 {
+  margin: 0.25rem 0;
+  font-size: 1rem;
+  color: #111827;
+}
+
+.alerta-message {
+  margin: 0.15rem 0;
+  font-size: 0.9rem;
+  color: #374151;
+}
+
+.alerta-meta {
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
+.btn-resolve {
+  padding: 0.5rem 1rem;
+  background-color: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-resolve:hover {
+  background-color: #f3f4f6;
+}
+
+.no-alertas {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+// Colores por nivel de severidad
+.severity-verde {
+  border-left-color: #22c55e;
+  .alerta-severity { background-color: #22c55e; }
+}
+
+.severity-amarillo {
+  border-left-color: #eab308;
+  .alerta-severity { background-color: #eab308; }
+}
+
+.severity-naranja {
+  border-left-color: #f97316;
+  .alerta-severity { background-color: #f97316; }
+}
+
+.severity-rojo {
+  border-left-color: #ef4444;
+  .alerta-severity { background-color: #ef4444; }
+}
