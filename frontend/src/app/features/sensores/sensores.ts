@@ -2,6 +2,7 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SensoresService, Sensor } from '../../core/services/sensores';
+import { AuthSimuladoService } from '../../core/services/auth-simulado';
 
 @Component({
   imports: [CommonModule, FormsModule],
@@ -22,10 +23,11 @@ export class Sensores implements OnInit {
     communityId: 1,
   };
 
-  constructor(
-    private sensoresService: SensoresService,
-    private cdr: ChangeDetectorRef
-  ) {}
+constructor(
+  private sensoresService: SensoresService,
+  private cdr: ChangeDetectorRef,
+  public authSimulado: AuthSimuladoService
+) {}
 
   ngOnInit(): void {
     this.load();

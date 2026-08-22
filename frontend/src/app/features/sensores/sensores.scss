@@ -115,3 +115,14 @@
   border-radius: 6px;
   font-size: 0.9rem;
 }
+
+.sensores-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.sensores-header h2 {
+  margin: 0;
+}

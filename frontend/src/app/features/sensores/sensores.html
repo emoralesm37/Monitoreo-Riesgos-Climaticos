@@ -1,10 +1,11 @@
 <div class="sensores">
   <div class="sensores-header">
     <h2>Sensores</h2>
-    <button type="button" class="btn-primary" (click)="toggleForm()">
-      {{ showForm ? 'Cancelar' : '+ Nuevo sensor' }}
-    </button>
-  </div>
+@if (authSimulado.isAdmin()) {
+  <button type="button" class="btn-primary" (click)="toggleForm()">
+    {{ showForm ? 'Cancelar' : '+ Nuevo sensor' }}
+  </button>
+}
 
   @if (showForm) {
     <form class="sensor-form" (ngSubmit)="submitNewSensor()">
