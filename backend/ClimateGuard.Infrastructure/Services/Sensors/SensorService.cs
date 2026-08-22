@@ -12,8 +12,20 @@ public sealed class SensorService(
     public async Task<IReadOnlyList<SensorDto>> GetAllAsync(
         CancellationToken cancellationToken = default)
     {
-        return await SensorQuery()
+        return await dbContext.Sensors
+            .AsNoTracking()
             .OrderBy(sensor => sensor.Name)
+            .Select(sensor => new SensorDto(
+                sensor.SensorId,
+                sensor.Name,
+                sensor.SensorTypeId,
+                sensor.SensorType.Code,
+                sensor.SensorType.Unit,
+                sensor.CommunityId,
+                sensor.Community.Name,
+                sensor.IsActive,
+                sensor.LastValue,
+                sensor.LastUpdatedAt))
             .ToListAsync(cancellationToken);
     }
 
