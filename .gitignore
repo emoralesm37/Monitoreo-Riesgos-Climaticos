@@ -480,3 +480,11 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# ==========================================
+# ClimateGuard - Environment / Secrets
+# ==========================================
+
+.env
+.env.local
+.env.*.local
