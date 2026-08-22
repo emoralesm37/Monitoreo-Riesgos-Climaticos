@@ -1,59 +1,78 @@
-# Frontend
+# Frontend - ClimateGuard
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.1.4.
+Interfaz web del Sistema de Monitoreo y Alerta Temprana para Riesgos Climáticos. Construida con Angular 20+.
 
-## Development server
+## Tecnologías
 
-To start a local development server, run:
+- Angular 20+ (standalone components, `@for`/`@if` control flow)
+- SCSS
+- HttpClient para consumo de la API REST
+
+## Estructura del proyecto
+
+```
+src/app/
+├── core/
+│   ├── services/       # Servicios singleton (auth, sensores)
+│   ├── guards/          # Guards de rutas
+│   └── interceptors/    # Interceptores HTTP
+├── shared/
+│   └── components/      # Componentes reutilizables (badges de severidad)
+├── layout/
+│   ├── header/           # Barra superior
+│   ├── sidebar/          # Menú de navegación
+│   └── main-layout/      # Contenedor que combina header + sidebar + router-outlet
+└── features/
+    ├── dashboard/         # Panel de indicadores climáticos
+    ├── sensores/          # Listado y administración de sensores (conectado a API real)
+    ├── alertas/           # Alertas activas por severidad
+    ├── historial/         # Historial de eventos climáticos
+    └── usuarios/           # Gestión de usuarios y bitácora
+```
+
+## Cómo levantar el proyecto localmente
+
+### Requisitos
+- Node.js 18+
+- Angular CLI (`npm install -g @angular/cli`)
+- Backend corriendo en `http://localhost:7000` (ver README de `backend/`)
+
+### Pasos
 
 ```bash
+cd frontend
+npm install
 ng serve
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+La aplicación queda disponible en `http://localhost:4200`.
 
-## Code scaffolding
+### Configuración de la API
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+La URL del backend se configura en `src/environments/environment.ts`:
 
-```bash
-ng generate component component-name
+```typescript
+export const environment = {
+  production: false,
+  apiUrl: 'http://localhost:7000/api'
+};
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Estado actual de cada módulo
 
-```bash
-ng generate --help
-```
+| Módulo | Estado | Notas |
+|---|---|---|
+| Layout y navegación | ✅ Completo | Rutas, header, sidebar, responsive básico |
+| Sensores | ✅ Conectado a API real | GET y cambio de estado (PATCH) funcionando contra el backend |
+| Dashboard | 🟡 Datos de ejemplo | Pendiente conectar a lecturas reales |
+| Alertas | 🟡 Datos de ejemplo | Incluye notificación sonora al cargar |
+| Historial | 🟡 Datos de ejemplo | Pendiente conectar y agregar filtros |
+| Usuarios | 🟡 Datos de ejemplo | Pendiente endpoint de backend (no implementado aún) |
+| Login / autenticación | ⏳ Pendiente | Depende de endpoint de auth en el backend |
+| SignalR (tiempo real) | ⏳ Pendiente | Depende de hub de backend |
 
-## Building
+## Notas de desarrollo
 
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- Los contratos de datos (forma de `Sensor`, `Alerta`, etc.) siguen el acuerdo documentado por el equipo antes de iniciar desarrollo.
+- El servicio `SensoresService` (`core/services/sensores.ts`) ya implementa `getAll`, `getById`, `create`, `changeStatus` y `reset` contra la API real; el resto de módulos usan arreglos fijos en espera de que los endpoints correspondientes del backend estén disponibles (Alerts, Users, Auth no existen aún en el backend al momento de este commit).
+- Diseño visual: tipografía Inter, paleta de severidad consistente (verde `#22c55e`, amarillo `#eab308`, naranja `#f97316`, rojo `#ef4444`), sidebar oscuro con ítem activo en azul `#2563eb`.
