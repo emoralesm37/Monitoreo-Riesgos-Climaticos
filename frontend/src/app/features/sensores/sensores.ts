@@ -1,26 +1,39 @@
-import { Component } from '@angular/core';
-
-interface Sensor {
-  sensorId: number;
-  name: string;
-  sensorType: string;
-  unit: string;
-  community: string;
-  isActive: boolean;
-  lastValue: number;
-}
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { SensoresService, Sensor } from '../../core/services/sensores';
 
 @Component({
-  imports: [],
+  imports: [CommonModule],
   selector: 'app-sensores',
   styleUrl: './sensores.scss',
   templateUrl: './sensores.html',
 })
-export class Sensores {
-  sensores: Sensor[] = [
-    { sensorId: 1, name: 'Sensor de temperatura', sensorType: 'Temperatura', unit: 'C', community: 'Comunidad El Progreso', isActive: true, lastValue: 28.5 },
-    { sensorId: 2, name: 'Sensor de humedad', sensorType: 'Humedad', unit: '%', community: 'Comunidad El Progreso', isActive: true, lastValue: 62 },
-    { sensorId: 3, name: 'Sensor de viento', sensorType: 'Viento', unit: 'km/h', community: 'Comunidad Las Flores', isActive: false, lastValue: 12 },
-    { sensorId: 4, name: 'Sensor de río', sensorType: 'NivelRio', unit: 'm', community: 'Comunidad Las Flores', isActive: true, lastValue: 0.8 },
-  ];
+export class Sensores implements OnInit {
+  sensores: Sensor[] = [];
+  loading = true;
+  error = '';
+
+  constructor(private sensoresService: SensoresService) {}
+
+  ngOnInit(): void {
+    this.sensoresService.getAll().subscribe({
+      next: (data) => {
+        this.sensores = data;
+        this.loading = false;
+      },
+      error: (err) => {
+        this.error = 'No se pudo conectar con el servidor';
+        this.loading = false;
+        console.error(err);
+      },
+    });
+  }
+
+  toggleStatus(sensor: Sensor): void {
+    const nuevoEstado = !sensor.isActive;
+    this.sensoresService.changeStatus(sensor.sensorId, nuevoEstado).subscribe({
+      next: () => (sensor.isActive = nuevoEstado),
+      error: (err) => console.error(err),
+    });
+  }
 }
