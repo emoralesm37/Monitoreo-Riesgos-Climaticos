@@ -1,6 +1,25 @@
 <div class="historial">
   <h2>Historial de eventos</h2>
 
+  <div class="filtros">
+    <select [(ngModel)]="filtroFenomeno" name="filtroFenomeno">
+      <option value="">Todos los fenómenos</option>
+      <option value="IncendioForestal">Incendio forestal</option>
+      <option value="Inundacion">Inundación</option>
+      <option value="Tormenta">Tormenta</option>
+      <option value="Helada">Helada</option>
+      <option value="Sequia">Sequía</option>
+    </select>
+
+    <select [(ngModel)]="filtroSeveridad" name="filtroSeveridad">
+      <option value="">Todas las severidades</option>
+      <option value="Verde">Verde</option>
+      <option value="Amarillo">Amarillo</option>
+      <option value="Naranja">Naranja</option>
+      <option value="Rojo">Rojo</option>
+    </select>
+  </div>
+
   <table class="historial-table">
     <thead>
       <tr>
@@ -12,7 +31,7 @@
       </tr>
     </thead>
     <tbody>
-      @for (evento of eventos; track evento.id) {
+      @for (evento of eventosFiltrados; track evento.id) {
         <tr>
           <td>{{ evento.fecha }}</td>
           <td>{{ evento.fenomeno }}</td>
