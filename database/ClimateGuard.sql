@@ -160,4 +160,9 @@ INSERT INTO dbo.PhenomenonTypes (PhenomenonTypeId, Name) VALUES
     (3, N'Tormenta'),
     (4, N'Helada'),
     (5, N'IncendioForestal');
+
+-- Comunidades iniciales utilizadas por la aplicación
+INSERT INTO dbo.Communities (Name, Region) VALUES
+    (N'Comunidad El Progreso', N'Guatemala'),
+    (N'Comunidad Las Flores', N'Guatemala');
 GO
