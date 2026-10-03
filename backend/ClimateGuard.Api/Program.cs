@@ -1,5 +1,6 @@
 using ClimateGuard.Api.Exceptions;
 using ClimateGuard.Infrastructure;
+using ClimateGuard.Infrastructure.Persistence.Initialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,6 +41,16 @@ builder.Services.AddInfrastructure(
 
 // La aplicación se construye después de registrar servicios
 var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    using var scope = app.Services.CreateScope();
+
+    var initialAdminSeeder =
+        scope.ServiceProvider.GetRequiredService<InitialAdminSeeder>();
+
+    await initialAdminSeeder.SeedAsync();
+}
 
 // Manejo global de errores
 app.UseExceptionHandler();
