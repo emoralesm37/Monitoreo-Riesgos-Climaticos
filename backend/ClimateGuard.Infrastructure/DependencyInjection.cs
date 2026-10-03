@@ -8,6 +8,11 @@ using ClimateGuard.Application.Abstractions.Catalogs;
 using ClimateGuard.Application.Abstractions.Communities;
 using ClimateGuard.Infrastructure.Services.Catalogs;
 using ClimateGuard.Infrastructure.Services.Communities;
+using ClimateGuard.Application.Abstractions.Auth;
+using ClimateGuard.Domain.Entities;
+using ClimateGuard.Infrastructure.Services.Auth;
+using Microsoft.AspNetCore.Identity;
+using ClimateGuard.Infrastructure.Persistence.Initialization;
 
 namespace ClimateGuard.Infrastructure;
 
@@ -37,6 +42,9 @@ public static class DependencyInjection
         services.AddScoped<ISensorService, SensorService>();
         services.AddScoped<ICommunityService, CommunityService>();
         services.AddScoped<ICatalogService, CatalogService>();
+        services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+        services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<InitialAdminSeeder>();
         return services;
     }
 }
