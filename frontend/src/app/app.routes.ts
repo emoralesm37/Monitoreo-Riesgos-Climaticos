@@ -5,11 +5,18 @@ import { Sensores } from './features/sensores/sensores';
 import { Alertas } from './features/alertas/alertas';
 import { Historial } from './features/historial/historial';
 import { Usuarios } from './features/usuarios/usuarios';
+import { Login } from './features/login/login';
+import { authGuard } from './core/guards/auth-guard';
 
 export const routes: Routes = [
   {
+    path: 'login',
+    component: Login
+  },
+  {
     path: '',
     component: MainLayout,
+    canActivate: [authGuard],
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: Dashboard },
@@ -19,4 +26,8 @@ export const routes: Routes = [
       { path: 'usuarios', component: Usuarios },
     ],
   },
+  {
+    path: '**',
+    redirectTo: ''
+  }
 ];
