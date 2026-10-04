@@ -36,6 +36,10 @@ export class Auth {
       );
   }
 
+  logout(): void {
+    sessionStorage.removeItem(this.sessionKey);
+  }
+
   isAuthenticated(): boolean {
     return sessionStorage.getItem(this.sessionKey) !== null;
   }
