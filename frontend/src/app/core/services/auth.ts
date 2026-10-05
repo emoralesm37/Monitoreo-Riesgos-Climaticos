@@ -13,10 +13,20 @@ export interface LoginResponse {
   name: string;
   email: string;
   role: string;
+  token: string;
+  expiresAt: string;
+}
+
+export interface AuthenticatedUser {
+  userId: number;
+  name: string;
+  email: string;
+  role: string;
 }
 
 interface UserSession {
-  user: LoginResponse;
+  user: AuthenticatedUser;
+  token: string;
   expiresAt: number;
 }
 
@@ -27,40 +37,46 @@ export class Auth {
   private readonly apiUrl = 'http://localhost:7000/api/auth';
   private readonly sessionKey = 'climateguard_user';
 
-  // Temporal para probar RF-ADM-04.
-  // Duración máxima de la sesión administrativa: 15 minutos.
-  private readonly sessionDurationMs = 15 * 60 * 1000;
+  private expirationTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
     private http: HttpClient,
     private router: Router
-    ) {
-      this.restoreExpirationTimer();
-    }
+  ) {
+    this.restoreExpirationTimer();
+  }
 
   login(credentials: LoginRequest): Observable<LoginResponse> {
     return this.http
       .post<LoginResponse>(`${this.apiUrl}/login`, credentials)
       .pipe(
-        tap(user => {
+        tap(response => {
+          const expiresAt = new Date(response.expiresAt).getTime();
+
           const session: UserSession = {
-            user,
-            expiresAt: Date.now() + this.sessionDurationMs
+            user: {
+              userId: response.userId,
+              name: response.name,
+              email: response.email,
+              role: response.role
+            },
+            token: response.token,
+            expiresAt
           };
 
           sessionStorage.setItem(
             this.sessionKey,
             JSON.stringify(session)
           );
+
           this.scheduleExpiration(session.expiresAt);
         })
       );
   }
 
-  private expirationTimer: ReturnType<typeof setTimeout> | null = null;
-
   logout(): void {
     sessionStorage.removeItem(this.sessionKey);
+
     if (this.expirationTimer) {
       clearTimeout(this.expirationTimer);
       this.expirationTimer = null;
@@ -71,22 +87,29 @@ export class Auth {
     return this.getValidSession() !== null;
   }
 
-  getCurrentUser(): LoginResponse | null {
+  getCurrentUser(): AuthenticatedUser | null {
     return this.getValidSession()?.user ?? null;
   }
 
+  getToken(): string | null {
+    return this.getValidSession()?.token ?? null;
+  }
+
   private getValidSession(): UserSession | null {
-    const storedSession = sessionStorage.getItem(this.sessionKey);
+    const storedSession =
+      sessionStorage.getItem(this.sessionKey);
 
     if (!storedSession) {
       return null;
     }
 
     try {
-      const session = JSON.parse(storedSession) as UserSession;
+      const session =
+        JSON.parse(storedSession) as UserSession;
 
       if (
         !session.user ||
+        !session.token ||
         !session.expiresAt ||
         Date.now() >= session.expiresAt
       ) {
@@ -100,16 +123,17 @@ export class Auth {
       return null;
     }
   }
+
   private scheduleExpiration(expiresAt: number): void {
     if (this.expirationTimer) {
       clearTimeout(this.expirationTimer);
     }
 
-  const remainingTime = expiresAt - Date.now();
+    const remainingTime = expiresAt - Date.now();
 
     if (remainingTime <= 0) {
       this.expireSession();
-    return;
+      return;
     }
 
     this.expirationTimer = setTimeout(() => {

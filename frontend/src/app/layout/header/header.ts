@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { Auth, LoginResponse } from '../../core/services/auth';
+import { Auth, AuthenticatedUser } from '../../core/services/auth';
 
 @Component({
   imports: [],
@@ -9,7 +9,7 @@ import { Auth, LoginResponse } from '../../core/services/auth';
   templateUrl: './header.html',
 })
 export class Header {
-  currentUser: LoginResponse | null;
+  currentUser: AuthenticatedUser | null = null;
 
   constructor(
     private auth: Auth,
