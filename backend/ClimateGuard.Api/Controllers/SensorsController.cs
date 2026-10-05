@@ -1,10 +1,12 @@
 using ClimateGuard.Application.Abstractions.Sensors;
 using ClimateGuard.Application.Contracts.Sensors;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ClimateGuard.Api.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/sensors")]
 public sealed class SensorsController(
     ISensorService sensorService) : ControllerBase
