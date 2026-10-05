@@ -4,7 +4,15 @@
   </div>
 
   <div class="app-header-user">
-    <span class="user-name">Usuario</span>
-    <button type="button" class="logout-btn">Cerrar sesión</button>
+    <span class="user-name">
+      {{ currentUser?.name ?? 'Usuario' }}
+    </span>
+    <button
+      type="button"
+      class="logout-btn"
+      (click)="logout()"
+    >
+      Cerrar sesión
+    </button>
   </div>
 </header>

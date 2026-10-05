@@ -1,6 +1,9 @@
 using ClimateGuard.Api.Exceptions;
 using ClimateGuard.Infrastructure;
 using ClimateGuard.Infrastructure.Persistence.Initialization;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +17,43 @@ var allowedOrigins =
 
 // Servicios de ASP.NET Core
 builder.Services.AddControllers();
+    var jwtKey = builder.Configuration["Jwt:Key"]
+        ?? throw new InvalidOperationException(
+            "No se encontró la configuración Jwt:Key.");
+
+    var jwtIssuer = builder.Configuration["Jwt:Issuer"]
+        ?? throw new InvalidOperationException(
+            "No se encontró la configuración Jwt:Issuer.");
+
+    var jwtAudience = builder.Configuration["Jwt:Audience"]
+        ?? throw new InvalidOperationException(
+            "No se encontró la configuración Jwt:Audience.");
+
+    builder.Services
+        .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters =
+                new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidIssuer = jwtIssuer,
+
+                    ValidateAudience = true,
+                    ValidAudience = jwtAudience,
+
+                    ValidateLifetime = true,
+
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey =
+                        new SymmetricSecurityKey(
+                            Encoding.UTF8.GetBytes(jwtKey)),
+
+                    ClockSkew = TimeSpan.Zero
+                };
+        }
+);
+
 builder.Services.AddAuthorization();
 
 // OpenAPI, salud y errores
@@ -75,6 +115,8 @@ app.UseHttpsRedirection();
 app.UseRouting();
 
 app.UseCors(frontendCorsPolicy);
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 
