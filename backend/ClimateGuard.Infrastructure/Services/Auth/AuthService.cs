@@ -9,7 +9,8 @@ namespace ClimateGuard.Infrastructure.Services.Auth;
 
 public sealed class AuthService(
     AppDbContext dbContext,
-    IPasswordHasher<User> passwordHasher)
+    IPasswordHasher<User> passwordHasher,
+    IJwtTokenService jwtTokenService)
     : IAuthService
 {
     public async Task<LoginResponse?> LoginAsync(
@@ -40,12 +41,17 @@ public sealed class AuthService(
             return null;
         }
 
+        var (token, expiresAt) =
+            jwtTokenService.GenerateToken(user);
+
         return new LoginResponse
         {
             UserId = user.UserId,
             Name = user.Name,
             Email = user.Email,
-            Role = user.Role.Name
+            Role = user.Role.Name,
+            Token = token,
+            ExpiresAt = expiresAt
         };
     }
 }
