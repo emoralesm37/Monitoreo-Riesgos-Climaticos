@@ -138,8 +138,9 @@ CREATE TABLE dbo.RefreshTokens (
 -- =====================================================================
 
 INSERT INTO dbo.Roles (RoleId, Name) VALUES
-    (1, N'Admin'),
-    (2, N'Operador');
+    (1, N'Administrador'),
+    (2, N'Operador'),
+    (3, N'Usuario de consulta');
 
 INSERT INTO dbo.SensorTypes (SensorTypeId, Code, Unit) VALUES
     (1, N'Temperatura',      N'C'),

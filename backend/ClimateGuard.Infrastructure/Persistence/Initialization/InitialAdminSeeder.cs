@@ -38,13 +38,13 @@ public sealed class InitialAdminSeeder(
 
         var adminRole = await dbContext.Roles
             .FirstOrDefaultAsync(
-                role => role.Name == "Admin",
+                role => role.Name == "Administrador",
                 cancellationToken);
 
         if (adminRole is null)
         {
             throw new InvalidOperationException(
-                "No se encontró el rol Admin.");
+                "No se encontró el rol Administrador.");
         }
 
         var user = new User
