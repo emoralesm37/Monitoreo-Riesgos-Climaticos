@@ -1,10 +1,12 @@
 using ClimateGuard.Application.Abstractions.Communities;
 using ClimateGuard.Application.Contracts.Communities;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ClimateGuard.Api.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/communities")]
 public sealed class CommunitiesController(
     ICommunityService communityService) : ControllerBase
@@ -40,6 +42,7 @@ public sealed class CommunitiesController(
     }
 
     [HttpPost]
+    [Authorize(Roles = "Administrador")]
     public async Task<ActionResult<CommunityDto>> Create(
         CreateCommunityRequest request,
         CancellationToken cancellationToken)
@@ -55,6 +58,7 @@ public sealed class CommunitiesController(
     }
 
     [HttpPut("{communityId:int}")]
+    [Authorize(Roles = "Administrador")]
     public async Task<IActionResult> Update(
         int communityId,
         UpdateCommunityRequest request,
