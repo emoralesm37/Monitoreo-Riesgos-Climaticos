@@ -36,6 +36,7 @@ public sealed class SensorsController(
     }
 
     [HttpPost]
+    [Authorize(Roles = "Administrador,Operador")]
     public async Task<ActionResult<SensorDto>> Create(
         CreateSensorRequest request,
         CancellationToken cancellationToken)
@@ -51,6 +52,7 @@ public sealed class SensorsController(
     }
 
     [HttpPut("{sensorId:int}")]
+    [Authorize(Roles = "Administrador,Operador")]
     public async Task<IActionResult> Update(
         int sensorId,
         UpdateSensorRequest request,
@@ -67,6 +69,7 @@ public sealed class SensorsController(
     }
 
     [HttpPatch("{sensorId:int}/status")]
+    [Authorize(Roles = "Administrador,Operador")]
     public async Task<IActionResult> ChangeStatus(
         int sensorId,
         ChangeSensorStatusRequest request,
@@ -98,6 +101,7 @@ public sealed class SensorsController(
     }
 
     [HttpPost("{sensorId:int}/readings/manual")]
+    [Authorize(Roles = "Administrador,Operador")]
     public async Task<ActionResult<SensorReadingDto>>
         RegisterManualValue(
             int sensorId,
@@ -116,6 +120,7 @@ public sealed class SensorsController(
     }
 
     [HttpPost("{sensorId:int}/reset")]
+    [Authorize(Roles = "Administrador,Operador")]
     public async Task<IActionResult> Reset(
         int sensorId,
         CancellationToken cancellationToken)

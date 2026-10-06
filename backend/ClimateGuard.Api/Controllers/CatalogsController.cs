@@ -1,10 +1,12 @@
 using ClimateGuard.Application.Abstractions.Catalogs;
 using ClimateGuard.Application.Contracts.Catalogs;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ClimateGuard.Api.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/catalogs")]
 public sealed class CatalogsController(
     ICatalogService catalogService) : ControllerBase
