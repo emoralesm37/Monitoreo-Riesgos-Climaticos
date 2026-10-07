@@ -1,192 +1,162 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { forkJoin, Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
-interface Regla {
-  id: number;
-  nombre: string;
-  tipoSensor: string;
-  comunidad: string;
-  operador: '>' | '<' | '>=' | '<=';
-  valor: number;
-  severidad: 'Verde' | 'Amarillo' | 'Naranja' | 'Rojo';
-  activa: boolean;
+export interface Regla {
+  alertRuleId: number;
+  name: string;
+  sensorTypeId: number;
+  sensorTypeCode: string;
+  sensorTypeUnit: string;
+  minimumValue: number;
+  maximumValue: number;
+  alertSeverityId: number;
+  alertSeverityName: string;
+  phenomenonTypeId: number;
+  phenomenonTypeName: string;
+  message: string;
+  isActive: boolean;
 }
+interface TipoSensor { sensorTypeId: number; code: string; unit: string; }
 
 @Component({
-  selector: 'app-reglas',
-  standalone: true,
+  selector: 'app-reglas', standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './reglas.html',
-  styleUrl: './reglas.scss'
+  templateUrl: './reglas.html', styleUrl: './reglas.scss',
 })
-export class Reglas {
-  reglas: Regla[] = [];
-
-  mostrarFormulario = false;
+export class Reglas implements OnInit {
+  private readonly http = inject(HttpClient);
+  private readonly url = `${environment.apiUrl}/alert-rules`;
+  reglas = signal<Regla[]>([]);
+  tipos = signal<TipoSensor[]>([]);
+  cargando = signal(false);
+  guardando = signal(false);
+  error = signal('');
+  errorFormulario = signal('');
+  mensaje = signal('');
+  mostrarFormulario = signal(false);
   editandoId: number | null = null;
+  formulario = this.vacio();
 
-  nombre = '';
-  tipoSensor = 'Temperatura';
-  comunidad = 'Comunidad El Progreso';
-  operador: '>' | '<' | '>=' | '<=' = '>';
-  valor: number | null = null;
-  severidad: 'Verde' | 'Amarillo' | 'Naranja' | 'Rojo' = 'Amarillo';
+  // IDs del catálogo inicial database/ClimateGuard.sql.
+  // La API actual solo expone el catálogo de tipos de sensor.
+  readonly severidades = [
+    { id: 1, nombre: 'Verde' }, { id: 2, nombre: 'Amarillo' },
+    { id: 3, nombre: 'Naranja' }, { id: 4, nombre: 'Rojo' },
+  ];
+  readonly fenomenos = [
+    { id: 1, nombre: 'Inundación' }, { id: 2, nombre: 'Sequía' },
+    { id: 3, nombre: 'Tormenta' }, { id: 4, nombre: 'Helada' },
+    { id: 5, nombre: 'Incendio forestal' },
+  ];
 
-  mensaje = '';
-  error = '';
+  ngOnInit(): void { this.cargar(); }
 
-  constructor() {
-    this.cargarReglas();
-  }
-
-  private cargarReglas(): void {
-    const guardadas = localStorage.getItem('climateguard_reglas');
-
-    if (guardadas) {
-      this.reglas = JSON.parse(guardadas);
-      return;
-    }
-
-    this.reglas = [
-      {
-        id: 1,
-        nombre: 'Temperatura elevada',
-        tipoSensor: 'Temperatura',
-        comunidad: 'Comunidad El Progreso',
-        operador: '>=',
-        valor: 35,
-        severidad: 'Naranja',
-        activa: true
+  cargar(): void {
+    if (this.cargando()) return;
+    this.cargando.set(true);
+    this.error.set('');
+    forkJoin({
+      reglas: this.http.get<Regla[]>(this.url),
+      tipos: this.http.get<TipoSensor[]>(`${environment.apiUrl}/catalogs/sensor-types`),
+    }).subscribe({
+      next: data => {
+        this.reglas.set(data.reglas);
+        this.tipos.set(data.tipos);
+        this.cargando.set(false);
       },
-      {
-        id: 2,
-        nombre: 'Nivel crítico de río',
-        tipoSensor: 'Nivel de río',
-        comunidad: 'Comunidad Las Flores',
-        operador: '>=',
-        valor: 2.5,
-        severidad: 'Rojo',
-        activa: true
-      }
-    ];
-
-    this.guardarReglas();
+      error: err => {
+        this.error.set(this.descripcionError(err));
+        this.cargando.set(false);
+      },
+    });
   }
 
   nuevaRegla(): void {
-    this.limpiarFormulario();
-    this.mostrarFormulario = true;
+    if (this.guardando()) return;
+    this.editandoId = null;
+    this.formulario = this.vacio();
+    this.errorFormulario.set('');
+    this.mensaje.set('');
+    this.mostrarFormulario.set(true);
   }
 
   editar(regla: Regla): void {
-    this.editandoId = regla.id;
-    this.nombre = regla.nombre;
-    this.tipoSensor = regla.tipoSensor;
-    this.comunidad = regla.comunidad;
-    this.operador = regla.operador;
-    this.valor = regla.valor;
-    this.severidad = regla.severidad;
-
-    this.mostrarFormulario = true;
-    this.mensaje = '';
-    this.error = '';
+    if (this.guardando()) return;
+    this.editandoId = regla.alertRuleId;
+    this.formulario = {
+      name: regla.name, sensorTypeId: regla.sensorTypeId,
+      minimumValue: regla.minimumValue, maximumValue: regla.maximumValue,
+      alertSeverityId: regla.alertSeverityId, phenomenonTypeId: regla.phenomenonTypeId,
+      message: regla.message,
+    };
+    this.errorFormulario.set('');
+    this.mensaje.set('');
+    this.mostrarFormulario.set(true);
   }
 
   guardar(): void {
-    this.mensaje = '';
-    this.error = '';
-
-    if (this.nombre.trim().length < 3) {
-      this.error = 'El nombre debe tener al menos 3 caracteres.';
+    if (this.guardando()) return;
+    const f = this.formulario;
+    if (!f.name.trim() || f.name.trim().length > 100 ||
+        !f.message.trim() || f.message.trim().length > 300 ||
+        !this.tipos().some(t => t.sensorTypeId === f.sensorTypeId) ||
+        !this.severidades.some(s => s.id === f.alertSeverityId) ||
+        !this.fenomenos.some(p => p.id === f.phenomenonTypeId)) {
+      this.errorFormulario.set('Completa el nombre, los catálogos y el mensaje.');
       return;
     }
-
-    if (this.valor === null) {
-      this.error = 'Debes ingresar un valor de umbral.';
+    if (f.minimumValue === null || f.maximumValue === null ||
+        !Number.isFinite(f.minimumValue) || !Number.isFinite(f.maximumValue) ||
+        f.minimumValue >= f.maximumValue ||
+        Math.abs(f.minimumValue) > 99999999.99 || Math.abs(f.maximumValue) > 99999999.99) {
+      this.errorFormulario.set('Ingresa un mínimo menor que el máximo, dentro de ±99,999,999.99.');
       return;
     }
-
-    if (this.editandoId !== null) {
-      const regla = this.reglas.find(
-        item => item.id === this.editandoId
-      );
-
-      if (!regla) {
-        this.error = 'La regla no fue encontrada.';
-        return;
-      }
-
-      regla.nombre = this.nombre.trim();
-      regla.tipoSensor = this.tipoSensor;
-      regla.comunidad = this.comunidad;
-      regla.operador = this.operador;
-      regla.valor = this.valor;
-      regla.severidad = this.severidad;
-
-      this.mensaje = 'Regla actualizada correctamente.';
-    } else {
-      const nueva: Regla = {
-        id: this.obtenerNuevoId(),
-        nombre: this.nombre.trim(),
-        tipoSensor: this.tipoSensor,
-        comunidad: this.comunidad,
-        operador: this.operador,
-        valor: this.valor,
-        severidad: this.severidad,
-        activa: true
-      };
-
-      this.reglas.push(nueva);
-
-      this.mensaje = 'Regla creada correctamente.';
-    }
-
-    this.guardarReglas();
-    this.cerrarFormulario();
-  }
-
-  cambiarEstado(regla: Regla): void {
-    regla.activa = !regla.activa;
-    this.guardarReglas();
-
-    this.mensaje = regla.activa
-      ? 'Regla activada correctamente.'
-      : 'Regla desactivada correctamente.';
+    const body = { ...f, name: f.name.trim(), message: f.message.trim() };
+    const editing = this.editandoId !== null;
+    const request: Observable<Regla | void> = editing
+      ? this.http.put<void>(`${this.url}/${this.editandoId}`, body)
+      : this.http.post<Regla>(this.url, body);
+    this.guardando.set(true);
+    this.errorFormulario.set('');
+    this.mensaje.set('');
+    request.subscribe({
+      next: () => {
+        this.guardando.set(false);
+        this.mostrarFormulario.set(false);
+        this.mensaje.set(editing ? 'Regla actualizada en el servidor.' : 'Regla creada en el servidor.');
+        this.cargar();
+      },
+      error: err => {
+        this.guardando.set(false);
+        this.errorFormulario.set(this.descripcionError(err));
+      },
+    });
   }
 
   cancelar(): void {
-    this.cerrarFormulario();
-    this.error = '';
+    if (!this.guardando()) this.mostrarFormulario.set(false);
   }
 
-  private guardarReglas(): void {
-    localStorage.setItem(
-      'climateguard_reglas',
-      JSON.stringify(this.reglas)
-    );
+  private vacio() {
+    return { name: '', sensorTypeId: 0, minimumValue: null as number | null,
+      maximumValue: null as number | null, alertSeverityId: 0, phenomenonTypeId: 0, message: '' };
   }
 
-  private obtenerNuevoId(): number {
-    if (this.reglas.length === 0) {
-      return 1;
+  private descripcionError(err: HttpErrorResponse): string {
+    if (err.status === 0) return 'No se pudo conectar con la API. Comprueba que el backend esté activo.';
+    if (err.status === 401) return 'La sesión expiró. Vuelve a iniciar sesión.';
+    if (err.status === 403) return 'Solo un administrador puede gestionar reglas.';
+    if (err.status === 404) return 'No se encontró el recurso. Actualiza la lista y comprueba que el backend incluya reglas.';
+    if (err.status === 400 || err.status === 409) {
+      const text = err.error?.detail ?? err.error?.message;
+      if (typeof text === 'string') return text;
+      return 'Revisa los datos: el nombre debe ser único y el mínimo menor que el máximo.';
     }
-
-    return Math.max(...this.reglas.map(regla => regla.id)) + 1;
-  }
-
-  private cerrarFormulario(): void {
-    this.mostrarFormulario = false;
-    this.limpiarFormulario();
-  }
-
-  private limpiarFormulario(): void {
-    this.editandoId = null;
-    this.nombre = '';
-    this.tipoSensor = 'Temperatura';
-    this.comunidad = 'Comunidad El Progreso';
-    this.operador = '>';
-    this.valor = null;
-    this.severidad = 'Amarillo';
+    return 'No se pudo completar la operación. Intenta nuevamente.';
   }
 }

@@ -22,11 +22,13 @@
       </a>
     </li>
 
+    @if (esAdministrador) {
     <li>
   <a routerLink="/reglas" routerLinkActive="active">
     Reglas
      </a>
     </li>
+    }
 
     <li>
       <a routerLink="/alertas" routerLinkActive="active">

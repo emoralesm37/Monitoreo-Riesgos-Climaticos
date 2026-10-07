@@ -225,3 +225,9 @@
     grid-column: auto;
   }
 }
+fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+button:disabled { opacity: .55; cursor: not-allowed; }
+.form-group textarea { box-sizing: border-box; width: 100%; padding: 11px 12px; border: 1px solid #d1d5db; border-radius: 8px; font: inherit; resize: vertical; }
+.empty-state { padding: 20px; }
+.reglas-table .rule-message { white-space: normal; min-width: 180px; overflow-wrap: anywhere; }
+@media (max-width: 600px) { .reglas { padding: 16px 8px; } .reglas-header { flex-wrap: wrap; } }

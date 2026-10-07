@@ -28,6 +28,8 @@ export const routes: Routes = [
 
       {
        path: 'reglas',
+       canActivate: [roleGuard],
+       data: { roles: ['Administrador'] },
        loadComponent: () =>
        import('./features/reglas/reglas')
        .then(m => m.Reglas)
