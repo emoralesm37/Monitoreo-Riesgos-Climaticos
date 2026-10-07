@@ -4,6 +4,7 @@ using ClimateGuard.Infrastructure.Persistence.Initialization;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using ClimateGuard.Api.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -57,7 +58,12 @@ builder.Services.AddControllers();
 builder.Services.AddAuthorization();
 
 // OpenAPI, salud y errores
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi(options =>
+{
+    options.AddDocumentTransformer<
+        BearerSecuritySchemeTransformer>();
+});
+
 builder.Services.AddHealthChecks();
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
