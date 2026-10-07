@@ -16,6 +16,17 @@ export interface Sensor {
   lastUpdatedAt: string | null;
 }
 
+export interface SensorCommunity {
+  communityId: number;
+  name: string;
+}
+
+export interface SensorType {
+  sensorTypeId: number;
+  code: string;
+  unit: string;
+}
+
 export interface CreateSensorRequest {
   name: string;
   sensorTypeId: number;
@@ -27,6 +38,14 @@ export class SensoresService {
   private baseUrl = `${environment.apiUrl}/sensors`;
 
   constructor(private http: HttpClient) {}
+
+  getCommunities(): Observable<SensorCommunity[]> {
+    return this.http.get<SensorCommunity[]>(`${environment.apiUrl}/communities`);
+  }
+
+  getSensorTypes(): Observable<SensorType[]> {
+    return this.http.get<SensorType[]>(`${environment.apiUrl}/catalogs/sensor-types`);
+  }
 
   getAll(): Observable<Sensor[]> {
     return this.http.get<Sensor[]>(this.baseUrl);

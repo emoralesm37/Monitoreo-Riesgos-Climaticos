@@ -1,49 +1,142 @@
-<div class="historial">
-  <h2>Historial de eventos</h2>
+<section class="historial">
+
+  <div class="historial-header">
+    <div>
+      <h1>Historial de eventos</h1>
+      <p>
+        Consulta las alertas y eventos atendidos en ClimateGuard.
+      </p>
+    </div>
+  </div>
 
   <div class="filtros">
-    <select [(ngModel)]="filtroFenomeno" name="filtroFenomeno">
+
+    <select
+      [(ngModel)]="filtroFenomeno"
+      name="filtroFenomeno"
+    >
       <option value="">Todos los fenómenos</option>
-      <option value="IncendioForestal">Incendio forestal</option>
-      <option value="Inundacion">Inundación</option>
-      <option value="Tormenta">Tormenta</option>
-      <option value="Helada">Helada</option>
-      <option value="Sequia">Sequía</option>
+      <option value="Incendio forestal">
+        Incendio forestal
+      </option>
+      <option value="Inundación">
+        Inundación
+      </option>
+      <option value="Tormenta">
+        Tormenta
+      </option>
+      <option value="Helada">
+        Helada
+      </option>
+      <option value="Sequía">
+        Sequía
+      </option>
     </select>
 
-    <select [(ngModel)]="filtroSeveridad" name="filtroSeveridad">
+    <select
+      [(ngModel)]="filtroSeveridad"
+      name="filtroSeveridad"
+    >
       <option value="">Todas las severidades</option>
       <option value="Verde">Verde</option>
       <option value="Amarillo">Amarillo</option>
       <option value="Naranja">Naranja</option>
       <option value="Rojo">Rojo</option>
     </select>
+
+    <button
+      type="button"
+      class="btn-limpiar"
+      (click)="limpiarFiltros()"
+    >
+      Limpiar filtros
+    </button>
+
   </div>
 
-  <table class="historial-table">
-    <thead>
-      <tr>
-        <th>Fecha y hora</th>
-        <th>Fenómeno</th>
-        <th>Sensor</th>
-        <th>Comunidad</th>
-        <th>Severidad</th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (evento of eventosFiltrados; track evento.id) {
-        <tr>
-          <td>{{ evento.fecha }}</td>
-          <td>{{ evento.fenomeno }}</td>
-          <td>{{ evento.sensorName }}</td>
-          <td>{{ evento.community }}</td>
-          <td>
-            <span class="severity-tag" [class]="'severity-' + evento.severity.toLowerCase()">
-              {{ evento.severity }}
-            </span>
-          </td>
-        </tr>
-      }
-    </tbody>
-  </table>
-</div>
+  <div class="historial-card">
+
+    <div class="historial-card-header">
+      <h2>Eventos registrados</h2>
+
+      <span>
+        {{ eventosFiltrados.length }} resultados
+      </span>
+    </div>
+
+    <div class="table-responsive">
+
+      <table class="historial-table">
+
+        <thead>
+          <tr>
+            <th>Fecha y hora</th>
+            <th>Fenómeno</th>
+            <th>Sensor</th>
+            <th>Comunidad</th>
+            <th>Severidad</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          @for (evento of eventosFiltrados; track evento.id) {
+
+            <tr>
+
+              <td>
+                {{ evento.fecha }}
+              </td>
+
+              <td>
+                {{ evento.fenomeno }}
+              </td>
+
+              <td>
+                {{ evento.sensorName }}
+              </td>
+
+              <td>
+                {{ evento.community }}
+              </td>
+
+              <td>
+                <span
+                  class="severity-tag"
+                  [class]="'severity-tag severity-' + evento.severity.toLowerCase()"
+                >
+                  {{ evento.severity }}
+                </span>
+              </td>
+
+              <td>
+                <span class="estado-resuelto">
+                  Resuelta
+                </span>
+              </td>
+
+            </tr>
+
+          } @empty {
+
+            <tr>
+              <td
+                colspan="6"
+                class="sin-resultados"
+              >
+                No se encontraron eventos con los filtros seleccionados.
+              </td>
+            </tr>
+
+          }
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</section>

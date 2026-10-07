@@ -1,74 +1,87 @@
 <div class="sensores">
   <div class="sensores-header">
     <h2>Sensores</h2>
-@if (authSimulado.isAdmin()) {
-  <button type="button" class="btn-primary" (click)="toggleForm()">
-    {{ showForm ? 'Cancelar' : '+ Nuevo sensor' }}
-  </button>
-}
-
-  @if (showForm) {
-    <form class="sensor-form" (ngSubmit)="submitNewSensor()">
-      <div class="form-row">
-        <label>Nombre</label>
-        <input type="text" [(ngModel)]="newSensor.name" name="name" required placeholder="Sensor de temperatura" />
-      </div>
-      <div class="form-row">
-        <label>Tipo</label>
-        <select [(ngModel)]="newSensor.sensorTypeId" name="sensorTypeId">
-          <option [value]="1">Temperatura</option>
-          <option [value]="2">Humedad</option>
-          <option [value]="3">Viento</option>
-          <option [value]="4">Lluvia</option>
-          <option [value]="5">Nivel de río</option>
-        </select>
-      </div>
-      <div class="form-row">
-        <label>Comunidad (ID)</label>
-        <input type="number" [(ngModel)]="newSensor.communityId" name="communityId" min="1" placeholder="Ej: 1 (Comunidad El Progreso)" />
-      </div>
-      <button type="submit" class="btn-primary" [disabled]="saving">
-        {{ saving ? 'Guardando...' : 'Guardar sensor' }}
+    @if (canManage) {
+      <button type="button" class="btn-primary" (click)="toggleForm()" [disabled]="saving">
+        {{ showForm ? 'Cancelar' : '+ Nuevo sensor' }}
       </button>
+    }
+  </div>
+
+  @if (success) { <p class="success-msg" role="status">{{ success }}</p> }
+  @if (actionError) { <p class="error-msg" role="alert">{{ actionError }}</p> }
+
+  @if (showForm && canManage) {
+    <form class="sensor-form" #sensorForm="ngForm" (ngSubmit)="submitNewSensor()">
+      <h3>Registrar sensor</h3>
+      @if (catalogsLoading) {
+        <p role="status">Cargando comunidades y tipos...</p>
+      } @else if (catalogError) {
+        <p class="error-msg" role="alert">{{ catalogError }}</p>
+        <button type="button" class="btn-link" (click)="loadCatalogs()">Reintentar catálogos</button>
+      } @else if (!communities.length || !sensorTypes.length) {
+        <p role="status">No hay comunidades o tipos disponibles. Deben registrarse antes de crear sensores.</p>
+      }
+      <fieldset [disabled]="saving || catalogsLoading || !!catalogError || !communities.length || !sensorTypes.length">
+        <div class="form-row">
+          <label for="sensor-name">Nombre</label>
+          <input id="sensor-name" type="text" [(ngModel)]="newSensor.name" name="name" required minlength="3" maxlength="100" placeholder="Sensor de temperatura" />
+        </div>
+        <div class="form-row">
+          <label for="sensor-type">Tipo</label>
+          <select id="sensor-type" [(ngModel)]="newSensor.sensorTypeId" name="sensorTypeId" required>
+            <option [ngValue]="0" disabled>Selecciona un tipo</option>
+            @for (type of sensorTypes; track type.sensorTypeId) {
+              <option [ngValue]="type.sensorTypeId">{{ type.code }} ({{ type.unit }})</option>
+            }
+          </select>
+        </div>
+        <div class="form-row">
+          <label for="sensor-community">Comunidad</label>
+          <select id="sensor-community" [(ngModel)]="newSensor.communityId" name="communityId" required>
+            <option [ngValue]="0" disabled>Selecciona una comunidad</option>
+            @for (community of communities; track community.communityId) {
+              <option [ngValue]="community.communityId">{{ community.name }}</option>
+            }
+          </select>
+        </div>
+        <button type="submit" class="btn-primary" [disabled]="sensorForm.invalid || newSensor.name.trim().length < 3 || !newSensor.sensorTypeId || !newSensor.communityId">
+          {{ saving ? 'Guardando...' : 'Guardar sensor' }}
+        </button>
+      </fieldset>
+      @if (formError) { <p class="error-msg" role="alert">{{ formError }}</p> }
     </form>
   }
 
   @if (loading) {
-    <p>Cargando sensores...</p>
+    <p role="status">Cargando sensores...</p>
   } @else if (error) {
-    <p class="error-msg">{{ error }}</p>
+    <p class="error-msg" role="alert">{{ error }}</p>
+    <button type="button" class="btn-link" (click)="load()">Reintentar</button>
+  } @else if (!sensores.length) {
+    <p class="empty-state">Todavía no hay sensores registrados.</p>
   } @else {
-    <table class="sensores-table">
-      <thead>
-        <tr>
-          <th>Nombre</th>
-          <th>Tipo</th>
-          <th>Comunidad</th>
-          <th>Último valor</th>
-          <th>Estado</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (sensor of sensores; track sensor.sensorId) {
-          <tr>
-            <td>{{ sensor.name }}</td>
-            <td>{{ sensor.sensorType }}</td>
-            <td>{{ sensor.community }}</td>
-            <td>{{ sensor.lastValue ?? '—' }} {{ sensor.unit }}</td>
-            <td>
-              <span class="status" [class.active]="sensor.isActive">
-                {{ sensor.isActive ? 'Activo' : 'Inactivo' }}
-              </span>
-            </td>
-            <td>
-              <button type="button" class="btn-link" (click)="toggleStatus(sensor)">
-                {{ sensor.isActive ? 'Desactivar' : 'Activar' }}
-              </button>
-            </td>
-          </tr>
-        }
-      </tbody>
-    </table>
+    <div class="table-scroll">
+      <table class="sensores-table">
+        <thead><tr>
+          <th>Nombre</th><th>Tipo</th><th>Comunidad</th><th>Último valor</th><th>Estado</th>
+          @if (canManage) { <th>Acciones</th> }
+        </tr></thead>
+        <tbody>
+          @for (sensor of sensores; track sensor.sensorId) {
+            <tr>
+              <td>{{ sensor.name }}</td><td>{{ sensor.sensorType }}</td><td>{{ sensor.community }}</td>
+              <td>{{ sensor.lastValue === null ? 'Sin lecturas' : sensor.lastValue + ' ' + sensor.unit }}</td>
+              <td><span class="status" [class.active]="sensor.isActive">{{ sensor.isActive ? 'Activo' : 'Inactivo' }}</span></td>
+              @if (canManage) {
+                <td><button type="button" class="btn-link" (click)="toggleStatus(sensor)" [disabled]="updating.has(sensor.sensorId)">
+                  {{ updating.has(sensor.sensorId) ? 'Guardando...' : sensor.isActive ? 'Desactivar' : 'Activar' }}
+                </button></td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
   }
 </div>

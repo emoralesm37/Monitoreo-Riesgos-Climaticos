@@ -1,0 +1,154 @@
+<section class="comunidades-page">
+  <div class="page-header">
+    <div>
+      <h1>Comunidades</h1>
+      <p>Administra las comunidades registradas en ClimateGuard.</p>
+    </div>
+  </div>
+
+  <div class="content-grid">
+    <div class="form-card">
+      <h2>
+        {{ editandoId !== null ? 'Editar comunidad' : 'Registrar comunidad' }}
+      </h2>
+
+      <form (ngSubmit)="guardar()">
+        <div class="form-group">
+          <label for="name">Nombre</label>
+          <input
+            id="name"
+            name="name"
+            type="text"
+            [(ngModel)]="name"
+            maxlength="120"
+            placeholder="Ej. Comunidad El Progreso"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="region">Región</label>
+          <input
+            id="region"
+            name="region"
+            type="text"
+            [(ngModel)]="region"
+            maxlength="120"
+            placeholder="Ej. Guatemala"
+          />
+        </div>
+
+        <div class="coordinates-grid">
+          <div class="form-group">
+            <label for="latitude">Latitud</label>
+            <input
+              id="latitude"
+              name="latitude"
+              type="number"
+              [(ngModel)]="latitude"
+              min="-90"
+              max="90"
+              step="any"
+              placeholder="14.6349"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="longitude">Longitud</label>
+            <input
+              id="longitude"
+              name="longitude"
+              type="number"
+              [(ngModel)]="longitude"
+              min="-180"
+              max="180"
+              step="any"
+              placeholder="-90.5069"
+            />
+          </div>
+        </div>
+
+        @if (error) {
+          <div class="message error">
+            {{ error }}
+          </div>
+        }
+
+        @if (mensaje) {
+          <div class="message success">
+            {{ mensaje }}
+          </div>
+        }
+
+        <div class="form-actions">
+          <button
+            type="submit"
+            class="btn-primary"
+          >
+            {{ editandoId !== null ? 'Guardar cambios' : 'Guardar comunidad' }}
+          </button>
+
+          @if (editandoId !== null) {
+            <button
+              type="button"
+              class="btn-secondary"
+              (click)="cancelarEdicion()"
+            >
+              Cancelar
+            </button>
+          }
+        </div>
+      </form>
+    </div>
+
+    <div class="table-card">
+      <div class="table-header">
+        <h2>Comunidades registradas</h2>
+      </div>
+
+      @if (cargando) {
+        <div class="empty-state">
+          Cargando comunidades...
+        </div>
+      } @else if (comunidades.length === 0) {
+        <div class="empty-state">
+          No hay comunidades registradas.
+        </div>
+      } @else {
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Región</th>
+                <th>Latitud</th>
+                <th>Longitud</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              @for (comunidad of comunidades; track comunidad.communityId) {
+                <tr>
+                  <td>{{ comunidad.name }}</td>
+                  <td>{{ comunidad.region || 'Sin región' }}</td>
+                  <td>{{ comunidad.latitude ?? 'Sin dato' }}</td>
+                  <td>{{ comunidad.longitude ?? 'Sin dato' }}</td>
+                  <td>
+                    <button
+                      type="button"
+                      class="btn-link"
+                      (click)="editar(comunidad)"
+                    >
+                      Editar
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  </div>
+</section>

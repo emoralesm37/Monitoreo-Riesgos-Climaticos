@@ -1,0 +1,244 @@
+<section class="reglas">
+
+  <div class="reglas-header">
+    <div>
+      <h1>Reglas de alerta</h1>
+      <p>
+        Configura las condiciones que determinan cuándo generar una alerta.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="btn-primary"
+      (click)="nuevaRegla()"
+    >
+      + Nueva regla
+    </button>
+  </div>
+
+  @if (mensaje) {
+    <div class="mensaje success">
+      {{ mensaje }}
+    </div>
+  }
+
+  @if (mostrarFormulario) {
+    <div class="form-card">
+
+      <h2>
+        {{ editandoId !== null ? 'Editar regla' : 'Nueva regla' }}
+      </h2>
+
+      <form (ngSubmit)="guardar()">
+
+        <div class="form-grid">
+
+          <div class="form-group full">
+            <label for="nombre">Nombre</label>
+            <input
+              id="nombre"
+              name="nombre"
+              type="text"
+              [(ngModel)]="nombre"
+              placeholder="Ej. Temperatura crítica"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="tipoSensor">Tipo de sensor</label>
+
+            <select
+              id="tipoSensor"
+              name="tipoSensor"
+              [(ngModel)]="tipoSensor"
+            >
+              <option value="Temperatura">Temperatura</option>
+              <option value="Humedad">Humedad</option>
+              <option value="Nivel de río">Nivel de río</option>
+              <option value="Viento">Viento</option>
+              <option value="Lluvia">Lluvia</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="comunidad">Comunidad</label>
+
+            <select
+              id="comunidad"
+              name="comunidad"
+              [(ngModel)]="comunidad"
+            >
+              <option value="Comunidad El Progreso">
+                Comunidad El Progreso
+              </option>
+
+              <option value="Comunidad Las Flores">
+                Comunidad Las Flores
+              </option>
+
+              <option value="Todas">
+                Todas
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="operador">Condición</label>
+
+            <select
+              id="operador"
+              name="operador"
+              [(ngModel)]="operador"
+            >
+              <option value=">">Mayor que</option>
+              <option value=">=">Mayor o igual que</option>
+              <option value="<">Menor que</option>
+              <option value="<=">Menor o igual que</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="valor">Valor umbral</label>
+
+            <input
+              id="valor"
+              name="valor"
+              type="number"
+              [(ngModel)]="valor"
+              step="any"
+              placeholder="Ej. 35"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="severidad">Severidad</label>
+
+            <select
+              id="severidad"
+              name="severidad"
+              [(ngModel)]="severidad"
+            >
+              <option value="Verde">Verde</option>
+              <option value="Amarillo">Amarillo</option>
+              <option value="Naranja">Naranja</option>
+              <option value="Rojo">Rojo</option>
+            </select>
+          </div>
+
+        </div>
+
+        @if (error) {
+          <div class="mensaje error">
+            {{ error }}
+          </div>
+        }
+
+        <div class="form-actions">
+          <button type="submit" class="btn-primary">
+            {{ editandoId !== null ? 'Guardar cambios' : 'Crear regla' }}
+          </button>
+
+          <button
+            type="button"
+            class="btn-secondary"
+            (click)="cancelar()"
+          >
+            Cancelar
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  }
+
+  <div class="reglas-card">
+
+    <div class="card-header">
+      <h2>Reglas configuradas</h2>
+      <span>{{ reglas.length }} reglas</span>
+    </div>
+
+    <div class="table-responsive">
+
+      <table class="reglas-table">
+
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Sensor</th>
+            <th>Comunidad</th>
+            <th>Condición</th>
+            <th>Severidad</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          @for (regla of reglas; track regla.id) {
+            <tr>
+
+              <td>{{ regla.nombre }}</td>
+
+              <td>{{ regla.tipoSensor }}</td>
+
+              <td>{{ regla.comunidad }}</td>
+
+              <td>
+                {{ regla.operador }} {{ regla.valor }}
+              </td>
+
+              <td>
+                <span
+                  class="severity-tag"
+                  [class]="'severity-tag severity-' + regla.severidad.toLowerCase()"
+                >
+                  {{ regla.severidad }}
+                </span>
+              </td>
+
+              <td>
+                <span
+                  class="estado"
+                  [class.activo]="regla.activa"
+                  [class.inactivo]="!regla.activa"
+                >
+                  {{ regla.activa ? 'Activa' : 'Inactiva' }}
+                </span>
+              </td>
+
+              <td class="acciones">
+
+                <button
+                  type="button"
+                  class="btn-link"
+                  (click)="editar(regla)"
+                >
+                  Editar
+                </button>
+
+                <button
+                  type="button"
+                  class="btn-link danger"
+                  (click)="cambiarEstado(regla)"
+                >
+                  {{ regla.activa ? 'Desactivar' : 'Activar' }}
+                </button>
+
+              </td>
+
+            </tr>
+          }
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</section>
