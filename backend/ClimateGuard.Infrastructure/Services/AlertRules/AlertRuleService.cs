@@ -64,6 +64,12 @@ public sealed class AlertRuleService(
     CreateAlertRuleRequest request,
     CancellationToken cancellationToken = default)
 {
+    ValidateParameters(
+        request.Name,
+        request.MinimumValue,
+        request.MaximumValue,
+        request.Message);
+
     await ValidateReferencesAsync(
         request.SensorTypeId,
         request.AlertSeverityId,
@@ -110,6 +116,12 @@ public async Task<bool> UpdateAsync(
     UpdateAlertRuleRequest request,
     CancellationToken cancellationToken = default)
     {
+    ValidateParameters(
+        request.Name,
+        request.MinimumValue,
+        request.MaximumValue,
+        request.Message);
+
     var alertRule = await dbContext.AlertRules
         .FirstOrDefaultAsync(
             rule => rule.AlertRuleId == alertRuleId,
@@ -175,6 +187,43 @@ public async Task<bool> UpdateAsync(
         await dbContext.SaveChangesAsync(cancellationToken);
 
         return true;
+    }
+
+    private static void ValidateParameters(
+        string name,
+        decimal minimumValue,
+        decimal maximumValue,
+        string message)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new ArgumentException(
+                "El nombre de la regla es obligatorio.");
+        }
+
+        if (name.Trim().Length > 100)
+        {
+            throw new ArgumentException(
+                "El nombre de la regla no puede superar los 100 caracteres.");
+        }
+
+        if (minimumValue >= maximumValue)
+        {
+            throw new ArgumentException(
+                "El valor mínimo debe ser menor que el valor máximo.");
+        }
+
+        if (string.IsNullOrWhiteSpace(message))
+        {
+            throw new ArgumentException(
+                "El mensaje de la regla es obligatorio.");
+        }
+
+        if (message.Trim().Length > 300)
+        {
+            throw new ArgumentException(
+                "El mensaje de la regla no puede superar los 300 caracteres.");
+        }
     }
 
     private async Task ValidateReferencesAsync(
