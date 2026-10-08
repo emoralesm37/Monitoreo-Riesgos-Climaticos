@@ -60,12 +60,25 @@ CREATE TABLE dbo.Users (
 );
 
 CREATE TABLE dbo.Communities (
-    CommunityId INT             IDENTITY(1,1) PRIMARY KEY,
-    Name        NVARCHAR(120)   NOT NULL UNIQUE,
-    Region      NVARCHAR(120)   NULL,
-    Latitude    DECIMAL(9,6)    NULL,
-    Longitude   DECIMAL(9,6)    NULL
+    CommunityId  INT             IDENTITY(1,1) PRIMARY KEY,
+    Name         NVARCHAR(120)   NOT NULL UNIQUE,
+    Municipality NVARCHAR(120)   NOT NULL,
+    Department   NVARCHAR(120)   NOT NULL,
+    Country      NVARCHAR(100)   NOT NULL,
+    Latitude     DECIMAL(9,6)    NULL,
+    Longitude    DECIMAL(9,6)    NULL,
+    Description  NVARCHAR(500)   NULL,
+    IsActive     BIT             NOT NULL DEFAULT (1)
 );
+
+CREATE INDEX IX_Communities_Municipality
+    ON dbo.Communities (Municipality);
+
+CREATE INDEX IX_Communities_Department
+    ON dbo.Communities (Department);
+
+CREATE INDEX IX_Communities_IsActive
+    ON dbo.Communities (IsActive);
 
 CREATE TABLE dbo.Sensors (
     SensorId        INT             IDENTITY(1,1) PRIMARY KEY,
@@ -163,7 +176,29 @@ INSERT INTO dbo.PhenomenonTypes (PhenomenonTypeId, Name) VALUES
     (5, N'IncendioForestal');
 
 -- Comunidades iniciales utilizadas por la aplicación
-INSERT INTO dbo.Communities (Name, Region) VALUES
-    (N'Comunidad El Progreso', N'Guatemala'),
-    (N'Comunidad Las Flores', N'Guatemala');
+INSERT INTO dbo.Communities (
+    Name,
+    Municipality,
+    Department,
+    Country,
+    Description,
+    IsActive
+)
+VALUES
+    (
+        N'Comunidad El Progreso',
+        N'Guatemala',
+        N'Guatemala',
+        N'Guatemala',
+        N'Comunidad inicial para demostración',
+        1
+    ),
+    (
+        N'Comunidad Las Flores',
+        N'Guatemala',
+        N'Guatemala',
+        N'Guatemala',
+        N'Comunidad inicial para demostración',
+        1
+    );
 GO
