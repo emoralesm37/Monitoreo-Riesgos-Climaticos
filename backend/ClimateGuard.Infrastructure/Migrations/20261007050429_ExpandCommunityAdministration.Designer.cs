@@ -4,6 +4,7 @@ using ClimateGuard.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ClimateGuard.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20261007050429_ExpandCommunityAdministration")]
+    partial class ExpandCommunityAdministration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -74,68 +77,6 @@ namespace ClimateGuard.Infrastructure.Migrations
                         .HasDatabaseName("IX_Alerts_SensorId");
 
                     b.ToTable("Alerts", "dbo");
-                });
-
-            modelBuilder.Entity("ClimateGuard.Domain.Entities.AlertRule", b =>
-                {
-                    b.Property<int>("AlertRuleId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AlertRuleId"));
-
-                    b.Property<byte>("AlertSeverityId")
-                        .HasColumnType("tinyint");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("SYSUTCDATETIME()");
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
-
-                    b.Property<decimal>("MaximumValue")
-                        .HasColumnType("decimal(10,2)");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)");
-
-                    b.Property<decimal>("MinimumValue")
-                        .HasColumnType("decimal(10,2)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<byte>("PhenomenonTypeId")
-                        .HasColumnType("tinyint");
-
-                    b.Property<byte>("SensorTypeId")
-                        .HasColumnType("tinyint");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("AlertRuleId");
-
-                    b.HasIndex("AlertSeverityId");
-
-                    b.HasIndex("IsActive");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
-
-                    b.HasIndex("PhenomenonTypeId");
-
-                    b.HasIndex("SensorTypeId");
-
-                    b.ToTable("AlertRules", "dbo");
                 });
 
             modelBuilder.Entity("ClimateGuard.Domain.Entities.AlertSeverity", b =>
@@ -514,36 +455,6 @@ namespace ClimateGuard.Infrastructure.Migrations
                     b.Navigation("ResolvedByUser");
 
                     b.Navigation("Sensor");
-                });
-
-            modelBuilder.Entity("ClimateGuard.Domain.Entities.AlertRule", b =>
-                {
-                    b.HasOne("ClimateGuard.Domain.Entities.AlertSeverity", "AlertSeverity")
-                        .WithMany()
-                        .HasForeignKey("AlertSeverityId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("FK_AlertRules_AlertSeverities");
-
-                    b.HasOne("ClimateGuard.Domain.Entities.PhenomenonType", "PhenomenonType")
-                        .WithMany()
-                        .HasForeignKey("PhenomenonTypeId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("FK_AlertRules_PhenomenonTypes");
-
-                    b.HasOne("ClimateGuard.Domain.Entities.SensorType", "SensorType")
-                        .WithMany()
-                        .HasForeignKey("SensorTypeId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("FK_AlertRules_SensorTypes");
-
-                    b.Navigation("AlertSeverity");
-
-                    b.Navigation("PhenomenonType");
-
-                    b.Navigation("SensorType");
                 });
 
             modelBuilder.Entity("ClimateGuard.Domain.Entities.AuditLogEntry", b =>
