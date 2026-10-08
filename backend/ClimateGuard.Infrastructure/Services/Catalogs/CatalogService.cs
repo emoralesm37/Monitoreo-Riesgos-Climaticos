@@ -20,4 +20,17 @@ public sealed class CatalogService(AppDbContext dbContext)
                 sensorType.Unit))
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<IReadOnlyList<AlertSeverityDto>> GetAlertSeveritiesAsync(
+        CancellationToken cancellationToken = default)
+    {
+        return await dbContext.AlertSeverities
+            .AsNoTracking()
+            .OrderBy(severity => severity.AlertSeverityId)
+            .Select(severity => new AlertSeverityDto(
+                severity.AlertSeverityId,
+                severity.Name))
+            .ToListAsync(cancellationToken);
+    }
+
 }

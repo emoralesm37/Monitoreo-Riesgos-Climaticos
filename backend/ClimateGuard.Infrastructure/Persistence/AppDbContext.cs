@@ -27,6 +27,8 @@ public sealed class AppDbContext(
 
     public DbSet<Alert> Alerts => Set<Alert>();
 
+    public DbSet<AlertRule> AlertRules => Set<AlertRule>();
+
     public DbSet<AuditLogEntry> AuditLogEntries =>
         Set<AuditLogEntry>();
 
