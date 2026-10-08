@@ -1,7 +1,7 @@
 using ClimateGuard.Application.Abstractions.Communities;
 using ClimateGuard.Application.Contracts.Communities;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace ClimateGuard.Api.Controllers;
 
@@ -13,10 +13,12 @@ public sealed class CommunitiesController(
 {
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<CommunityDto>>> GetAll(
+        [FromQuery] CommunityFilterRequest filters,
         CancellationToken cancellationToken)
     {
-        var communities =
-            await communityService.GetAllAsync(cancellationToken);
+        var communities = await communityService.GetAllAsync(
+            filters,
+            cancellationToken);
 
         return Ok(communities);
     }
@@ -67,6 +69,29 @@ public sealed class CommunitiesController(
         var updated = await communityService.UpdateAsync(
             communityId,
             request,
+            cancellationToken);
+
+        if (!updated)
+        {
+            return NotFound(new
+            {
+                message = "La comunidad no fue encontrada."
+            });
+        }
+
+        return NoContent();
+    }
+
+    [HttpPatch("{communityId:int}/status")]
+    [Authorize(Roles = "Administrador")]
+    public async Task<IActionResult> ChangeStatus(
+        int communityId,
+        ChangeCommunityStatusRequest request,
+        CancellationToken cancellationToken)
+    {
+        var updated = await communityService.ChangeStatusAsync(
+            communityId,
+            request.IsActive,
             cancellationToken);
 
         if (!updated)
