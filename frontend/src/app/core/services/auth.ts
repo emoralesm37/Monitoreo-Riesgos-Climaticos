@@ -34,7 +34,7 @@ interface UserSession {
   providedIn: 'root'
 })
 export class Auth {
-  private readonly apiUrl = 'http://localhost:7000/api/auth';
+  private readonly apiUrl = '/api/auth';
   private readonly sessionKey = 'climateguard_user';
 
   private expirationTimer: ReturnType<typeof setTimeout> | null = null;

@@ -29,7 +29,7 @@ export interface ActualizarComunidadRequest {
 })
 export class ComunidadesService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:7000/api/communities';
+  private readonly apiUrl = '/api/communities';
 
   obtenerTodas(): Observable<Comunidad[]> {
     return this.http.get<Comunidad[]>(this.apiUrl);

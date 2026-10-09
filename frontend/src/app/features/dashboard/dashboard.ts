@@ -30,7 +30,7 @@ export class Dashboard implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly cdr = inject(ChangeDetectorRef);
 
-  private readonly apiUrl = 'http://localhost:7000/api';
+  private readonly apiUrl = '/api';
 
   totalSensores = 0;
   totalComunidades = 0;
