@@ -5,6 +5,7 @@ namespace ClimateGuard.Application.Abstractions.Communities;
 public interface ICommunityService
 {
     Task<IReadOnlyList<CommunityDto>> GetAllAsync(
+        CommunityFilterRequest filters,
         CancellationToken cancellationToken = default);
 
     Task<CommunityDto?> GetByIdAsync(
@@ -18,5 +19,10 @@ public interface ICommunityService
     Task<bool> UpdateAsync(
         int communityId,
         UpdateCommunityRequest request,
+        CancellationToken cancellationToken = default);
+
+    Task<bool> ChangeStatusAsync(
+        int communityId,
+        bool isActive,
         CancellationToken cancellationToken = default);
 }

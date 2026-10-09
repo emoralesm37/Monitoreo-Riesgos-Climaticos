@@ -10,17 +10,46 @@ public sealed class CommunityService(AppDbContext dbContext)
     : ICommunityService
 {
     public async Task<IReadOnlyList<CommunityDto>> GetAllAsync(
+        CommunityFilterRequest filters,
         CancellationToken cancellationToken = default)
     {
-        return await dbContext.Communities
+        var query = dbContext.Communities
             .AsNoTracking()
-            .OrderBy(community => community.Name)
-            .Select(community => new CommunityDto(
-                community.CommunityId,
-                community.Name,
-                community.Region,
-                community.Latitude,
-                community.Longitude))
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(filters.Search))
+        {
+            var search = filters.Search.Trim();
+
+            query = query.Where(community =>
+                community.Name.Contains(search));
+        }
+
+        if (filters.IsActive.HasValue)
+        {
+            query = query.Where(community =>
+                community.IsActive == filters.IsActive.Value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(filters.Municipality))
+        {
+            var municipality = filters.Municipality.Trim();
+
+            query = query.Where(community =>
+                community.Municipality == municipality);
+        }
+
+        if (!string.IsNullOrWhiteSpace(filters.Department))
+        {
+            var department = filters.Department.Trim();
+
+            query = query.Where(community =>
+                community.Department == department);
+        }
+
+        query = query.OrderBy(community => community.Name);
+
+        return await ProjectToDto(query)
             .ToListAsync(cancellationToken);
     }
 
@@ -28,15 +57,12 @@ public sealed class CommunityService(AppDbContext dbContext)
         int communityId,
         CancellationToken cancellationToken = default)
     {
-        return await dbContext.Communities
+        var query = dbContext.Communities
             .AsNoTracking()
-            .Where(community => community.CommunityId == communityId)
-            .Select(community => new CommunityDto(
-                community.CommunityId,
-                community.Name,
-                community.Region,
-                community.Latitude,
-                community.Longitude))
+            .Where(community =>
+                community.CommunityId == communityId);
+
+        return await ProjectToDto(query)
             .FirstOrDefaultAsync(cancellationToken);
     }
 
@@ -59,20 +85,22 @@ public sealed class CommunityService(AppDbContext dbContext)
         var community = new Community
         {
             Name = normalizedName,
-            Region = request.Region?.Trim(),
+            Municipality = request.Municipality.Trim(),
+            Department = request.Department.Trim(),
+            Country = request.Country.Trim(),
             Latitude = request.Latitude,
-            Longitude = request.Longitude
+            Longitude = request.Longitude,
+            Description = NormalizeOptionalText(request.Description),
+            IsActive = true
         };
 
         dbContext.Communities.Add(community);
+
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        return new CommunityDto(
+        return (await GetByIdAsync(
             community.CommunityId,
-            community.Name,
-            community.Region,
-            community.Latitude,
-            community.Longitude);
+            cancellationToken))!;
     }
 
     public async Task<bool> UpdateAsync(
@@ -80,9 +108,10 @@ public sealed class CommunityService(AppDbContext dbContext)
         UpdateCommunityRequest request,
         CancellationToken cancellationToken = default)
     {
-        var community = await dbContext.Communities.FindAsync(
-            [communityId],
-            cancellationToken);
+        var community = await dbContext.Communities
+            .FirstOrDefaultAsync(
+                item => item.CommunityId == communityId,
+                cancellationToken);
 
         if (community is null)
         {
@@ -104,12 +133,62 @@ public sealed class CommunityService(AppDbContext dbContext)
         }
 
         community.Name = normalizedName;
-        community.Region = request.Region?.Trim();
+        community.Municipality = request.Municipality.Trim();
+        community.Department = request.Department.Trim();
+        community.Country = request.Country.Trim();
         community.Latitude = request.Latitude;
         community.Longitude = request.Longitude;
+        community.Description =
+            NormalizeOptionalText(request.Description);
 
         await dbContext.SaveChangesAsync(cancellationToken);
 
         return true;
+    }
+
+    public async Task<bool> ChangeStatusAsync(
+        int communityId,
+        bool isActive,
+        CancellationToken cancellationToken = default)
+    {
+        var community = await dbContext.Communities
+            .FirstOrDefaultAsync(
+                item => item.CommunityId == communityId,
+                cancellationToken);
+
+        if (community is null)
+        {
+            return false;
+        }
+
+        community.IsActive = isActive;
+
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        return true;
+    }
+
+    private static IQueryable<CommunityDto> ProjectToDto(
+        IQueryable<Community> query)
+    {
+        return query.Select(community => new CommunityDto(
+            community.CommunityId,
+            community.Name,
+            community.Municipality,
+            community.Department,
+            community.Country,
+            community.Latitude,
+            community.Longitude,
+            community.Description,
+            community.IsActive,
+            community.Sensors.Count
+        ));
+    }
+
+    private static string? NormalizeOptionalText(string? value)
+    {
+        return string.IsNullOrWhiteSpace(value)
+            ? null
+            : value.Trim();
     }
 }
