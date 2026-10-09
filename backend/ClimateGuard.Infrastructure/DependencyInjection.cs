@@ -47,6 +47,7 @@ public static class DependencyInjection
         services.AddScoped<ICommunityService, CommunityService>();
         services.AddScoped<IAlertRuleService, AlertRuleService>();
         services.AddScoped<IAlertEvaluationService, AlertEvaluationService>();
+        services.AddScoped<IAlertGenerationService, AlertGenerationService>();
         services.AddScoped<ICatalogService, CatalogService>();
         services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
         services.AddScoped<IAuthService, AuthService>();

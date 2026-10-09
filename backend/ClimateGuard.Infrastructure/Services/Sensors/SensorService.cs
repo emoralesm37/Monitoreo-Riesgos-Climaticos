@@ -9,7 +9,8 @@ namespace ClimateGuard.Infrastructure.Services.Sensors;
 
 public sealed class SensorService(
     AppDbContext dbContext,
-    IAlertEvaluationService alertEvaluationService) : ISensorService
+    IAlertEvaluationService alertEvaluationService,
+    IAlertGenerationService alertGenerationService) : ISensorService
 {
     public async Task<IReadOnlyList<SensorDto>> GetAllAsync(
         CancellationToken cancellationToken = default)
@@ -184,7 +185,7 @@ public sealed class SensorService(
 
         dbContext.SensorReadings.Add(reading);
 
-        await dbContext.SaveChangesAsync(cancellationToken);
+
 
         // RF-ADM-32: evaluar la lectura contra las reglas activas.
         var violatedRuleIds = await alertEvaluationService.EvaluateAsync(
@@ -192,6 +193,18 @@ public sealed class SensorService(
             reading.Value,
             cancellationToken);
 
+            // RF-ADM-33: preparar las alertas correspondientes
+            // a las reglas incumplidas.
+            await alertGenerationService.GenerateAsync(
+                sensor.SensorId,
+                reading.Value,
+                violatedRuleIds,
+                cancellationToken);
+
+            // Guardar la lectura, los cambios del sensor y las
+            // alertas en una misma operación de EF Core.
+            await dbContext.SaveChangesAsync(cancellationToken);
+            
         // Por ahora solo se detectan las reglas incumplidas.
         // RF-ADM-33 implementará la generación de alertas.
 
