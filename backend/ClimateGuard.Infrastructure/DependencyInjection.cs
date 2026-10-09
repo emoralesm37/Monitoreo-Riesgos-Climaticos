@@ -15,6 +15,8 @@ using Microsoft.AspNetCore.Identity;
 using ClimateGuard.Infrastructure.Persistence.Initialization;
 using ClimateGuard.Application.Abstractions.AlertRules;
 using ClimateGuard.Infrastructure.Services.AlertRules;
+using ClimateGuard.Application.Abstractions.Alerts;
+using ClimateGuard.Infrastructure.Services.Alerts;
 
 namespace ClimateGuard.Infrastructure;
 
@@ -44,6 +46,7 @@ public static class DependencyInjection
         services.AddScoped<ISensorService, SensorService>();
         services.AddScoped<ICommunityService, CommunityService>();
         services.AddScoped<IAlertRuleService, AlertRuleService>();
+        services.AddScoped<IAlertEvaluationService, AlertEvaluationService>();
         services.AddScoped<ICatalogService, CatalogService>();
         services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
         services.AddScoped<IAuthService, AuthService>();
