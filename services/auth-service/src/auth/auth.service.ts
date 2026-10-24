@@ -8,12 +8,20 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { createHash, randomUUID } from 'crypto';
-import { Repository } from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
 
-import { RefreshToken } from './entities/refresh-token.entity';
+import { User } from '../users/entities/user.entity';
 import { LoginRequestDto } from './dto/login-request.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
-import { User } from '../users/entities/user.entity';
+import { RefreshToken } from './entities/refresh-token.entity';
+
+interface RefreshTokenPayload {
+  sub: string;
+  email: string;
+  name: string;
+  role: string;
+  type: string;
+}
 
 @Injectable()
 export class AuthService {
@@ -64,6 +72,114 @@ export class AuthService {
       );
     }
 
+    return this.issueTokenPair(user);
+  }
+
+  async refresh(
+    refreshToken: string,
+  ): Promise<LoginResponseDto> {
+    const issuer =
+      this.configService.getOrThrow<string>('JWT_ISSUER');
+
+    const audience =
+      this.configService.getOrThrow<string>('JWT_AUDIENCE');
+
+    let payload: RefreshTokenPayload;
+
+    try {
+      payload =
+        await this.jwtService.verifyAsync<RefreshTokenPayload>(
+          refreshToken,
+          {
+            secret:
+              this.configService.getOrThrow<string>(
+                'JWT_REFRESH_SECRET',
+              ),
+            issuer,
+            audience,
+          },
+        );
+    } catch {
+      throw new UnauthorizedException(
+        'El refresh token no es válido o expiró.',
+      );
+    }
+
+    if (
+      payload.type !== 'refresh' ||
+      !payload.sub
+    ) {
+      throw new UnauthorizedException(
+        'El refresh token no es válido.',
+      );
+    }
+
+    const storedToken =
+      await this.refreshTokenRepository.findOne({
+        where: {
+          tokenHash: this.hashToken(refreshToken),
+          revokedAt: IsNull(),
+        },
+        relations: {
+          user: {
+            role: true,
+          },
+        },
+      });
+
+    if (
+      !storedToken ||
+      storedToken.expiresAt <= new Date()
+    ) {
+      throw new UnauthorizedException(
+        'El refresh token no es válido o expiró.',
+      );
+    }
+
+    if (storedToken.user.id !== payload.sub) {
+      throw new UnauthorizedException(
+        'El refresh token no pertenece al usuario.',
+      );
+    }
+
+    if (!storedToken.user.isActive) {
+      throw new ForbiddenException(
+        'El usuario se encuentra inactivo.',
+      );
+    }
+
+    storedToken.revokedAt = new Date();
+
+    await this.refreshTokenRepository.save(storedToken);
+
+    return this.issueTokenPair(storedToken.user);
+  }
+
+  async logout(
+    refreshToken: string,
+  ): Promise<{ message: string }> {
+    const storedToken =
+      await this.refreshTokenRepository.findOne({
+        where: {
+          tokenHash: this.hashToken(refreshToken),
+          revokedAt: IsNull(),
+        },
+      });
+
+    if (storedToken) {
+      storedToken.revokedAt = new Date();
+
+      await this.refreshTokenRepository.save(storedToken);
+    }
+
+    return {
+      message: 'Sesión cerrada correctamente.',
+    };
+  }
+
+  private async issueTokenPair(
+    user: User,
+  ): Promise<LoginResponseDto> {
     const accessTtl = this.getPositiveInteger(
       'JWT_ACCESS_TTL_SECONDS',
     );
