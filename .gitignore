@@ -489,3 +489,7 @@ $RECYCLE.BIN/
 .env.local
 .env.*.local
 venv/
+
+# Auth Service - archivos generados
+/services/auth-service/dist/
+/services/auth-service/*.tsbuildinfo
