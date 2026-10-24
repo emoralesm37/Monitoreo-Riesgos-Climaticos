@@ -9,6 +9,7 @@ import { Role } from './roles/entities/role.entity';
 import { RolesModule } from './roles/roles.module';
 import { User } from './users/entities/user.entity';
 import { UsersModule } from './users/users.module';
+import { DatabaseModule } from './database/database.module';
 
 @Module({
   imports: [
@@ -42,11 +43,12 @@ import { UsersModule } from './users/users.module';
             ? { rejectUnauthorized: false }
             : false,
 
-        retryAttempts: 5,
+                retryAttempts: 5,
         retryDelay: 3000,
       }),
     }),
 
+    DatabaseModule,
     AuthModule,
     UsersModule,
     RolesModule,
