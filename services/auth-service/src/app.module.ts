@@ -1,30 +1,56 @@
 import { Module } from '@nestjs/common';
-import { createObserveModule } from '@nestjs/observe';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { AuthModule } from './auth/auth.module';
-import { UsersModule } from './users/users.module';
-import { RolesModule } from './roles/roles.module';
-import { HealthModule } from './health/health.module';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
-export const { ObserveModule, ObserveInstrument } = createObserveModule();
+import { AuthModule } from './auth/auth.module';
+import { RefreshToken } from './auth/entities/refresh-token.entity';
+import { HealthModule } from './health/health.module';
+import { Role } from './roles/entities/role.entity';
+import { RolesModule } from './roles/roles.module';
+import { User } from './users/entities/user.entity';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
-    // Distributed tracing, auto-correlated logs, request/job metrics, error
-    // telemetry, alarms, and more — out of the box. Sign up at https://observe.nestjs.com,
-    // then run `npx @nestjs/observe link` to write your key pair into .env.
-    ObserveModule.forRoot({
-      appKey: process.env.OBSERVE_APP_KEY ?? 'YOUR_APP_KEY',
-      appSecret: process.env.OBSERVE_APP_SECRET ?? 'YOUR_APP_SECRET',
-      serviceId: 'auth-service',
+    ConfigModule.forRoot({
+      isGlobal: true,
     }),
+
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        type: 'postgres',
+        host: configService.getOrThrow<string>('DB_HOST'),
+        port: Number(
+          configService.getOrThrow<string>('DB_PORT'),
+        ),
+        database:
+          configService.getOrThrow<string>('DB_NAME'),
+        username:
+          configService.getOrThrow<string>('DB_USER'),
+        password:
+          configService.getOrThrow<string>('DB_PASSWORD'),
+
+        entities: [User, Role, RefreshToken],
+
+        synchronize: false,
+        migrationsRun: false,
+
+        ssl:
+          configService.get<string>('DB_SSL') === 'true'
+            ? { rejectUnauthorized: false }
+            : false,
+
+        retryAttempts: 5,
+        retryDelay: 3000,
+      }),
+    }),
+
     AuthModule,
     UsersModule,
     RolesModule,
     HealthModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}
