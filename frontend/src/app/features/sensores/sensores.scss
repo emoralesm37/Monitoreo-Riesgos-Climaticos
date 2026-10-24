@@ -126,3 +126,16 @@
 .sensores-header h2 {
   margin: 0;
 }
+.sensor-form h3 { margin: 0; font-size: 1rem; }
+.sensor-form fieldset { border: 0; padding: 0; margin: 0; min-width: 0; display: grid; gap: .75rem; }
+.form-row input, .form-row select { width: 100%; box-sizing: border-box; }
+button:disabled { opacity: .55; cursor: not-allowed; }
+.error-msg { color: #991b1b; background: #fef2f2; padding: .75rem; border-radius: 6px; }
+.success-msg { color: #166534; background: #f0fdf4; padding: .75rem; border-radius: 6px; }
+.empty-state { padding: 1.5rem; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; }
+.table-scroll { overflow-x: auto; }
+.sensores-table { min-width: 600px; }
+@media (max-width: 600px) {
+  .sensores-header { flex-wrap: wrap; }
+  .sensor-form { max-width: none; }
+}

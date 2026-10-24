@@ -1,45 +1,229 @@
-<div class="usuarios">
+<section class="usuarios">
+
   <div class="usuarios-header">
-    <h2>Usuarios</h2>
-    <button type="button" class="btn-primary">+ Nuevo usuario</button>
+    <div>
+      <h1>Administración de usuarios</h1>
+      <p>Gestiona los usuarios y permisos de ClimateGuard.</p>
+    </div>
+
+    <button
+      type="button"
+      class="btn-primary"
+      (click)="nuevoUsuario()"
+    >
+      + Nuevo usuario
+    </button>
   </div>
 
-  <table class="usuarios-table">
-    <thead>
-      <tr>
-        <th>Nombre</th>
-        <th>Email</th>
-        <th>Rol</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (usuario of usuarios; track usuario.id) {
-        <tr>
-          <td>{{ usuario.nombre }}</td>
-          <td>{{ usuario.email }}</td>
-          <td>
-            <span class="rol-tag" [class.admin]="usuario.rol === 'Admin'">
-              {{ usuario.rol }}
-            </span>
-          </td>
-          <td>
-            <button type="button" class="btn-link">Editar</button>
-          </td>
-        </tr>
-      }
-    </tbody>
-  </table>
+  @if (mensaje) {
+    <div class="mensaje success">
+      {{ mensaje }}
+    </div>
+  }
+
+  @if (mostrarFormulario) {
+    <div class="usuario-form-card">
+
+      <h2>
+        {{ editandoId !== null ? 'Editar usuario' : 'Nuevo usuario' }}
+      </h2>
+
+      <form (ngSubmit)="guardar()">
+
+        <div class="form-grid">
+
+          <div class="form-group">
+            <label for="nombre">Nombre</label>
+
+            <input
+              id="nombre"
+              name="nombre"
+              type="text"
+              [(ngModel)]="nombre"
+              placeholder="Nombre completo"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="email">Correo electrónico</label>
+
+            <input
+              id="email"
+              name="email"
+              type="email"
+              [(ngModel)]="email"
+              placeholder="usuario@climateguard.com"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="rol">Rol</label>
+
+            <select
+              id="rol"
+              name="rol"
+              [(ngModel)]="rol"
+            >
+              <option value="Administrador">
+                Administrador
+              </option>
+
+              <option value="Operador">
+                Operador
+              </option>
+            </select>
+          </div>
+
+        </div>
+
+        @if (error) {
+          <div class="mensaje error">
+            {{ error }}
+          </div>
+        }
+
+        <div class="form-actions">
+
+          <button
+            type="submit"
+            class="btn-primary"
+          >
+            {{ editandoId !== null ? 'Guardar cambios' : 'Crear usuario' }}
+          </button>
+
+          <button
+            type="button"
+            class="btn-secondary"
+            (click)="cancelar()"
+          >
+            Cancelar
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+  }
+
+  <div class="usuarios-card">
+
+    <div class="card-header">
+      <h2>Usuarios registrados</h2>
+      <span>{{ usuarios.length }} usuarios</span>
+    </div>
+
+    <div class="table-responsive">
+
+      <table class="usuarios-table">
+
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Email</th>
+            <th>Rol</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          @for (usuario of usuarios; track usuario.id) {
+
+            <tr>
+
+              <td>
+                {{ usuario.nombre }}
+              </td>
+
+              <td>
+                {{ usuario.email }}
+              </td>
+
+              <td>
+                <span
+                  class="rol-tag"
+                  [class.admin]="usuario.rol === 'Administrador'"
+                >
+                  {{ usuario.rol }}
+                </span>
+              </td>
+
+              <td>
+                <span
+                  class="estado"
+                  [class.activo]="usuario.activo"
+                  [class.inactivo]="!usuario.activo"
+                >
+                  {{ usuario.activo ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+
+              <td class="acciones">
+
+                <button
+                  type="button"
+                  class="btn-link"
+                  (click)="editar(usuario)"
+                >
+                  Editar
+                </button>
+
+                <button
+                  type="button"
+                  class="btn-link danger"
+                  (click)="cambiarEstado(usuario)"
+                >
+                  {{ usuario.activo ? 'Desactivar' : 'Activar' }}
+                </button>
+
+              </td>
+
+            </tr>
+
+          }
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
 
   <div class="bitacora-section">
-    <h2>Bitácora reciente</h2>
+
+    <div class="card-header">
+      <div>
+        <h2>Bitácora reciente</h2>
+        <p>Últimas acciones realizadas en el sistema.</p>
+      </div>
+    </div>
+
     <ul class="bitacora-list">
+
       @for (log of bitacora; track log.id) {
+
         <li>
-          <span class="bitacora-fecha">{{ log.fecha }}</span>
-          <span>{{ log.usuario }} — {{ log.accion }}</span>
+
+          <div class="bitacora-info">
+            <strong>{{ log.usuario }}</strong>
+            <span>{{ log.accion }}</span>
+          </div>
+
+          <span class="bitacora-fecha">
+            {{ log.fecha }}
+          </span>
+
         </li>
+
       }
+
     </ul>
+
   </div>
-</div>
+
+</section>

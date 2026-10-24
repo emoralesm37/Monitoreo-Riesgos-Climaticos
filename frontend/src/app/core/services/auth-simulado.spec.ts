@@ -1,12 +1,12 @@
 import { TestBed } from '@angular/core/testing';
-import { AuthSimulado } from './auth-simulado';
+import { AuthSimuladoService } from './auth-simulado';
 
-describe('AuthSimulado', () => {
-  let service: AuthSimulado;
+describe('AuthSimuladoService', () => {
+  let service: AuthSimuladoService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(AuthSimulado);
+    service = TestBed.inject(AuthSimuladoService);
   });
 
   it('should be created', () => {

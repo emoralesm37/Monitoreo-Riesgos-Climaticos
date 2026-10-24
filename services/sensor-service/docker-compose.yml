@@ -1,0 +1,29 @@
+
+services:
+  sensor-sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: climateguard-sensor-sqlserver
+    restart: unless-stopped
+
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Developer"
+      MSSQL_SA_PASSWORD: ${SENSOR_SQL_PASSWORD:?Definir SENSOR_SQL_PASSWORD}
+
+    ports:
+      - "127.0.0.1:1435:1433"
+
+    volumes:
+      - sensor_sqlserver_data:/var/opt/mssql
+
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - "bash -c 'echo > /dev/tcp/127.0.0.1/1433'"
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+volumes:
+  sensor_sqlserver_data:
