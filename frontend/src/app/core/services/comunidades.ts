@@ -1,35 +1,40 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface Comunidad {
   communityId: number;
   name: string;
-  region: string | null;
+  municipality: string;
+  department: string;
+  country: string;
   latitude: number | null;
   longitude: number | null;
+  description: string | null;
+  isActive: boolean;
+  sensorCount: number;
 }
 
 export interface CrearComunidadRequest {
   name: string;
-  region?: string | null;
-  latitude?: number | null;
-  longitude?: number | null;
+  municipality: string;
+  department: string;
+  country: string;
+  latitude: number | null;
+  longitude: number | null;
+  description: string | null;
 }
 
-export interface ActualizarComunidadRequest {
-  name: string;
-  region?: string | null;
-  latitude?: number | null;
-  longitude?: number | null;
-}
+export interface ActualizarComunidadRequest
+  extends CrearComunidadRequest {}
 
 @Injectable({
   providedIn: 'root'
 })
 export class ComunidadesService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:7000/api/communities';
+  private readonly apiUrl = `${environment.apiUrl}/communities`;
 
   obtenerTodas(): Observable<Comunidad[]> {
     return this.http.get<Comunidad[]>(this.apiUrl);
@@ -43,7 +48,10 @@ export class ComunidadesService {
     return this.http.post<Comunidad>(this.apiUrl, data);
   }
 
-  actualizar(id: number, data: ActualizarComunidadRequest): Observable<void> {
+  actualizar(
+    id: number,
+    data: ActualizarComunidadRequest
+  ): Observable<void> {
     return this.http.put<void>(`${this.apiUrl}/${id}`, data);
   }
 }

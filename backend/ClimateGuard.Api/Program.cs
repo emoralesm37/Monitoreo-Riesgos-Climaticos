@@ -18,44 +18,44 @@ var allowedOrigins =
 
 // Servicios de ASP.NET Core
 builder.Services.AddControllers();
-    var jwtKey = builder.Configuration["Jwt:Key"]
-        ?? throw new InvalidOperationException(
-            "No se encontró la configuración Jwt:Key.");
 
-    var jwtIssuer = builder.Configuration["Jwt:Issuer"]
-        ?? throw new InvalidOperationException(
-            "No se encontró la configuración Jwt:Issuer.");
+var jwtKey = builder.Configuration["Jwt:Key"]
+    ?? throw new InvalidOperationException("Falta Jwt:Key.");
 
-    var jwtAudience = builder.Configuration["Jwt:Audience"]
-        ?? throw new InvalidOperationException(
-            "No se encontró la configuración Jwt:Audience.");
+var jwtIssuer = builder.Configuration["Jwt:Issuer"]
+    ?? throw new InvalidOperationException("Falta Jwt:Issuer.");
 
-    builder.Services
-        .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-        .AddJwtBearer(options =>
+var jwtAudience = builder.Configuration["Jwt:Audience"]
+    ?? throw new InvalidOperationException("Falta Jwt:Audience.");
+
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.MapInboundClaims = false;
+
+        options.TokenValidationParameters = new TokenValidationParameters
         {
-            options.TokenValidationParameters =
-                new TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidIssuer = jwtIssuer,
+            ValidateIssuer = true,
+            ValidIssuer = jwtIssuer,
 
-                    ValidateAudience = true,
-                    ValidAudience = jwtAudience,
+            ValidateAudience = true,
+            ValidAudience = jwtAudience,
 
-                    ValidateLifetime = true,
+            ValidateLifetime = true,
+            RequireExpirationTime = true,
 
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey =
-                        new SymmetricSecurityKey(
-                            Encoding.UTF8.GetBytes(jwtKey)),
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(jwtKey)),
 
-                    ClockSkew = TimeSpan.Zero
-                };
-        }
-);
+            ValidAlgorithms = [SecurityAlgorithms.HmacSha256],
+            ClockSkew = TimeSpan.Zero,
 
-builder.Services.AddAuthorization();
+            NameClaimType = "name",
+            RoleClaimType = "role"
+        };
+    });
 
 // OpenAPI, salud y errores
 builder.Services.AddOpenApi(options =>
@@ -116,7 +116,10 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseRouting();
 

@@ -2,104 +2,157 @@
   <div class="page-header">
     <div>
       <h1>Comunidades</h1>
-      <p>Administra las comunidades registradas en ClimateGuard.</p>
+      <p>Consulta y administra las comunidades de ClimateGuard.</p>
     </div>
   </div>
 
   <div class="content-grid">
-    <div class="form-card">
-      <h2>
-        {{ editandoId !== null ? 'Editar comunidad' : 'Registrar comunidad' }}
-      </h2>
+    @if (puedeAdministrar) {
+      <div class="form-card">
+        <h2>
+          {{ editandoId !== null
+            ? 'Editar comunidad'
+            : 'Registrar comunidad' }}
+        </h2>
 
-      <form (ngSubmit)="guardar()">
-        <div class="form-group">
-          <label for="name">Nombre</label>
-          <input
-            id="name"
-            name="name"
-            type="text"
-            [(ngModel)]="name"
-            maxlength="120"
-            placeholder="Ej. Comunidad El Progreso"
-            required
-          />
-        </div>
-
-        <div class="form-group">
-          <label for="region">Región</label>
-          <input
-            id="region"
-            name="region"
-            type="text"
-            [(ngModel)]="region"
-            maxlength="120"
-            placeholder="Ej. Guatemala"
-          />
-        </div>
-
-        <div class="coordinates-grid">
-          <div class="form-group">
-            <label for="latitude">Latitud</label>
-            <input
-              id="latitude"
-              name="latitude"
-              type="number"
-              [(ngModel)]="latitude"
-              min="-90"
-              max="90"
-              step="any"
-              placeholder="14.6349"
-            />
-          </div>
-
-          <div class="form-group">
-            <label for="longitude">Longitud</label>
-            <input
-              id="longitude"
-              name="longitude"
-              type="number"
-              [(ngModel)]="longitude"
-              min="-180"
-              max="180"
-              step="any"
-              placeholder="-90.5069"
-            />
-          </div>
-        </div>
-
-        @if (error) {
-          <div class="message error">
-            {{ error }}
-          </div>
-        }
-
-        @if (mensaje) {
-          <div class="message success">
-            {{ mensaje }}
-          </div>
-        }
-
-        <div class="form-actions">
-          <button
-            type="submit"
-            class="btn-primary"
+        <form (ngSubmit)="guardar()" #formulario="ngForm">
+          <fieldset
+            [disabled]="guardando"
+            style="border: 0; padding: 0; margin: 0; min-width: 0;"
           >
-            {{ editandoId !== null ? 'Guardar cambios' : 'Guardar comunidad' }}
-          </button>
+            <div class="form-group">
+              <label for="name">Nombre</label>
+              <input
+                id="name"
+                name="name"
+                type="text"
+                [(ngModel)]="name"
+                minlength="3"
+                maxlength="120"
+                placeholder="Ej. Comunidad El Progreso"
+                required
+              />
+            </div>
 
-          @if (editandoId !== null) {
-            <button
-              type="button"
-              class="btn-secondary"
-              (click)="cancelarEdicion()"
-            >
-              Cancelar
-            </button>
-          }
-        </div>
-      </form>
-    </div>
+            <div class="form-group">
+              <label for="municipality">Municipio</label>
+              <input
+                id="municipality"
+                name="municipality"
+                type="text"
+                [(ngModel)]="municipality"
+                maxlength="120"
+                placeholder="Ej. Villa Nueva"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="department">Departamento</label>
+              <input
+                id="department"
+                name="department"
+                type="text"
+                [(ngModel)]="department"
+                maxlength="120"
+                placeholder="Ej. Guatemala"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="country">País</label>
+              <input
+                id="country"
+                name="country"
+                type="text"
+                [(ngModel)]="country"
+                maxlength="100"
+                required
+              />
+            </div>
+
+            <div class="coordinates-grid">
+              <div class="form-group">
+                <label for="latitude">Latitud</label>
+                <input
+                  id="latitude"
+                  name="latitude"
+                  type="number"
+                  [(ngModel)]="latitude"
+                  min="-90"
+                  max="90"
+                  step="any"
+                  placeholder="14.6349"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="longitude">Longitud</label>
+                <input
+                  id="longitude"
+                  name="longitude"
+                  type="number"
+                  [(ngModel)]="longitude"
+                  min="-180"
+                  max="180"
+                  step="any"
+                  placeholder="-90.5069"
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="description">Descripción (opcional)</label>
+              <textarea
+                id="description"
+                name="description"
+                [(ngModel)]="description"
+                maxlength="500"
+                rows="3"
+                style="width: 100%; box-sizing: border-box;"
+              ></textarea>
+            </div>
+
+            @if (error) {
+              <div class="message error" role="alert">
+                {{ error }}
+              </div>
+            }
+
+            @if (mensaje) {
+              <div class="message success" role="status">
+                {{ mensaje }}
+              </div>
+            }
+
+            <div class="form-actions">
+              <button
+                type="submit"
+                class="btn-primary"
+                [disabled]="guardando || formulario.invalid"
+              >
+                {{ guardando
+                  ? 'Guardando...'
+                  : editandoId !== null
+                    ? 'Guardar cambios'
+                    : 'Guardar comunidad' }}
+              </button>
+
+              @if (editandoId !== null) {
+                <button
+                  type="button"
+                  class="btn-secondary"
+                  (click)="cancelarEdicion()"
+                >
+                  Cancelar
+                </button>
+              }
+            </div>
+          </fieldset>
+        </form>
+      </div>
+    }
 
     <div class="table-card">
       <div class="table-header">
@@ -107,8 +160,19 @@
       </div>
 
       @if (cargando) {
-        <div class="empty-state">
+        <div class="empty-state" role="status">
           Cargando comunidades...
+        </div>
+      } @else if (errorCarga) {
+        <div class="empty-state">
+          <p role="alert">{{ errorCarga }}</p>
+          <button
+            type="button"
+            class="btn-secondary"
+            (click)="cargarComunidades()"
+          >
+            Reintentar
+          </button>
         </div>
       } @else if (comunidades.length === 0) {
         <div class="empty-state">
@@ -120,10 +184,14 @@
             <thead>
               <tr>
                 <th>Nombre</th>
-                <th>Región</th>
-                <th>Latitud</th>
-                <th>Longitud</th>
-                <th>Acciones</th>
+                <th>Municipio</th>
+                <th>Departamento</th>
+                <th>País</th>
+                <th>Sensores</th>
+                <th>Estado</th>
+                @if (puedeAdministrar) {
+                  <th>Acciones</th>
+                }
               </tr>
             </thead>
 
@@ -131,18 +199,25 @@
               @for (comunidad of comunidades; track comunidad.communityId) {
                 <tr>
                   <td>{{ comunidad.name }}</td>
-                  <td>{{ comunidad.region || 'Sin región' }}</td>
-                  <td>{{ comunidad.latitude ?? 'Sin dato' }}</td>
-                  <td>{{ comunidad.longitude ?? 'Sin dato' }}</td>
+                  <td>{{ comunidad.municipality }}</td>
+                  <td>{{ comunidad.department }}</td>
+                  <td>{{ comunidad.country }}</td>
+                  <td>{{ comunidad.sensorCount }}</td>
                   <td>
-                    <button
-                      type="button"
-                      class="btn-link"
-                      (click)="editar(comunidad)"
-                    >
-                      Editar
-                    </button>
+                    {{ comunidad.isActive ? 'Activa' : 'Inactiva' }}
                   </td>
+                  @if (puedeAdministrar) {
+                    <td>
+                      <button
+                        type="button"
+                        class="btn-link"
+                        [disabled]="guardando"
+                        (click)="editar(comunidad)"
+                      >
+                        Editar
+                      </button>
+                    </td>
+                  }
                 </tr>
               }
             </tbody>
