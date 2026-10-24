@@ -204,22 +204,48 @@ namespace ClimateGuard.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CommunityId"));
 
+                    b.Property<string>("Country")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Department")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
+
                     b.Property<decimal?>("Latitude")
                         .HasColumnType("decimal(9,6)");
 
                     b.Property<decimal?>("Longitude")
                         .HasColumnType("decimal(9,6)");
 
+                    b.Property<string>("Municipality")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(120)
                         .HasColumnType("nvarchar(120)");
 
-                    b.Property<string>("Region")
-                        .HasMaxLength(120)
-                        .HasColumnType("nvarchar(120)");
-
                     b.HasKey("CommunityId");
+
+                    b.HasIndex("Department");
+
+                    b.HasIndex("IsActive");
+
+                    b.HasIndex("Municipality");
 
                     b.HasIndex("Name")
                         .IsUnique();

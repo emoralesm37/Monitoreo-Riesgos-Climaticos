@@ -65,6 +65,31 @@ public sealed class AlertRulesController(
             ? NoContent()
             : NotFound();
     }
+ 
+    [HttpPatch("{alertRuleId:int}/status")]
+    public async Task<IActionResult> ChangeStatus(
+        int alertRuleId,
+        ChangeAlertRuleStatusRequest request,
+        CancellationToken cancellationToken)
+    {
+        if (request is null || !request.IsActive.HasValue)
+        {
+            return BadRequest(
+                new
+                {
+                    message = "Debe indicar el estado de la regla (isActive)."
+                });
+        }
+
+        var updated = await alertRuleService.ChangeStatusAsync(
+            alertRuleId,
+            request.IsActive.Value,
+            cancellationToken);
+
+        return updated
+            ? NoContent()
+            : NotFound();
+    }
 
     [HttpDelete("{alertRuleId:int}")]
     public async Task<IActionResult> Delete(

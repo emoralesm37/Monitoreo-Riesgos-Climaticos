@@ -20,4 +20,14 @@ public sealed class CatalogsController(
 
         return Ok(sensorTypes);
     }
+
+    [HttpGet("alert-severities")]
+    public async Task<ActionResult<IReadOnlyList<AlertSeverityDto>>> GetAlertSeverities(
+        CancellationToken cancellationToken)
+    {
+        var severities =
+            await catalogService.GetAlertSeveritiesAsync(cancellationToken);
+
+        return Ok(severities);
+    }
 }

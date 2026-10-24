@@ -3,6 +3,12 @@ namespace ClimateGuard.Application.Contracts.Communities;
 public sealed record CommunityDto(
     int CommunityId,
     string Name,
-    string? Region,
+    string Municipality,
+    string Department,
+    string Country,
     decimal? Latitude,
-    decimal? Longitude);
+    decimal? Longitude,
+    string? Description,
+    bool IsActive,
+    int SensorCount
+);

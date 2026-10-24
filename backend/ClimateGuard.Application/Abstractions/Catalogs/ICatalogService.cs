@@ -6,4 +6,7 @@ public interface ICatalogService
 {
     Task<IReadOnlyList<SensorTypeDto>> GetSensorTypesAsync(
         CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<AlertSeverityDto>> GetAlertSeveritiesAsync(
+        CancellationToken cancellationToken = default);
 }

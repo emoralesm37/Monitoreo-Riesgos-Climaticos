@@ -20,6 +20,13 @@ public interface IAlertRuleService
         UpdateAlertRuleRequest request,
         CancellationToken cancellationToken = default);
 
+    
+    Task<bool> ChangeStatusAsync(
+        int alertRuleId,
+        bool isActive,
+        CancellationToken cancellationToken = default);
+
+
     Task<bool> DeleteAsync(
         int alertRuleId,
         CancellationToken cancellationToken = default);

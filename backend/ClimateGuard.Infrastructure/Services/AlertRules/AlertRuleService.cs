@@ -167,6 +167,34 @@ public async Task<bool> UpdateAsync(
     return true;
     }
 
+    
+    public async Task<bool> ChangeStatusAsync(
+        int alertRuleId,
+        bool isActive,
+        CancellationToken cancellationToken = default)
+    {
+        var alertRule = await dbContext.AlertRules
+            .FirstOrDefaultAsync(
+                rule => rule.AlertRuleId == alertRuleId,
+                cancellationToken);
+
+        if (alertRule is null)
+        {
+            return false;
+        }
+
+        if (alertRule.IsActive == isActive)
+        {
+            return true;
+        }
+
+        alertRule.IsActive = isActive;
+        alertRule.UpdatedAt = DateTime.UtcNow;
+
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        return true;
+    }
 
     public async Task<bool> DeleteAsync(
         int alertRuleId,
