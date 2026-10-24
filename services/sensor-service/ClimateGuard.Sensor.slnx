@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/tests/">
+    <Project Path="tests/ClimateGuard.Sensor.Tests/ClimateGuard.Sensor.Tests.csproj" />
+  </Folder>
+  <Project Path="ClimateGuard.Sensor.Api/ClimateGuard.Sensor.Api.csproj" />
+  <Project Path="ClimateGuard.Sensor.Application/ClimateGuard.Sensor.Application.csproj" />
+  <Project Path="ClimateGuard.Sensor.Domain/ClimateGuard.Sensor.Domain.csproj" />
+  <Project Path="ClimateGuard.Sensor.Infrastructure/ClimateGuard.Sensor.Infrastructure.csproj" />
+</Solution>
