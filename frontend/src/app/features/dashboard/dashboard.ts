@@ -7,6 +7,8 @@ import {
 
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
+
 
 interface EventoHistorial {
   id: number;
@@ -30,7 +32,7 @@ export class Dashboard implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly cdr = inject(ChangeDetectorRef);
 
-  private readonly apiUrl = 'http://localhost:7000/api';
+  private readonly apiUrl = environment.apiUrl;
 
   totalSensores = 0;
   totalComunidades = 0;
