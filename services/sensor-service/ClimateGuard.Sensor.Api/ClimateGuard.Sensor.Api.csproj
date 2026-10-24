@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.13" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.13" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.13">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -20,4 +21,9 @@
     <ProjectReference Include="..\ClimateGuard.Sensor.Infrastructure\ClimateGuard.Sensor.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="../../../backend/ClimateGuard.Infrastructure/ClimateGuard.Infrastructure.csproj" />
+    <Compile Include="../../../backend/ClimateGuard.Api/Controllers/SensorsController.cs" Link="Compatibility/SensorsController.cs" />
+    <Compile Include="../../../backend/ClimateGuard.Api/Exceptions/GlobalExceptionHandler.cs" Link="Compatibility/GlobalExceptionHandler.cs" />
+  </ItemGroup>
 </Project>
