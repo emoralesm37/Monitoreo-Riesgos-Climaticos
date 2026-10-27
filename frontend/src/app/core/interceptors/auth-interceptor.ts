@@ -1,26 +1,31 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Auth } from '../services/auth';
+import { environment } from '../../../environments/environment';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  const auth = inject(Auth);
+  const apiUrl = environment.apiUrl.replace(/\/$/, '');
 
-  // El login es público y todavía no requiere JWT.
-  if (req.url.endsWith('/api/auth/login')) {
+  const isApiRequest =
+    req.url === apiUrl ||
+    req.url.startsWith(`${apiUrl}/`);
+
+  const isAuthRequest =
+    req.url.startsWith(`${apiUrl}/auth/`);
+
+  if (!isApiRequest || isAuthRequest) {
     return next(req);
   }
 
-  const token = auth.getToken();
+  const token = inject(Auth).getToken();
 
   if (!token) {
     return next(req);
   }
 
-  const authenticatedRequest = req.clone({
+  return next(req.clone({
     setHeaders: {
       Authorization: `Bearer ${token}`
     }
-  });
-
-  return next(authenticatedRequest);
+  }));
 };
