@@ -1,4 +1,3 @@
-
 using ClimateGuard.Sensor.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using SensorEntity = ClimateGuard.Sensor.Domain.Entities.Sensor;
