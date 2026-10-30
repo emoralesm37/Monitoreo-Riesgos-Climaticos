@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface LoginRequest {
   email: string;
@@ -9,16 +10,20 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-  userId: number;
-  name: string;
-  email: string;
-  role: string;
-  token: string;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+  };
+  accessToken: string;
+  refreshToken: string;
+  tokenType: string;
   expiresAt: string;
 }
 
 export interface AuthenticatedUser {
-  userId: number;
+  userId: string;
   name: string;
   email: string;
   role: string;
@@ -27,6 +32,7 @@ export interface AuthenticatedUser {
 interface UserSession {
   user: AuthenticatedUser;
   token: string;
+  refreshToken: string;
   expiresAt: number;
 }
 
@@ -34,7 +40,7 @@ interface UserSession {
   providedIn: 'root'
 })
 export class Auth {
-  private readonly apiUrl = 'http://localhost:7000/api/auth';
+  private readonly apiUrl = `${environment.apiUrl}/auth`;
   private readonly sessionKey = 'climateguard_user';
 
   private expirationTimer: ReturnType<typeof setTimeout> | null = null;
@@ -43,7 +49,11 @@ export class Auth {
     private http: HttpClient,
     private router: Router
   ) {
-    this.restoreExpirationTimer();
+    const session = this.getValidSession();
+
+    if (session) {
+      this.scheduleExpiration(session.expiresAt);
+    }
   }
 
   login(credentials: LoginRequest): Observable<LoginResponse> {
@@ -51,16 +61,27 @@ export class Auth {
       .post<LoginResponse>(`${this.apiUrl}/login`, credentials)
       .pipe(
         tap(response => {
-          const expiresAt = new Date(response.expiresAt).getTime();
+          const expiresAt = Date.parse(response.expiresAt);
+
+          if (
+            !response.user?.id ||
+            !response.accessToken ||
+            !response.refreshToken ||
+            !Number.isFinite(expiresAt) ||
+            expiresAt <= Date.now()
+          ) {
+            throw new Error('La respuesta de autenticación no es válida.');
+          }
 
           const session: UserSession = {
             user: {
-              userId: response.userId,
-              name: response.name,
-              email: response.email,
-              role: response.role
+              userId: response.user.id,
+              name: response.user.name,
+              email: response.user.email,
+              role: response.user.role
             },
-            token: response.token,
+            token: response.accessToken,
+            refreshToken: response.refreshToken,
             expiresAt
           };
 
@@ -69,17 +90,26 @@ export class Auth {
             JSON.stringify(session)
           );
 
-          this.scheduleExpiration(session.expiresAt);
+          this.scheduleExpiration(expiresAt);
         })
       );
   }
 
   logout(): void {
-    sessionStorage.removeItem(this.sessionKey);
+    const session = this.readSession();
 
-    if (this.expirationTimer) {
-      clearTimeout(this.expirationTimer);
-      this.expirationTimer = null;
+    this.clearSession();
+
+    if (session?.refreshToken) {
+      this.http.post(`${this.apiUrl}/logout`, {
+        refreshToken: session.refreshToken
+      }).subscribe({
+        error: () => {
+          console.warn(
+            'La sesión local se cerró, pero no se pudo revocar en el servidor.'
+          );
+        }
+      });
     }
   }
 
@@ -95,32 +125,48 @@ export class Auth {
     return this.getValidSession()?.token ?? null;
   }
 
-  private getValidSession(): UserSession | null {
-    const storedSession =
-      sessionStorage.getItem(this.sessionKey);
+  private readSession(): UserSession | null {
+    const stored = sessionStorage.getItem(this.sessionKey);
 
-    if (!storedSession) {
+    if (!stored) {
       return null;
     }
 
     try {
-      const session =
-        JSON.parse(storedSession) as UserSession;
-
-      if (
-        !session.user ||
-        !session.token ||
-        !session.expiresAt ||
-        Date.now() >= session.expiresAt
-      ) {
-        this.logout();
-        return null;
-      }
-
-      return session;
+      return JSON.parse(stored) as UserSession;
     } catch {
-      this.logout();
+      this.clearSession();
       return null;
+    }
+  }
+
+  private getValidSession(): UserSession | null {
+    const session = this.readSession();
+
+    if (!session) {
+      return null;
+    }
+
+    if (
+      !session.user?.userId ||
+      !session.token ||
+      !session.refreshToken ||
+      !Number.isFinite(session.expiresAt) ||
+      Date.now() >= session.expiresAt
+    ) {
+      this.clearSession();
+      return null;
+    }
+
+    return session;
+  }
+
+  private clearSession(): void {
+    sessionStorage.removeItem(this.sessionKey);
+
+    if (this.expirationTimer) {
+      clearTimeout(this.expirationTimer);
+      this.expirationTimer = null;
     }
   }
 
@@ -129,28 +175,9 @@ export class Auth {
       clearTimeout(this.expirationTimer);
     }
 
-    const remainingTime = expiresAt - Date.now();
-
-    if (remainingTime <= 0) {
-      this.expireSession();
-      return;
-    }
-
     this.expirationTimer = setTimeout(() => {
-      this.expireSession();
-    }, remainingTime);
-  }
-
-  private restoreExpirationTimer(): void {
-    const session = this.getValidSession();
-
-    if (session) {
-      this.scheduleExpiration(session.expiresAt);
-    }
-  }
-
-  private expireSession(): void {
-    this.logout();
-    this.router.navigate(['/login']);
+      this.logout();
+      void this.router.navigate(['/login']);
+    }, Math.max(0, expiresAt - Date.now()));
   }
 }

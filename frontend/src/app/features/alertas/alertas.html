@@ -1,19 +1,91 @@
-<div class="alertas">
-  <h2>Alertas activas</h2>
+<section class="alertas">
+
+  <div class="alertas-header">
+    <div>
+      <h1>Alertas activas</h1>
+      <p>
+        Monitorea las alertas generadas por los sensores de ClimateGuard.
+      </p>
+    </div>
+
+    <span class="contador">
+      {{ alertas.length }} activas
+    </span>
+  </div>
+
+  @if (mensaje) {
+    <div class="mensaje-exito">
+      {{ mensaje }}
+    </div>
+  }
 
   <div class="alertas-list">
+
     @for (alerta of alertas; track alerta.alertId) {
-      <div class="alerta-card" [class]="'severity-' + alerta.severity.toLowerCase()">
+
+      <article
+        class="alerta-card"
+        [class]="'alerta-card severity-' + alerta.severity.toLowerCase()"
+      >
+
         <div class="alerta-info">
-          <span class="alerta-severity">{{ alerta.severity }}</span>
-          <h3>{{ alerta.sensorName }}</h3>
-          <p class="alerta-message">{{ alerta.message }}</p>
-          <span class="alerta-meta">{{ alerta.community }} · {{ alerta.phenomenon }}</span>
+
+          <div class="alerta-top">
+            <span
+              class="alerta-severity"
+              [class]="'alerta-severity severity-' + alerta.severity.toLowerCase()"
+            >
+              {{ alerta.severity }}
+            </span>
+
+            <span class="alerta-fecha">
+              {{ alerta.createdAt }}
+            </span>
+          </div>
+
+          <h3>
+            {{ alerta.phenomenon }}
+          </h3>
+
+          <p class="alerta-message">
+            {{ alerta.message }}
+          </p>
+
+          <div class="alerta-meta">
+            <span>
+              <strong>Sensor:</strong>
+              {{ alerta.sensorName }}
+            </span>
+
+            <span>
+              <strong>Comunidad:</strong>
+              {{ alerta.community }}
+            </span>
+          </div>
+
         </div>
-        <button type="button" class="btn-resolve">Resolver</button>
-      </div>
+
+        <button
+          type="button"
+          class="btn-resolve"
+          (click)="resolver(alerta)"
+        >
+          Resolver alerta
+        </button>
+
+      </article>
+
     } @empty {
-      <p class="no-alertas">No hay alertas activas por el momento.</p>
+
+      <div class="no-alertas">
+        <h3>No hay alertas activas</h3>
+        <p>
+          Todos los eventos registrados han sido atendidos.
+        </p>
+      </div>
+
     }
+
   </div>
-</div>
+
+</section>

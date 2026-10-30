@@ -1,30 +1,235 @@
-<div class="dashboard">
-  <h2>Panel general</h2>
+<section class="dashboard">
 
-  <div class="cards-grid">
-    <div class="card">
-      <span class="card-label">Temperatura</span>
-      <span class="card-value">28.5 °C</span>
-    </div>
-
-    <div class="card">
-      <span class="card-label">Humedad relativa</span>
-      <span class="card-value">62 %</span>
-    </div>
-
-    <div class="card">
-      <span class="card-label">Velocidad del viento</span>
-      <span class="card-value">18 km/h</span>
-    </div>
-
-    <div class="card">
-      <span class="card-label">Nivel de lluvia</span>
-      <span class="card-value">4 mm</span>
-    </div>
-
-    <div class="card">
-      <span class="card-label">Nivel del río</span>
-      <span class="card-value">0.8 m</span>
+  <div class="dashboard-header">
+    <div>
+      <h1>Panel general</h1>
+      <p>
+        Resumen del sistema de monitoreo y alerta temprana.
+      </p>
     </div>
   </div>
-</div>
+
+  <div class="summary-grid">
+
+    <div class="summary-card">
+      <div class="summary-icon sensores">
+        S
+      </div>
+
+      <div class="summary-content">
+        <span class="summary-label">
+          Sensores registrados
+        </span>
+
+        @if (cargandoSensores) {
+          <span class="summary-value">
+            ...
+          </span>
+        } @else {
+          <span class="summary-value">
+            {{ totalSensores }}
+          </span>
+        }
+
+        @if (errorSensores) {
+          <small class="summary-error">
+            No se pudieron consultar
+          </small>
+        } @else {
+          <small>
+            Conectados al sistema
+          </small>
+        }
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-icon comunidades">
+        C
+      </div>
+
+      <div class="summary-content">
+        <span class="summary-label">
+          Comunidades
+        </span>
+
+        @if (cargandoComunidades) {
+          <span class="summary-value">
+            ...
+          </span>
+        } @else {
+          <span class="summary-value">
+            {{ totalComunidades }}
+          </span>
+        }
+
+        @if (errorComunidades) {
+          <small class="summary-error">
+            No se pudieron consultar
+          </small>
+        } @else {
+          <small>
+            Registradas actualmente
+          </small>
+        }
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-icon alertas">
+        !
+      </div>
+
+      <div class="summary-content">
+        <span class="summary-label">
+          Alertas activas
+        </span>
+
+        <span class="summary-value">
+          {{ alertasActivas }}
+        </span>
+
+        <small>
+          Requieren monitoreo
+        </small>
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-icon historial">
+        H
+      </div>
+
+      <div class="summary-content">
+        <span class="summary-label">
+          Eventos atendidos
+        </span>
+
+        <span class="summary-value">
+          {{ eventosHistorial }}
+        </span>
+
+        <small>
+          Registrados en historial
+        </small>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="dashboard-section">
+
+    <div class="section-header">
+      <div>
+        <h2>Estado general</h2>
+        <p>
+          Situación actual de ClimateGuard.
+        </p>
+      </div>
+    </div>
+
+    <div class="estado-grid">
+
+      <div class="estado-card">
+        <span class="estado-indicator correcto"></span>
+
+        <div>
+          <strong>Base de datos</strong>
+          <span>Operativa</span>
+        </div>
+      </div>
+
+      <div class="estado-card">
+        <span class="estado-indicator correcto"></span>
+
+        <div>
+          <strong>API ClimateGuard</strong>
+          <span>En funcionamiento</span>
+        </div>
+      </div>
+
+      <div class="estado-card">
+        <span
+          class="estado-indicator"
+          [class.correcto]="alertasActivas === 0"
+          [class.advertencia]="alertasActivas > 0"
+        ></span>
+
+        <div>
+          <strong>Monitoreo</strong>
+
+          <span>
+            @if (alertasActivas > 0) {
+              {{ alertasActivas }} alerta(s) activa(s)
+            } @else {
+              Sin alertas activas
+            }
+          </span>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="dashboard-section">
+
+    <div class="section-header">
+      <div>
+        <h2>Actividad reciente</h2>
+        <p>
+          Últimos eventos atendidos por el sistema.
+        </p>
+      </div>
+    </div>
+
+    @if (ultimosEventos.length > 0) {
+
+      <div class="eventos-list">
+
+        @for (evento of ultimosEventos; track evento.id) {
+
+          <div class="evento">
+
+            <div
+              class="evento-severidad"
+              [class]="'evento-severidad severity-' + evento.severity.toLowerCase()"
+            >
+              {{ evento.severity }}
+            </div>
+
+            <div class="evento-content">
+
+              <strong>
+                {{ evento.fenomeno }}
+              </strong>
+
+              <span>
+                {{ evento.sensorName }}
+                ·
+                {{ evento.community }}
+              </span>
+
+            </div>
+
+            <div class="evento-fecha">
+              {{ evento.fecha }}
+            </div>
+
+          </div>
+
+        }
+
+      </div>
+
+    } @else {
+
+      <div class="sin-eventos">
+        No hay eventos recientes registrados.
+      </div>
+
+    }
+
+  </div>
+
+</section>
