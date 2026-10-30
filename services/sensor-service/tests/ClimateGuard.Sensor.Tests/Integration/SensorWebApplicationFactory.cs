@@ -1,4 +1,3 @@
-
 using ClimateGuard.Sensor.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -9,6 +8,11 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http.Headers;
+using System.Security.Claims;
+using System.Text;
+using Microsoft.IdentityModel.Tokens;
 
 namespace ClimateGuard.Sensor.Tests.Integration;
 
@@ -21,15 +25,13 @@ public sealed class SensorWebApplicationFactory
     {
         builder.UseEnvironment("Development");
 
-        builder.ConfigureAppConfiguration((context, config) =>
-        {
-            config.AddInMemoryCollection(
-                new Dictionary<string, string?>
-                {
-                    ["ConnectionStrings:SensorDatabase"] =
-                        "Server=localhost;Database=TestOnly;"
-                });
-        });
+        builder.UseSetting("ConnectionStrings:SensorDatabase", "Server=localhost;Database=TestOnly;");
+
+        builder.UseSetting("Jwt:Key", "ClimateGuardSensorIntegrationTestsOnlyKey2026DoNotUseInProduction!");
+
+        builder.UseSetting("Jwt:Issuer", "ClimateGuard.Auth");
+
+        builder.UseSetting("Jwt:Audience", "ClimateGuard.Services");
 
         builder.ConfigureTestServices(services =>
         {
@@ -65,6 +67,42 @@ public sealed class SensorWebApplicationFactory
 
             db.Database.EnsureCreated();
         });
+    }
+
+    public HttpClient CreateAuthenticatedClient()
+    {
+        const string testKey =
+            "ClimateGuardSensorIntegrationTestsOnlyKey2026DoNotUseInProduction!";
+
+        var signingKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(testKey));
+
+        var credentials = new SigningCredentials(
+            signingKey,
+            SecurityAlgorithms.HmacSha256);
+
+        var token = new JwtSecurityToken(
+            issuer: "ClimateGuard.Auth",
+            audience: "ClimateGuard.Services",
+            claims:
+            [
+                new Claim("sub", "sensor-integration-test"),
+                new Claim("role", "Admin")
+            ],
+            notBefore: DateTime.UtcNow.AddMinutes(-1),
+            expires: DateTime.UtcNow.AddMinutes(15),
+            signingCredentials: credentials
+        );
+
+        var tokenString =
+            new JwtSecurityTokenHandler().WriteToken(token);
+
+        var client = CreateClient();
+
+        client.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", tokenString);
+
+        return client;
     }
 
     protected override void Dispose(bool disposing)

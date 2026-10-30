@@ -12,10 +12,36 @@ namespace ClimateGuard.Sensor.Tests.Integration;
 public class SensorEndpointsTests
 {
     [Fact]
-    public async Task CreateSensor_ThenGetSensor_ReturnsCreatedSensor()
+    public async Task GetSensors_WithoutToken_ReturnsUnauthorized()
     {
         using var factory = new SensorWebApplicationFactory();
         using var client = factory.CreateClient();
+
+        var response = await client.GetAsync("/api/sensors");
+
+        Assert.Equal(
+            HttpStatusCode.Unauthorized,
+            response.StatusCode);
+    }
+
+    [Fact]
+    public async Task GetSensors_WithValidToken_ReturnsOk()
+    {
+        using var factory = new SensorWebApplicationFactory();
+        using var client = factory.CreateAuthenticatedClient();
+
+        var response = await client.GetAsync("/api/sensors");
+
+        Assert.Equal(
+            HttpStatusCode.OK,
+            response.StatusCode);
+    }
+ 
+    [Fact]
+    public async Task CreateSensor_ThenGetSensor_ReturnsCreatedSensor()
+    {
+        using var factory = new SensorWebApplicationFactory();
+        using var client = factory.CreateAuthenticatedClient();
 
         // Preparar un tipo de sensor en SQLite temporal.
         using (var scope = factory.Services.CreateScope())
@@ -71,7 +97,7 @@ public class SensorEndpointsTests
     public async Task DeactivateSensor_ReturnsInactiveSensor()
     {
         using var factory = new SensorWebApplicationFactory();
-        using var client = factory.CreateClient();
+        using var client = factory.CreateAuthenticatedClient();
 
         int sensorId;
 
@@ -127,7 +153,7 @@ public class SensorEndpointsTests
     public async Task CreateReading_UpdatesSensorLastValue()
     {
         using var factory = new SensorWebApplicationFactory();
-        using var client = factory.CreateClient();
+        using var client = factory.CreateAuthenticatedClient();
 
         int sensorId;
 
@@ -195,7 +221,7 @@ public class SensorEndpointsTests
     public async Task CreateReading_InactiveSensor_ReturnsConflict()
     {
         using var factory = new SensorWebApplicationFactory();
-        using var client = factory.CreateClient();
+        using var client = factory.CreateAuthenticatedClient();
 
         int sensorId;
 
@@ -246,13 +272,11 @@ public class SensorEndpointsTests
         Assert.Equal(0, readingCount);
     }
 
-
-
     [Fact]
     public async Task UpdateSensor_ChangesNameAndType()
     {
         using var factory = new SensorWebApplicationFactory();
-        using var client = factory.CreateClient();
+        using var client = factory.CreateAuthenticatedClient();
 
         int sensorId;
 
@@ -319,13 +343,11 @@ public class SensorEndpointsTests
         Assert.NotNull(updatedSensor.UpdatedAt);
     }
 
-
-
     [Fact]
     public async Task GetReadings_ReturnsPaginatedHistory()
     {
         using var factory = new SensorWebApplicationFactory();
-        using var client = factory.CreateClient();
+        using var client = factory.CreateAuthenticatedClient();
 
         int sensorId;
 
