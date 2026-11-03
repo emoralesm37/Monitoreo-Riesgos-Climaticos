@@ -70,9 +70,9 @@ public sealed class CommunityService(
                 filters.IsActive.Value);
         }
 
-        return await ProjectToDto(query)
-            .OrderBy(community => community.Name)
-            .ToListAsync(cancellationToken);
+        return await ProjectToDto(
+        query.OrderBy(community => community.Name))
+        .ToListAsync(cancellationToken);
     }
 
     public async Task<CommunityDto?> GetByIdAsync(
