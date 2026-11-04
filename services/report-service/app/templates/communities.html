@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Reporte de Comunidades - ClimateGuard</title>
+
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 20mm;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 11px;
+            color: #263238;
+        }
+
+        h1 {
+            color: #1565c0;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            color: #607d8b;
+            margin-bottom: 25px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid #cfd8dc;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #1565c0;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #eceff1;
+        }
+
+        .footer {
+            margin-top: 25px;
+            font-size: 9px;
+            color: #607d8b;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>ClimateGuard</h1>
+
+    <div class="subtitle">
+        Reporte de Comunidades
+        <p>Fecha de generación: {{ generated_at }}</p>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Municipio</th>
+                <th>Departamento</th>
+                <th>País</th>
+                <th>Coordenadas</th>
+                <th>Estado</th>
+                <th>Cantidad de sensores</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for community in communities %}
+            <tr>
+                <td>{{ community.name }}</td>
+                <td>{{ community.municipality }}</td>
+                <td>{{ community.department }}</td>
+                <td>{{ community.country }}</td>
+                <td>{{ community.coordinates }}</td>
+                <td>{{ community.status }}</td>
+                <td>{{ community.sensor_count }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7">No hay comunidades disponibles.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="footer">
+        Documento generado por ClimateGuard Report Service.
+    </div>
+</body>
+</html>
