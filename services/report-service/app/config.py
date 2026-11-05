@@ -1,18 +1,30 @@
+from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# Raíz del repositorio ClimateGuard
+ROOT_DIR = Path(__file__).resolve().parents[3]
 
 
 class Settings(BaseSettings):
+    # MongoDB
     mongo_host: str = "127.0.0.1"
     mongo_port: int = 27017
     mongo_database: str = "ClimateGuardReports"
     mongo_report_username: str
     mongo_report_password: str
-    jwt_issuer: str = "ClimateGuard.Auth"
-    jwt_audience: str = "ClimateGuard.Services"
+
+    # Seguridad JWT
+    jwt_issuer: str
+    jwt_audience: str
     jwt_access_secret: str
+    community_service_url: str
 
     model_config = SettingsConfigDict(
-        env_file="../../infrastructure/mongodb/.env",
+        env_file=(
+            ROOT_DIR / "infrastructure/mongodb/.env",
+            ROOT_DIR / ".env",
+        ),
+        env_file_encoding="utf-8",
         extra="ignore"
     )
 

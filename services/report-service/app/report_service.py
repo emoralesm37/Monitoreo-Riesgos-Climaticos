@@ -6,6 +6,7 @@ from app.repository import (
     save_report_metadata,
     update_report_metadata,
 )
+from app.community_client import get_communities
 
 
 def create_communities_report(
@@ -58,3 +59,20 @@ def create_communities_report(
             pdf_path.unlink(missing_ok=True)
 
         raise
+
+def create_communities_report_from_api(
+    access_token: str,
+    user_id: str,
+    parameters: dict | None = None,
+    ) -> tuple[str, Path]:
+    """
+    Consulta comunidades oficiales y genera su reporte PDF.
+    """
+
+    communities = get_communities(access_token)
+
+    return create_communities_report(
+        communities=communities,
+        user_id=user_id,
+        parameters=parameters,
+    )

@@ -63,3 +63,31 @@ def update_report_metadata(
     )
 
     return result.matched_count == 1
+
+def list_report_metadata(limit: int = 50) -> list[dict]:
+    """
+    Obtiene el historial de reportes,
+    ordenado del más reciente al más antiguo.
+    """
+
+    database: Database = get_database()
+
+    if not 1 <= limit <= 100:
+        raise ValueError(
+            "El límite debe estar entre 1 y 100"
+        )
+
+    cursor = (
+        database["reports"]
+        .find({}, {"file_path": 0})
+        .sort("created_at", -1)
+        .limit(limit)
+    )
+
+    reports = []
+
+    for document in cursor:
+        document["_id"] = str(document["_id"])
+        reports.append(document)
+
+    return reports
