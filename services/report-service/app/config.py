@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     jwt_audience: str
     jwt_access_secret: str
     community_service_url: str
+    sensor_service_url: str = "http://127.0.0.1:5026"
 
     model_config = SettingsConfigDict(
         env_file=(

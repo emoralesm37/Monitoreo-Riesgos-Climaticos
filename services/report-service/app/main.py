@@ -8,6 +8,8 @@ from app.community_client import CommunityServiceError
 from app.repository import list_report_metadata
 from fastapi.responses import FileResponse
 from app.report_download import get_report_file, ReportDownloadError
+from app.report_service import create_sensors_report_from_api
+from app.sensor_client import SensorServiceError
 
 app = FastAPI(
     title="ClimateGuard Report Service",
@@ -70,6 +72,35 @@ def generate_communities_report(
         raise HTTPException(
             status_code=502,
             detail="No fue posible obtener los datos del servicio de comunidades",
+        )
+
+@app.post("/api/reports/sensors", tags=["Reports"])
+def generate_sensors_report(
+    user: dict = Depends(require_administrator),
+    credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme),
+    ):
+    """
+    Genera un reporte PDF de sensores registrados.
+    Acceso exclusivo para administradores.
+    """
+
+    try:
+        report_id, pdf_path = create_sensors_report_from_api(
+            access_token=credentials.credentials,
+            user_id=user["sub"],
+        )
+
+        return {
+            "status": "completed",
+            "report_id": report_id,
+            "file_name": pdf_path.name,
+            "message": "Reporte de sensores generado correctamente",
+        }
+
+    except SensorServiceError:
+        raise HTTPException(
+            status_code=502,
+            detail="No fue posible obtener los datos del servicio de sensores",
         )
 
 @app.get("/api/reports/history", tags=["Reports"])
