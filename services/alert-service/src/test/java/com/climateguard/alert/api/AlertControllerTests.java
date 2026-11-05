@@ -145,4 +145,164 @@ class AlertControllerTests {
             )
             .andExpect(jsonPath("$.resolvedAt").exists());
     }
+    @Test
+void dangerousReadingGeneratesAlert() throws Exception {
+    String body = """
+        {
+          "sensorId": 10,
+          "communityId": 1,
+          "sensorName": "Sensor de nivel del río",
+          "communityName": "Comunidad El Progreso",
+          "readingType": "NIVEL_RIO",
+          "value": 9.50
+        }
+        """;
+
+    mockMvc.perform(
+            post("/api/alerts/evaluate")
+                .with(jwt()
+                    .jwt(token ->
+                        token.subject("admin-user")
+                    )
+                    .authorities(
+                        new SimpleGrantedAuthority(
+                            "ROLE_Administrador"
+                        )
+                    )
+                )
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body)
+        )
+        .andExpect(status().isOk())
+        .andExpect(
+            jsonPath("$.alertGenerated").value(true)
+        )
+        .andExpect(
+            jsonPath("$.duplicatePrevented").value(false)
+        )
+        .andExpect(
+            jsonPath("$.alert.severity").value("ROJO")
+        )
+        .andExpect(
+            jsonPath("$.alert.phenomenon")
+                .value("INUNDACION")
+        )
+        .andExpect(
+            jsonPath("$.alert.status").value("ACTIVA")
+        );
+}
+
+@Test
+void duplicateActiveAlertIsPrevented() throws Exception {
+    String body = """
+        {
+          "sensorId": 20,
+          "communityId": 1,
+          "sensorName": "Sensor de lluvia",
+          "communityName": "Comunidad El Progreso",
+          "readingType": "NIVEL_LLUVIA",
+          "value": 120.00
+        }
+        """;
+
+    var administrator = jwt()
+        .jwt(token -> token.subject("admin-user"))
+        .authorities(
+            new SimpleGrantedAuthority(
+                "ROLE_Administrador"
+            )
+        );
+
+    mockMvc.perform(
+            post("/api/alerts/evaluate")
+                .with(administrator)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body)
+        )
+        .andExpect(status().isOk())
+        .andExpect(
+            jsonPath("$.alertGenerated").value(true)
+        );
+
+    mockMvc.perform(
+            post("/api/alerts/evaluate")
+                .with(jwt()
+                    .jwt(token ->
+                        token.subject("admin-user")
+                    )
+                    .authorities(
+                        new SimpleGrantedAuthority(
+                            "ROLE_Administrador"
+                        )
+                    )
+                )
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body)
+        )
+        .andExpect(status().isOk())
+        .andExpect(
+            jsonPath("$.alertGenerated").value(false)
+        )
+        .andExpect(
+            jsonPath("$.duplicatePrevented").value(true)
+        );
+
+    mockMvc.perform(
+            get("/api/alerts")
+                .with(jwt()
+                    .jwt(token ->
+                        token.subject("admin-user")
+                    )
+                )
+        )
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.length()").value(1));
+}
+
+@Test
+void alertsCanBeFilteredBySeverityAndSensor()
+    throws Exception {
+
+    Alert redAlert = new Alert();
+    redAlert.setSensorId(30);
+    redAlert.setCommunityId(1);
+    redAlert.setSeverity(Alert.Severity.ROJO);
+    redAlert.setPhenomenon(
+        Alert.Phenomenon.INUNDACION
+    );
+    redAlert.setMessage("Alerta roja");
+
+    Alert yellowAlert = new Alert();
+    yellowAlert.setSensorId(31);
+    yellowAlert.setCommunityId(1);
+    yellowAlert.setSeverity(
+        Alert.Severity.AMARILLO
+    );
+    yellowAlert.setPhenomenon(
+        Alert.Phenomenon.SEQUIA
+    );
+    yellowAlert.setMessage("Alerta amarilla");
+
+    alertRepository.saveAndFlush(redAlert);
+    alertRepository.saveAndFlush(yellowAlert);
+
+    mockMvc.perform(
+            get("/api/alerts")
+                .param("severity", "ROJO")
+                .param("sensorId", "30")
+                .with(jwt()
+                    .jwt(token ->
+                        token.subject("admin-user")
+                    )
+                )
+        )
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.length()").value(1))
+        .andExpect(
+            jsonPath("$[0].severity").value("ROJO")
+        )
+        .andExpect(
+            jsonPath("$[0].sensorId").value(30)
+        );
+}
 }

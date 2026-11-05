@@ -4,11 +4,15 @@ import com.climateguard.alert.domain.Alert;
 import com.climateguard.alert.service.AlertService;
 import com.climateguard.alert.service.AlertService.AlertResponse;
 import com.climateguard.alert.service.AlertService.CreateAlertRequest;
+import com.climateguard.alert.service.AlertService.EvaluateReadingRequest;
+import com.climateguard.alert.service.AlertService.EvaluationResult;
 import jakarta.validation.Valid;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.time.Instant;
 import java.util.List;
 
 @RestController
@@ -24,9 +28,37 @@ public class AlertController {
     @GetMapping
     public List<AlertResponse> getAll(
         @RequestParam(required = false)
-        Alert.Status status
+        Alert.Status status,
+
+        @RequestParam(required = false)
+        Alert.Severity severity,
+
+        @RequestParam(required = false)
+        Alert.Phenomenon phenomenon,
+
+        @RequestParam(required = false)
+        Integer sensorId,
+
+        @RequestParam(required = false)
+        Integer communityId,
+
+        @RequestParam(required = false)
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+        Instant from,
+
+        @RequestParam(required = false)
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+        Instant to
     ) {
-        return alertService.getAll(status);
+        return alertService.getAll(
+            status,
+            severity,
+            phenomenon,
+            sensorId,
+            communityId,
+            from,
+            to
+        );
     }
 
     @GetMapping("/{id}")
@@ -42,6 +74,13 @@ public class AlertController {
         @Valid @RequestBody CreateAlertRequest request
     ) {
         return alertService.create(request);
+    }
+
+    @PostMapping("/evaluate")
+    public EvaluationResult evaluate(
+        @Valid @RequestBody EvaluateReadingRequest request
+    ) {
+        return alertService.evaluate(request);
     }
 
     @PatchMapping("/{id}/resolve")
