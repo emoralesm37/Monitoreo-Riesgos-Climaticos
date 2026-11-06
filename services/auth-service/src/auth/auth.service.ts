@@ -24,6 +24,7 @@ interface RefreshTokenPayload {
   name: string;
   role: string;
   type: string;
+  provider: string;
 }
 
 @Injectable()
@@ -111,7 +112,10 @@ constructor(
       );
     }
 
-    return this.issueTokenPair(existingAccount.user);
+    return this.issueTokenPair(
+  existingAccount.user,
+  existingAccount.provider,
+);
   }
 
   const email = profile.email.trim().toLowerCase();
@@ -163,7 +167,10 @@ constructor(
     externalAccount,
   );
 
-  return this.issueTokenPair(user);
+  return this.issueTokenPair(
+  user,
+  profile.provider,
+);
 }
 
   async refresh(
@@ -180,6 +187,7 @@ constructor(
     try {
       payload =
         await this.jwtService.verifyAsync<RefreshTokenPayload>(
+          
           refreshToken,
           {
             secret:
@@ -190,6 +198,7 @@ constructor(
             audience,
           },
         );
+        
     } catch {
       throw new UnauthorizedException(
         'El refresh token no es válido o expiró.',
@@ -243,7 +252,10 @@ constructor(
 
     await this.refreshTokenRepository.save(storedToken);
 
-    return this.issueTokenPair(storedToken.user);
+    return this.issueTokenPair(
+    storedToken.user,
+    payload.provider ?? 'local',
+  );
   }
 
   async logout(
@@ -268,90 +280,121 @@ constructor(
     };
   }
 
-  private async issueTokenPair(
-    user: User,
-  ): Promise<LoginResponseDto> {
-    const accessTtl = this.getPositiveInteger(
-      'JWT_ACCESS_TTL_SECONDS',
-    );
+private async issueTokenPair(
+  user: User,
+  provider = 'local',
+): Promise<LoginResponseDto> {
+  const accessTtl = this.getPositiveInteger(
+    'JWT_ACCESS_TTL_SECONDS',
+  );
 
-    const refreshTtl = this.getPositiveInteger(
-      'JWT_REFRESH_TTL_SECONDS',
-    );
+  const refreshTtl = this.getPositiveInteger(
+    'JWT_REFRESH_TTL_SECONDS',
+  );
 
-    const issuer =
-      this.configService.getOrThrow<string>('JWT_ISSUER');
+  const issuer =
+    this.configService.getOrThrow<string>('JWT_ISSUER');
 
-    const audience =
-      this.configService.getOrThrow<string>('JWT_AUDIENCE');
+  const audience =
+    this.configService.getOrThrow<string>('JWT_AUDIENCE');
 
-    const payload = {
-      sub: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role.name,
-    };
+  const payload = {
+    sub: user.id,
+    email: user.email,
+    name: user.name,
+    role: user.role.name,
+    roles: [user.role.name],
+    permissions: this.getPermissions(user.role.name),
+    provider,
+  };
 
-    const accessToken = await this.jwtService.signAsync(
-      payload,
-      {
-        secret:
-          this.configService.getOrThrow<string>(
-            'JWT_ACCESS_SECRET',
-          ),
-        expiresIn: accessTtl,
-        issuer,
-        audience,
-        jwtid: randomUUID(),
-      },
-    );
-
-    const refreshToken = await this.jwtService.signAsync(
-      {
-        ...payload,
-        type: 'refresh',
-      },
-      {
-        secret:
-          this.configService.getOrThrow<string>(
-            'JWT_REFRESH_SECRET',
-          ),
-        expiresIn: refreshTtl,
-        issuer,
-        audience,
-        jwtid: randomUUID(),
-      },
-    );
-
-    const refreshTokenEntity =
-      this.refreshTokenRepository.create({
-        tokenHash: this.hashToken(refreshToken),
-        userId: user.id,
-        expiresAt: new Date(
-          Date.now() + refreshTtl * 1000,
+  const accessToken = await this.jwtService.signAsync(
+    payload,
+    {
+      secret:
+        this.configService.getOrThrow<string>(
+          'JWT_ACCESS_SECRET',
         ),
-        revokedAt: null,
-      });
+      expiresIn: accessTtl,
+      issuer,
+      audience,
+      jwtid: randomUUID(),
+    },
+  );
 
-    await this.refreshTokenRepository.save(
-      refreshTokenEntity,
-    );
+  const refreshToken = await this.jwtService.signAsync(
+    {
+      ...payload,
+      type: 'refresh',
+    },
+    {
+      secret:
+        this.configService.getOrThrow<string>(
+          'JWT_REFRESH_SECRET',
+        ),
+      expiresIn: refreshTtl,
+      issuer,
+      audience,
+      jwtid: randomUUID(),
+    },
+  );
 
-    return {
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role.name,
-      },
-      accessToken,
-      refreshToken,
-      tokenType: 'Bearer',
+  const refreshTokenEntity =
+    this.refreshTokenRepository.create({
+      tokenHash: this.hashToken(refreshToken),
+      userId: user.id,
       expiresAt: new Date(
-        Date.now() + accessTtl * 1000,
-      ).toISOString(),
-    };
-  }
+        Date.now() + refreshTtl * 1000,
+      ),
+      revokedAt: null,
+    });
+
+  await this.refreshTokenRepository.save(
+    refreshTokenEntity,
+  );
+
+  return {
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role.name,
+    },
+    accessToken,
+    refreshToken,
+    tokenType: 'Bearer',
+    expiresAt: new Date(
+      Date.now() + accessTtl * 1000,
+    ).toISOString(),
+  };
+}
+  private getPermissions(role: string): string[] {
+  const permissionsByRole: Record<string, string[]> = {
+    Administrador: [
+      'users:manage',
+      'communities:read',
+      'communities:write',
+      'alerts:read',
+      'alerts:write',
+      'reports:read',
+      'reports:generate',
+    ],
+    Operador: [
+      'communities:read',
+      'alerts:read',
+      'alerts:write',
+      'reports:read',
+      'reports:generate',
+    ],
+    Viewer: [
+      'communities:read',
+      'alerts:read',
+      'reports:read',
+    ],
+  };
+
+  return permissionsByRole[role] ?? [];
+}
 
   private getPositiveInteger(variableName: string): number {
     const value = Number(
