@@ -11,6 +11,7 @@ import { createHash, randomUUID } from 'crypto';
 import { IsNull, Repository } from 'typeorm';
 
 import { User } from '../users/entities/user.entity';
+import { AuditClientService } from './audit-client.service';
 import { LoginRequestDto } from './dto/login-request.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { RefreshToken } from './entities/refresh-token.entity';
@@ -35,6 +36,7 @@ export class AuthService {
 
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly auditClient: AuditClientService,
   ) {}
 
   async login(
@@ -50,12 +52,29 @@ export class AuthService {
       .getOne();
 
     if (!user) {
+      await this.auditClient.registerEvent({
+        service: 'auth-service',
+        action: 'LOGIN_FAILED',
+        result: 'FAILURE',
+        details: { reason: 'INVALID_CREDENTIALS' },
+      });
+
       throw new UnauthorizedException(
         'Correo o contraseña incorrectos.',
       );
     }
 
     if (!user.isActive) {
+      await this.auditClient.registerEvent({
+        service: 'auth-service',
+        action: 'LOGIN_BLOCKED',
+        user_id: user.id,
+        entity_type: 'user',
+        entity_id: user.id,
+        result: 'BLOCKED',
+        details: { reason: 'INACTIVE_USER' },
+      });
+
       throw new ForbiddenException(
         'El usuario se encuentra inactivo.',
       );
@@ -67,12 +86,36 @@ export class AuthService {
     );
 
     if (!passwordIsValid) {
+      await this.auditClient.registerEvent({
+        service: 'auth-service',
+        action: 'LOGIN_FAILED',
+        user_id: user.id,
+        entity_type: 'user',
+        entity_id: user.id,
+        result: 'FAILURE',
+        details: { reason: 'INVALID_CREDENTIALS' },
+      });
+
       throw new UnauthorizedException(
         'Correo o contraseña incorrectos.',
       );
     }
 
-    return this.issueTokenPair(user);
+    const tokens = await this.issueTokenPair(user);
+
+    await this.auditClient.registerEvent({
+      service: 'auth-service',
+      action: 'LOGIN_SUCCESS',
+      user_id: user.id,
+      entity_type: 'user',
+      entity_id: user.id,
+      result: 'SUCCESS',
+      details: {
+        method: 'password',
+      },
+    });
+
+    return tokens;
   }
 
   async refresh(
