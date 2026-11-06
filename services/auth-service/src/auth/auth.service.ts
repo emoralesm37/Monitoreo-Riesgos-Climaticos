@@ -10,10 +10,13 @@ import * as bcrypt from 'bcrypt';
 import { createHash, randomUUID } from 'crypto';
 import { IsNull, Repository } from 'typeorm';
 
+import { Role } from '../roles/entities/role.entity';
 import { User } from '../users/entities/user.entity';
 import { LoginRequestDto } from './dto/login-request.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
+import { ExternalAccount } from './entities/external-account.entity';
 import { RefreshToken } from './entities/refresh-token.entity';
+import { ExternalProfile } from './interfaces/external-profile.interface';
 
 interface RefreshTokenPayload {
   sub: string;
@@ -25,17 +28,22 @@ interface RefreshTokenPayload {
 
 @Injectable()
 export class AuthService {
-  constructor(
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
+constructor(
+  @InjectRepository(User)
+  private readonly userRepository: Repository<User>,
 
-    @InjectRepository(RefreshToken)
-    private readonly refreshTokenRepository:
-      Repository<RefreshToken>,
+  @InjectRepository(Role)
+  private readonly roleRepository: Repository<Role>,
 
-    private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
-  ) {}
+  @InjectRepository(RefreshToken)
+  private readonly refreshTokenRepository: Repository<RefreshToken>,
+
+  @InjectRepository(ExternalAccount)
+  private readonly externalAccountRepository: Repository<ExternalAccount>,
+
+  private readonly jwtService: JwtService,
+  private readonly configService: ConfigService,
+) {}
 
   async login(
     request: LoginRequestDto,
@@ -60,6 +68,11 @@ export class AuthService {
         'El usuario se encuentra inactivo.',
       );
     }
+    if (!user.passwordHash) {
+  throw new UnauthorizedException(
+    'Esta cuenta utiliza autenticación externa.',
+  );
+}
 
     const passwordIsValid = await bcrypt.compare(
       request.password,
@@ -74,6 +87,84 @@ export class AuthService {
 
     return this.issueTokenPair(user);
   }
+  
+  async externalLogin(
+  profile: ExternalProfile,
+): Promise<LoginResponseDto> {
+  const existingAccount =
+    await this.externalAccountRepository.findOne({
+      where: {
+        provider: profile.provider,
+        providerUserId: profile.providerUserId,
+      },
+      relations: {
+        user: {
+          role: true,
+        },
+      },
+    });
+
+  if (existingAccount) {
+    if (!existingAccount.user.isActive) {
+      throw new ForbiddenException(
+        'El usuario se encuentra inactivo.',
+      );
+    }
+
+    return this.issueTokenPair(existingAccount.user);
+  }
+
+  const email = profile.email.trim().toLowerCase();
+
+  let user = await this.userRepository.findOne({
+    where: { email },
+    relations: { role: true },
+  });
+
+  if (!user) {
+    const viewerRole =
+      await this.roleRepository.findOne({
+        where: { name: 'Viewer' },
+      });
+
+    if (!viewerRole) {
+      throw new UnauthorizedException(
+        'El rol Viewer no se encuentra configurado.',
+      );
+    }
+
+    user = this.userRepository.create({
+      name: profile.name.trim(),
+      email,
+      passwordHash: null,
+      roleId: viewerRole.id,
+      role: viewerRole,
+      isActive: true,
+    });
+
+    user = await this.userRepository.save(user);
+  }
+
+  if (!user.isActive) {
+    throw new ForbiddenException(
+      'El usuario se encuentra inactivo.',
+    );
+  }
+
+  const externalAccount =
+    this.externalAccountRepository.create({
+      provider: profile.provider,
+      providerUserId: profile.providerUserId,
+      userId: user.id,
+      user,
+    });
+
+  await this.externalAccountRepository.save(
+    externalAccount,
+  );
+
+  return this.issueTokenPair(user);
+}
 
   async refresh(
     refreshToken: string,

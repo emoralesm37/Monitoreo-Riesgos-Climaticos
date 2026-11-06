@@ -27,9 +27,10 @@ export class User {
     name: 'password_hash',
     type: 'varchar',
     length: 255,
+    nullable: true,
     select: false,
   })
-  passwordHash!: string;
+  passwordHash!: string | null;
 
   @Column({ name: 'role_id', type: 'uuid' })
   roleId!: string;

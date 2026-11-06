@@ -10,6 +10,7 @@ import { RolesModule } from './roles/roles.module';
 import { User } from './users/entities/user.entity';
 import { UsersModule } from './users/users.module';
 import { DatabaseModule } from './database/database.module';
+import { ExternalAccount } from './auth/entities/external-account.entity';
 
 @Module({
   imports: [
@@ -33,7 +34,12 @@ import { DatabaseModule } from './database/database.module';
         password:
           configService.getOrThrow<string>('DB_PASSWORD'),
 
-        entities: [User, Role, RefreshToken],
+        entities: [
+          User,
+          Role,
+          RefreshToken,
+          ExternalAccount,
+        ],
 
         synchronize: false,
         migrationsRun: false,
