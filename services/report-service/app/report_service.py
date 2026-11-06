@@ -8,8 +8,10 @@ from app.repository import (
 )
 from app.community_client import get_communities
 from app.pdf_generator import generate_sensors_pdf
-from app.sensor_client import get_sensors
-from app.sensor_mapper import map_sensors
+from app.sensor_client import get_sensors, get_sensor_types
+from app.sensor_mapper import map_sensors_with_units
+from app.community_client import get_communities_raw
+from app.sensor_mapper import enrich_sensors_with_communities
 
 def create_communities_report(
     communities: list[dict],
@@ -136,15 +138,23 @@ def create_sensors_report_from_api(
     access_token: str,
     user_id: str,
     parameters: dict | None = None,
-    ) -> tuple[str, Path]:
-    """
-    Consulta Sensor Service y genera el reporte PDF.
-    """
-
+):
     sensors = get_sensors(access_token)
+    sensor_types = get_sensor_types(access_token)
+    communities = get_communities_raw(access_token)
+
+    mapped_sensors = map_sensors_with_units(
+        sensors,
+        sensor_types,
+    )
+
+    enriched_sensors = enrich_sensors_with_communities(
+        mapped_sensors,
+        communities,
+    )
 
     return create_sensors_report(
-        sensors=map_sensors(sensors),
+        sensors=enriched_sensors,
         user_id=user_id,
         parameters=parameters,
     )

@@ -97,10 +97,13 @@ def generate_sensors_report(
             "message": "Reporte de sensores generado correctamente",
         }
 
-    except SensorServiceError:
+    except (SensorServiceError, CommunityServiceError):
         raise HTTPException(
             status_code=502,
-            detail="No fue posible obtener los datos del servicio de sensores",
+            detail=(
+                "No fue posible obtener los datos necesarios "
+                "para generar el reporte de sensores"
+            ),
         )
 
 @app.get("/api/reports/history", tags=["Reports"])

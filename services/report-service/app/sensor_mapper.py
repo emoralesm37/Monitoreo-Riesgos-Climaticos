@@ -29,3 +29,52 @@ def map_sensor(sensor: dict) -> dict:
 
 def map_sensors(sensors: list[dict]) -> list[dict]:
     return [map_sensor(sensor) for sensor in sensors]
+
+
+def map_sensors_with_units(
+    sensors: list[dict],
+    sensor_types: list[dict],
+) -> list[dict]:
+    units_by_type = {
+        sensor_type["sensorTypeId"]: sensor_type.get("unit")
+        for sensor_type in sensor_types
+    }
+
+    mapped_sensors = map_sensors(sensors)
+
+    for original, mapped in zip(sensors, mapped_sensors):
+        sensor_type_id = original.get("sensorTypeId")
+        unit = units_by_type.get(sensor_type_id)
+
+        mapped["unit"] = (
+            unit if unit else "No disponible"
+        )
+
+    return mapped_sensors
+
+
+def enrich_sensors_with_communities(
+    sensors: list[dict],
+    communities: list[dict],
+) -> list[dict]:
+    communities_by_id = {
+        community["communityId"]: community
+        for community in communities
+    }
+
+    for sensor in sensors:
+        community_id = sensor.get("community_id")
+        community = communities_by_id.get(community_id)
+
+        if community is not None:
+            sensor["community_name"] = (
+                community.get("name") or "No disponible"
+            )
+            sensor["location"] = (
+                community.get("department") or "No disponible"
+            )
+        else:
+            sensor["community_name"] = "No disponible"
+            sensor["location"] = "No disponible"
+
+    return sensors
