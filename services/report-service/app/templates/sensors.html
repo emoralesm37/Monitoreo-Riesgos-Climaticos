@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Reporte de Sensores - ClimateGuard</title>
+
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 15mm;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 10px;
+            color: #263238;
+        }
+
+        h1 {
+            color: #1565c0;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            color: #607d8b;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        th, td {
+            border: 1px solid #cfd8dc;
+            padding: 6px;
+            text-align: left;
+            overflow-wrap: anywhere;
+        }
+
+        th {
+            background-color: #1565c0;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #eceff1;
+        }
+
+        .footer {
+            margin-top: 25px;
+            font-size: 9px;
+            color: #607d8b;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>ClimateGuard</h1>
+
+    <div class="subtitle">
+        Reporte de Sensores
+        <p>Fecha de generación: {{ generated_at }}</p>
+        <p>Total de sensores: {{ sensors | length }}</p>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Tipo</th>
+                <th>Unidad</th>
+                <th>Comunidad</th>
+                <th>Ubicación (Departamento)</th>
+                <th>Estado</th>
+                <th>Última lectura</th>
+                <th>Última actualización</th>
+                <th>Fecha de instalación</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for sensor in sensors %}
+            <tr>
+                <td>{{ sensor.sensor_id }}</td>
+                <td>{{ sensor.name }}</td>
+                <td>{{ sensor.sensor_type }}</td>
+                <td>{{ sensor.unit }}</td>
+                <td>{{ sensor.community_name }}</td>
+                <td>{{ sensor.location }}</td>
+                <td>{{ sensor.status }}</td>
+                <td>{{ sensor.last_value }}</td>
+                <td>{{ sensor.last_updated_at }}</td>
+                <td>{{ sensor.created_at }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="10">
+                    No hay sensores disponibles.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="footer">
+        Documento generado por ClimateGuard Report Service.
+    </div>
+</body>
+</html>
