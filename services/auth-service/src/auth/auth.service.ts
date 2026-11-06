@@ -12,6 +12,7 @@ import { IsNull, Repository } from 'typeorm';
 
 import { Role } from '../roles/entities/role.entity';
 import { User } from '../users/entities/user.entity';
+import { AuditClientService } from './audit-client.service';
 import { LoginRequestDto } from './dto/login-request.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { ExternalAccount } from './entities/external-account.entity';
@@ -36,15 +37,10 @@ constructor(
   @InjectRepository(Role)
   private readonly roleRepository: Repository<Role>,
 
-  @InjectRepository(RefreshToken)
-  private readonly refreshTokenRepository: Repository<RefreshToken>,
-
-  @InjectRepository(ExternalAccount)
-  private readonly externalAccountRepository: Repository<ExternalAccount>,
-
-  private readonly jwtService: JwtService,
-  private readonly configService: ConfigService,
-) {}
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
+    private readonly auditClient: AuditClientService,
+  ) {}
 
   async login(
     request: LoginRequestDto,
@@ -59,12 +55,29 @@ constructor(
       .getOne();
 
     if (!user) {
+      await this.auditClient.registerEvent({
+        service: 'auth-service',
+        action: 'LOGIN_FAILED',
+        result: 'FAILURE',
+        details: { reason: 'INVALID_CREDENTIALS' },
+      });
+
       throw new UnauthorizedException(
         'Correo o contraseña incorrectos.',
       );
     }
 
     if (!user.isActive) {
+      await this.auditClient.registerEvent({
+        service: 'auth-service',
+        action: 'LOGIN_BLOCKED',
+        user_id: user.id,
+        entity_type: 'user',
+        entity_id: user.id,
+        result: 'BLOCKED',
+        details: { reason: 'INACTIVE_USER' },
+      });
+
       throw new ForbiddenException(
         'El usuario se encuentra inactivo.',
       );
@@ -81,12 +94,36 @@ constructor(
     );
 
     if (!passwordIsValid) {
+      await this.auditClient.registerEvent({
+        service: 'auth-service',
+        action: 'LOGIN_FAILED',
+        user_id: user.id,
+        entity_type: 'user',
+        entity_id: user.id,
+        result: 'FAILURE',
+        details: { reason: 'INVALID_CREDENTIALS' },
+      });
+
       throw new UnauthorizedException(
         'Correo o contraseña incorrectos.',
       );
     }
 
-    return this.issueTokenPair(user);
+    const tokens = await this.issueTokenPair(user);
+
+    await this.auditClient.registerEvent({
+      service: 'auth-service',
+      action: 'LOGIN_SUCCESS',
+      user_id: user.id,
+      entity_type: 'user',
+      entity_id: user.id,
+      result: 'SUCCESS',
+      details: {
+        method: 'password',
+      },
+    });
+
+    return tokens;
   }
   
   async externalLogin(

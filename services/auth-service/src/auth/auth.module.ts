@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { Role } from '../roles/entities/role.entity';
 import { User } from '../users/entities/user.entity';
+import { AuditClientService } from './audit-client.service';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { ExternalAccount } from './entities/external-account.entity';
@@ -27,6 +28,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     JwtModule.register({}),
   ],
   providers: [
+    AuditClientService,
     AuthService,
     JwtStrategy,
     GoogleStrategy,
