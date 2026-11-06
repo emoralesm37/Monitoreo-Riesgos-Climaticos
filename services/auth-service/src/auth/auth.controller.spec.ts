@@ -7,11 +7,14 @@ describe('AuthController', () => {
   let receivedLogin: unknown;
   let receivedRefresh: unknown;
   let receivedLogout: unknown;
+  let receivedExternalProfile: unknown;
+
 
   beforeEach(() => {
     receivedLogin = undefined;
     receivedRefresh = undefined;
     receivedLogout = undefined;
+    receivedExternalProfile = undefined;
 
     const authService = {
       login: async (request: unknown) => {
@@ -25,6 +28,10 @@ describe('AuthController', () => {
       logout: async (refreshToken: string) => {
         receivedLogout = refreshToken;
         return { message: 'Sesión cerrada.' };
+      },
+      externalLogin: async (profile: unknown) => {
+        receivedExternalProfile = profile;
+        return {};
       },
     } as unknown as AuthService;
 
@@ -57,4 +64,33 @@ describe('AuthController', () => {
 
     expect(receivedLogout).toBe('refresh-token');
   });
+  it('procesa el callback de Google', async () => {
+  const profile = {
+    provider: 'google',
+    providerUserId: 'google-123',
+    email: 'viewer@example.com',
+    name: 'Viewer Google',
+  };
+
+  await controller.googleCallback({
+    user: profile,
+  } as never);
+
+  expect(receivedExternalProfile).toEqual(profile);
+});
+
+it('procesa el callback de GitHub', async () => {
+  const profile = {
+    provider: 'github',
+    providerUserId: 'github-123',
+    email: 'viewer@example.com',
+    name: 'Viewer GitHub',
+  };
+
+  await controller.githubCallback({
+    user: profile,
+  } as never);
+
+  expect(receivedExternalProfile).toEqual(profile);
+});
 });

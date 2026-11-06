@@ -10,11 +10,14 @@ import * as bcrypt from 'bcrypt';
 import { createHash, randomUUID } from 'crypto';
 import { IsNull, Repository } from 'typeorm';
 
+import { Role } from '../roles/entities/role.entity';
 import { User } from '../users/entities/user.entity';
 import { AuditClientService } from './audit-client.service';
 import { LoginRequestDto } from './dto/login-request.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
+import { ExternalAccount } from './entities/external-account.entity';
 import { RefreshToken } from './entities/refresh-token.entity';
+import { ExternalProfile } from './interfaces/external-profile.interface';
 
 interface RefreshTokenPayload {
   sub: string;
@@ -22,17 +25,17 @@ interface RefreshTokenPayload {
   name: string;
   role: string;
   type: string;
+  provider: string;
 }
 
 @Injectable()
 export class AuthService {
-  constructor(
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
+constructor(
+  @InjectRepository(User)
+  private readonly userRepository: Repository<User>,
 
-    @InjectRepository(RefreshToken)
-    private readonly refreshTokenRepository:
-      Repository<RefreshToken>,
+  @InjectRepository(Role)
+  private readonly roleRepository: Repository<Role>,
 
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
@@ -79,6 +82,11 @@ export class AuthService {
         'El usuario se encuentra inactivo.',
       );
     }
+    if (!user.passwordHash) {
+  throw new UnauthorizedException(
+    'Esta cuenta utiliza autenticación externa.',
+  );
+}
 
     const passwordIsValid = await bcrypt.compare(
       request.password,
@@ -117,6 +125,90 @@ export class AuthService {
 
     return tokens;
   }
+  
+  async externalLogin(
+  profile: ExternalProfile,
+): Promise<LoginResponseDto> {
+  const existingAccount =
+    await this.externalAccountRepository.findOne({
+      where: {
+        provider: profile.provider,
+        providerUserId: profile.providerUserId,
+      },
+      relations: {
+        user: {
+          role: true,
+        },
+      },
+    });
+
+  if (existingAccount) {
+    if (!existingAccount.user.isActive) {
+      throw new ForbiddenException(
+        'El usuario se encuentra inactivo.',
+      );
+    }
+
+    return this.issueTokenPair(
+  existingAccount.user,
+  existingAccount.provider,
+);
+  }
+
+  const email = profile.email.trim().toLowerCase();
+
+  let user = await this.userRepository.findOne({
+    where: { email },
+    relations: { role: true },
+  });
+
+  if (!user) {
+    const viewerRole =
+      await this.roleRepository.findOne({
+        where: { name: 'Viewer' },
+      });
+
+    if (!viewerRole) {
+      throw new UnauthorizedException(
+        'El rol Viewer no se encuentra configurado.',
+      );
+    }
+
+    user = this.userRepository.create({
+      name: profile.name.trim(),
+      email,
+      passwordHash: null,
+      roleId: viewerRole.id,
+      role: viewerRole,
+      isActive: true,
+    });
+
+    user = await this.userRepository.save(user);
+  }
+
+  if (!user.isActive) {
+    throw new ForbiddenException(
+      'El usuario se encuentra inactivo.',
+    );
+  }
+
+  const externalAccount =
+    this.externalAccountRepository.create({
+      provider: profile.provider,
+      providerUserId: profile.providerUserId,
+      userId: user.id,
+      user,
+    });
+
+  await this.externalAccountRepository.save(
+    externalAccount,
+  );
+
+  return this.issueTokenPair(
+  user,
+  profile.provider,
+);
+}
 
   async refresh(
     refreshToken: string,
@@ -132,6 +224,7 @@ export class AuthService {
     try {
       payload =
         await this.jwtService.verifyAsync<RefreshTokenPayload>(
+          
           refreshToken,
           {
             secret:
@@ -142,6 +235,7 @@ export class AuthService {
             audience,
           },
         );
+        
     } catch {
       throw new UnauthorizedException(
         'El refresh token no es válido o expiró.',
@@ -195,7 +289,10 @@ export class AuthService {
 
     await this.refreshTokenRepository.save(storedToken);
 
-    return this.issueTokenPair(storedToken.user);
+    return this.issueTokenPair(
+    storedToken.user,
+    payload.provider ?? 'local',
+  );
   }
 
   async logout(
@@ -220,90 +317,121 @@ export class AuthService {
     };
   }
 
-  private async issueTokenPair(
-    user: User,
-  ): Promise<LoginResponseDto> {
-    const accessTtl = this.getPositiveInteger(
-      'JWT_ACCESS_TTL_SECONDS',
-    );
+private async issueTokenPair(
+  user: User,
+  provider = 'local',
+): Promise<LoginResponseDto> {
+  const accessTtl = this.getPositiveInteger(
+    'JWT_ACCESS_TTL_SECONDS',
+  );
 
-    const refreshTtl = this.getPositiveInteger(
-      'JWT_REFRESH_TTL_SECONDS',
-    );
+  const refreshTtl = this.getPositiveInteger(
+    'JWT_REFRESH_TTL_SECONDS',
+  );
 
-    const issuer =
-      this.configService.getOrThrow<string>('JWT_ISSUER');
+  const issuer =
+    this.configService.getOrThrow<string>('JWT_ISSUER');
 
-    const audience =
-      this.configService.getOrThrow<string>('JWT_AUDIENCE');
+  const audience =
+    this.configService.getOrThrow<string>('JWT_AUDIENCE');
 
-    const payload = {
-      sub: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role.name,
-    };
+  const payload = {
+    sub: user.id,
+    email: user.email,
+    name: user.name,
+    role: user.role.name,
+    roles: [user.role.name],
+    permissions: this.getPermissions(user.role.name),
+    provider,
+  };
 
-    const accessToken = await this.jwtService.signAsync(
-      payload,
-      {
-        secret:
-          this.configService.getOrThrow<string>(
-            'JWT_ACCESS_SECRET',
-          ),
-        expiresIn: accessTtl,
-        issuer,
-        audience,
-        jwtid: randomUUID(),
-      },
-    );
-
-    const refreshToken = await this.jwtService.signAsync(
-      {
-        ...payload,
-        type: 'refresh',
-      },
-      {
-        secret:
-          this.configService.getOrThrow<string>(
-            'JWT_REFRESH_SECRET',
-          ),
-        expiresIn: refreshTtl,
-        issuer,
-        audience,
-        jwtid: randomUUID(),
-      },
-    );
-
-    const refreshTokenEntity =
-      this.refreshTokenRepository.create({
-        tokenHash: this.hashToken(refreshToken),
-        userId: user.id,
-        expiresAt: new Date(
-          Date.now() + refreshTtl * 1000,
+  const accessToken = await this.jwtService.signAsync(
+    payload,
+    {
+      secret:
+        this.configService.getOrThrow<string>(
+          'JWT_ACCESS_SECRET',
         ),
-        revokedAt: null,
-      });
+      expiresIn: accessTtl,
+      issuer,
+      audience,
+      jwtid: randomUUID(),
+    },
+  );
 
-    await this.refreshTokenRepository.save(
-      refreshTokenEntity,
-    );
+  const refreshToken = await this.jwtService.signAsync(
+    {
+      ...payload,
+      type: 'refresh',
+    },
+    {
+      secret:
+        this.configService.getOrThrow<string>(
+          'JWT_REFRESH_SECRET',
+        ),
+      expiresIn: refreshTtl,
+      issuer,
+      audience,
+      jwtid: randomUUID(),
+    },
+  );
 
-    return {
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role.name,
-      },
-      accessToken,
-      refreshToken,
-      tokenType: 'Bearer',
+  const refreshTokenEntity =
+    this.refreshTokenRepository.create({
+      tokenHash: this.hashToken(refreshToken),
+      userId: user.id,
       expiresAt: new Date(
-        Date.now() + accessTtl * 1000,
-      ).toISOString(),
-    };
-  }
+        Date.now() + refreshTtl * 1000,
+      ),
+      revokedAt: null,
+    });
+
+  await this.refreshTokenRepository.save(
+    refreshTokenEntity,
+  );
+
+  return {
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role.name,
+    },
+    accessToken,
+    refreshToken,
+    tokenType: 'Bearer',
+    expiresAt: new Date(
+      Date.now() + accessTtl * 1000,
+    ).toISOString(),
+  };
+}
+  private getPermissions(role: string): string[] {
+  const permissionsByRole: Record<string, string[]> = {
+    Administrador: [
+      'users:manage',
+      'communities:read',
+      'communities:write',
+      'alerts:read',
+      'alerts:write',
+      'reports:read',
+      'reports:generate',
+    ],
+    Operador: [
+      'communities:read',
+      'alerts:read',
+      'alerts:write',
+      'reports:read',
+      'reports:generate',
+    ],
+    Viewer: [
+      'communities:read',
+      'alerts:read',
+      'reports:read',
+    ],
+  };
+
+  return permissionsByRole[role] ?? [];
+}
 
   private getPositiveInteger(variableName: string): number {
     const value = Number(
