@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="ClimateGuard.Community.Api/ClimateGuard.Community.Api.csproj" />
+  <Project Path="ClimateGuard.Community.Application/ClimateGuard.Community.Application.csproj" />
+  <Project Path="ClimateGuard.Community.Domain/ClimateGuard.Community.Domain.csproj" />
+  <Project Path="ClimateGuard.Community.Infrastructure/ClimateGuard.Community.Infrastructure.csproj" />
+  <Project Path="ClimateGuard.Community.Tests/ClimateGuard.Community.Tests.csproj" />
+</Solution>

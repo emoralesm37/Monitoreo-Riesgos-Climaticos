@@ -493,3 +493,8 @@ venv/
 # Auth Service - archivos generados
 /services/auth-service/dist/
 /services/auth-service/*.tsbuildinfo
+# Python - Entornos virtuales
+.venv/
+
+# Report Service - archivos PDF generados
+/services/report-service/app/generated/
