@@ -60,3 +60,27 @@ def generate_sensors_pdf(sensors: list[dict]) -> Path:
     ).write_pdf(str(output_file))
 
     return output_file
+
+def generate_readings_pdf(readings: list[dict]) -> Path:
+    """Genera el reporte PDF de lecturas."""
+
+    GENERATED_DIR.mkdir(parents=True, exist_ok=True)
+
+    template = environment.get_template("readings.html")
+
+    html_content = template.render(
+        generated_at=datetime.now(
+            timezone.utc
+        ).strftime("%d/%m/%Y %H:%M UTC"),
+        readings=readings,
+    )
+
+    file_name = f"readings_{uuid4().hex}.pdf"
+    output_file = GENERATED_DIR / file_name
+
+    HTML(
+        string=html_content,
+        base_url=str(TEMPLATES_DIR),
+    ).write_pdf(str(output_file))
+
+    return output_file
