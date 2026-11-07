@@ -37,10 +37,16 @@ constructor(
   @InjectRepository(Role)
   private readonly roleRepository: Repository<Role>,
 
-    private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
-    private readonly auditClient: AuditClientService,
-  ) {}
+  @InjectRepository(RefreshToken)
+  private readonly refreshTokenRepository: Repository<RefreshToken>,
+
+  @InjectRepository(ExternalAccount)
+  private readonly externalAccountRepository: Repository<ExternalAccount>,
+
+  private readonly jwtService: JwtService,
+  private readonly configService: ConfigService,
+  private readonly auditClient: AuditClientService,
+) {}
 
   async login(
     request: LoginRequestDto,
