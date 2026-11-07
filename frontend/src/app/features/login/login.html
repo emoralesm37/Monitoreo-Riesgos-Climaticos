@@ -1,44 +1,58 @@
-<div class="login-page">
-  <div class="login-card">
-    <h1>ClimateGuard</h1>
-    <h2>Inicio de sesión</h2>
+<main class="login-page">
+  <section class="brand-panel" aria-labelledby="brand-title">
+    <a class="wordmark" href="/login"><span class="brand-symbol" aria-hidden="true">◈</span> ClimateGuard</a>
+    <div class="brand-copy"><span class="eyebrow">MONITOREO CLIMÁTICO · GUATEMALA</span>
+      <h1 id="brand-title">Información clara.<br>Comunidades preparadas.</h1>
+      <p>Una plataforma para consultar mediciones, gestionar alertas y tomar decisiones informadas.</p>
+      <div class="orbit" aria-hidden="true"><span></span><i></i><b>CG</b></div>
+    </div>
+    <p class="brand-footer">Sensores · Comunidades · Alertas · Reportes</p>
+  </section>
 
-    <form (ngSubmit)="onSubmit()">
-      <div class="form-group">
-        <label for="email">Correo electrónico</label>
-        <input
-          id="email"
-          name="email"
-          type="email"
-          [(ngModel)]="email"
-          autocomplete="username"
-          required
-        />
+  <section class="form-panel" aria-labelledby="login-title">
+    <div class="login-card">
+      <span class="eyebrow">ACCESO A LA PLATAFORMA</span>
+      <h2 id="login-title">Bienvenido de nuevo</h2>
+      <p class="intro">Inicia sesión con tu cuenta de ClimateGuard.</p>
+      <form #loginForm="ngForm" (ngSubmit)="onSubmit(loginForm)" [attr.aria-busy]="isLoading" novalidate>
+        <div class="form-group">
+          <label for="email">Correo electrónico</label>
+          <input id="email" name="email" type="email" [(ngModel)]="email" #emailField="ngModel"
+            autocomplete="username" inputmode="email" required email [readOnly]="isLoading"
+            placeholder="tu.correo@ejemplo.com" [attr.aria-invalid]="emailField.invalid && emailField.touched"
+            aria-describedby="login-feedback" />
+        </div>
+        <div class="form-group">
+          <label for="password">Contraseña</label>
+          <div class="password-wrap">
+            <input id="password" name="password" [type]="showPassword ? 'text' : 'password'"
+              [(ngModel)]="password" #passwordField="ngModel" autocomplete="current-password"
+              required minlength="8" [readOnly]="isLoading" placeholder="Ingresa tu contraseña"
+              [attr.aria-invalid]="passwordField.invalid && passwordField.touched" aria-describedby="login-feedback" />
+            <button class="show-password" type="button" (click)="showPassword = !showPassword"
+              [disabled]="isLoading" [attr.aria-pressed]="showPassword"
+              [attr.aria-label]="showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'">{{ showPassword ? 'Ocultar' : 'Mostrar' }}</button>
+          </div>
+        </div>
+        <div id="login-feedback" aria-live="assertive" aria-atomic="true">
+          @if (errorMessage) { <p class="error-message" role="alert">{{ errorMessage }}</p> }
+        </div>
+        <button class="submit-button" type="submit" [disabled]="isLoading || state() === 'success'">
+          @if (isLoading) { <span class="spinner" aria-hidden="true"></span> Verificando acceso… }
+          @else if (state() === 'success') { Sesión iniciada }
+          @else { {{ state() === 'error' ? 'Volver a intentar' : 'Iniciar sesión' }} <span aria-hidden="true">→</span> }
+        </button>
+        <p class="form-status" role="status" aria-live="polite">
+          @if (isLoading) { Conectando con el servicio de autenticación… }
+          @else if (state() === 'success') { Abriendo tu espacio de monitoreo… }
+        </p>
+      </form>
+      <div class="oauth-actions" aria-label="Acceso con proveedores externos">
+        <button type="button" (click)="oauth('google')" [disabled]="isLoading || state() === 'success'">Continuar con Google</button>
+        <button type="button" (click)="oauth('github')" [disabled]="isLoading || state() === 'success'">Continuar con GitHub</button>
       </div>
-
-      <div class="form-group">
-        <label for="password">Contraseña</label>
-        <input
-          id="password"
-          name="password"
-          type="password"
-          [(ngModel)]="password"
-          autocomplete="current-password"
-          required
-        />
-      </div>
-
-      @if (errorMessage) {
-        <p class="error-message">{{ errorMessage }}</p>
-      }
-
-      <button type="submit" [disabled]="isLoading">
-        @if (isLoading) {
-          Ingresando...
-        } @else {
-          Iniciar sesión
-        }
-      </button>
-    </form>
-  </div>
-</div>
+      <p class="access-note">¿Necesitas acceso? Contacta al administrador de tu organización.</p>
+    </div>
+    <footer>ClimateGuard · Sistema de monitoreo y alerta temprana</footer>
+  </section>
+</main>

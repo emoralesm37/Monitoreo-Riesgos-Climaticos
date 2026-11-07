@@ -1,6 +1,9 @@
 import {
   ChangeDetectorRef,
   Component,
+  DestroyRef,
+  ElementRef,
+  ViewChild,
   OnInit,
   inject
 } from '@angular/core';
@@ -8,7 +11,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 
-import { Observable } from 'rxjs';
+import { Observable, TimeoutError } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Auth } from '../../core/services/auth';
 import {
   Comunidad,
@@ -27,6 +31,7 @@ export class Comunidades implements OnInit {
   private readonly service = inject(ComunidadesService);
   private readonly auth = inject(Auth);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly destroyRef = inject(DestroyRef);
 
   comunidades: Comunidad[] = [];
 
@@ -45,6 +50,47 @@ export class Comunidades implements OnInit {
   mensaje = '';
   error = '';
   errorCarga = '';
+  @ViewChild('coordinateConfirmation') coordinateConfirmation?: ElementRef<HTMLDialogElement>;
+  confirmacionUbicacion = false;
+  private originalLatitude: number | null = null;
+  private originalLongitude: number | null = null;
+  @ViewChild('statusConfirmation') statusConfirmation?: ElementRef<HTMLDialogElement>;
+  statusTarget: Comunidad | null = null;
+  changingStatus = false;
+  statusError = '';
+  search = '';
+  statusFilter = '';
+  departmentFilter = '';
+  get activeCount() { return this.comunidades.filter(c => c.isActive).length; }
+  get departments() { return [...new Set(this.comunidades.map(c => c.department))].sort(); }
+  get filtered() {
+    const normalize = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const query = normalize(this.search.trim());
+    return this.comunidades.filter(c => (!query || normalize(`${c.name} ${c.municipality} ${c.department}`).includes(query)) &&
+      (!this.statusFilter || c.isActive === (this.statusFilter === 'active')) && (!this.departmentFilter || c.department === this.departmentFilter));
+  }
+  clearFilters() { this.search = ''; this.statusFilter = ''; this.departmentFilter = ''; }
+  requestStatus(community: Comunidad) {
+    if (!this.puedeAdministrar || this.cargando || this.guardando || this.changingStatus) return;
+    this.statusTarget = community; this.statusError = ''; this.statusConfirmation?.nativeElement.showModal();
+  }
+  cancelStatus(event?: Event) {
+    if (this.changingStatus) { event?.preventDefault(); return; }
+    this.statusConfirmation?.nativeElement.close(); this.statusTarget = null; this.statusError = '';
+  }
+  confirmStatus() {
+    if (!this.puedeAdministrar || !this.statusTarget || this.changingStatus) return;
+    this.changingStatus = true; this.statusError = '';
+    this.service.cambiarEstado(this.statusTarget.communityId, !this.statusTarget.isActive)
+      .pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+        next: () => {
+          this.changingStatus = false; this.cancelStatus(); this.mensaje = 'Estado actualizado en el servidor.';
+          this.cargarComunidades(); this.cdr.markForCheck();
+        }, error: error => {
+          this.changingStatus = false; this.statusError = this.obtenerError(error, 'No se pudo cambiar el estado. Puedes reintentar.'); this.cdr.markForCheck();
+        }
+      });
+  }
 
   get puedeAdministrar(): boolean {
     return this.auth.getCurrentUser()?.role === 'Administrador';
@@ -55,10 +101,11 @@ export class Comunidades implements OnInit {
   }
 
   cargarComunidades(): void {
+    if (this.cargando) return;
     this.cargando = true;
     this.errorCarga = '';
 
-    this.service.obtenerTodas().subscribe({
+    this.service.obtenerTodas().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: data => {
         this.comunidades = data;
         this.cargando = false;
@@ -75,8 +122,8 @@ export class Comunidades implements OnInit {
     });
   }
 
-  guardar(): void {
-    if (this.guardando) {
+  guardar(confirmado = false): void {
+    if (this.guardando || this.changingStatus) {
       return;
     }
 
@@ -146,6 +193,17 @@ export class Comunidades implements OnInit {
       return;
     }
 
+    if ((data.latitude === null) !== (data.longitude === null)) {
+      this.error = 'Introduce latitud y longitud juntas, o deja ambas vacías.';
+      return;
+    }
+    if (!confirmado && (data.latitude !== this.originalLatitude || data.longitude !== this.originalLongitude)) {
+      this.confirmacionUbicacion = true;
+      this.coordinateConfirmation?.nativeElement.showModal();
+      return;
+    }
+    if (confirmado && !this.confirmacionUbicacion) return;
+    this.cancelarUbicacion();
     const esEdicion = this.editandoId !== null;
 
     const request: Observable<Comunidad | void> =
@@ -155,7 +213,7 @@ export class Comunidades implements OnInit {
 
     this.guardando = true;
 
-    request.subscribe({
+    request.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.guardando = false;
         this.mensaje = esEdicion
@@ -178,7 +236,7 @@ export class Comunidades implements OnInit {
   }
 
   editar(comunidad: Comunidad): void {
-    if (!this.puedeAdministrar || this.guardando) {
+    if (!this.puedeAdministrar || this.guardando || this.changingStatus || this.cargando) {
       return;
     }
 
@@ -189,6 +247,8 @@ export class Comunidades implements OnInit {
     this.country = comunidad.country;
     this.latitude = comunidad.latitude;
     this.longitude = comunidad.longitude;
+    this.originalLatitude = comunidad.latitude;
+    this.originalLongitude = comunidad.longitude;
     this.description = comunidad.description ?? '';
 
     this.error = '';
@@ -214,12 +274,20 @@ export class Comunidades implements OnInit {
     this.description = '';
     this.latitude = null;
     this.longitude = null;
+    this.originalLatitude = null;
+    this.originalLongitude = null;
+  }
+
+  cancelarUbicacion() {
+    this.coordinateConfirmation?.nativeElement.close();
+    this.confirmacionUbicacion = false;
   }
 
   private obtenerError(
     error: HttpErrorResponse,
     fallback: string
   ): string {
+    if (error instanceof TimeoutError) return 'El servidor tardó demasiado. Actualiza el listado antes de repetir la operación.';
     if (error.status === 0) {
       return 'No se pudo conectar con el servidor.';
     }
@@ -258,6 +326,7 @@ export class Comunidades implements OnInit {
       return error.error?.detail ??
         'La operación tiene un conflicto con los datos existentes.';
     }
+    if (error.status === 429) return 'Demasiadas solicitudes. Espera un momento antes de reintentar.';
 
     return fallback;
   }

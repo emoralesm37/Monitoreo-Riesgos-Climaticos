@@ -1,4 +1,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import 'leaflet/dist/leaflet.css';
+
+/* Leaflet creates DOM outside Angular's scoped styles. Only this map is themed. */
+app-monitoring-map .climate-map-tiles { filter: saturate(.45) hue-rotate(12deg); }
+app-monitoring-map .leaflet-control-zoom { border: 1px solid #b7d0dd; border-radius: 10px; overflow: hidden; box-shadow: 0 3px 12px #12384e22; }
+app-monitoring-map .leaflet-control-zoom a { color: #1b536d; background: #f4fbff; }
+app-monitoring-map .leaflet-control-attribution { background: #fffffff2; color: #344e60; }
+app-monitoring-map .climate-community-popup .leaflet-popup-content-wrapper { border-radius: 14px; background: #102e43; color: #e9f8ff; }
+app-monitoring-map .climate-community-popup .leaflet-popup-tip { background: #102e43; }
+app-monitoring-map .climate-community-popup p { margin: 8px 0; font-size: 12px; }
+app-monitoring-map .climate-community-popup strong { color: #93e7f5; }
 
 * {
   box-sizing: border-box;

@@ -1,4 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, DestroyRef, inject } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { AlertasService } from '../../core/services/alertas';
 import { FormsModule } from '@angular/forms';
 
 interface EventoHistorial {
@@ -15,66 +18,42 @@ interface EventoHistorial {
 @Component({
   selector: 'app-historial',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, DatePipe],
   styleUrl: './historial.scss',
   templateUrl: './historial.html',
 })
-export class Historial {
+export class Historial implements OnInit {
+  private readonly service = inject(AlertasService);
+  private readonly cdr = inject(ChangeDetectorRef);
+  private readonly destroyRef = inject(DestroyRef);
+  loading = false;
+  error = '';
+
   eventos: EventoHistorial[] = [];
 
   filtroFenomeno = '';
   filtroSeveridad = '';
 
-  constructor() {
-    this.cargarHistorial();
-  }
+  ngOnInit() { this.cargarHistorial(); }
 
-  private cargarHistorial(): void {
-    const historialGuardado =
-      localStorage.getItem('climateguard_historial');
-
-    if (historialGuardado) {
-      this.eventos = JSON.parse(historialGuardado);
-      return;
-    }
-
-    this.eventos = [
-      {
-        id: 1,
-        fecha: '20/08/2026 14:32',
-        fenomeno: 'Incendio forestal',
-        sensorName: 'Sensor de temperatura',
-        community: 'Comunidad El Progreso',
-        severity: 'Naranja',
-        mensaje: 'Temperatura elevada y humedad baja',
-        estado: 'Resuelta'
+  cargarHistorial(): void {
+    if (this.loading) return;
+    this.loading = true; this.error = '';
+    this.service.query({ status: 'RESUELTA' }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: alerts => {
+        this.eventos = alerts.map(a => ({ id: a.alertId, fecha: a.resolvedAt || a.createdAt,
+          fenomeno: a.phenomenon ? ({INUNDACION:'Inundaci\u00f3n',SEQUIA:'Sequ\u00eda',TORMENTA:'Tormenta',HELADA:'Helada',INCENDIO_FORESTAL:'Incendio forestal',SISTEMA:'Sistema'})[a.phenomenon] : 'Sin fenomeno',
+          sensorName: a.sensorName || `Sensor ${a.sensorId}`, community: a.communityName || 'Sin comunidad',
+          severity: ({VERDE:'Verde', AMARILLO:'Amarillo', NARANJA:'Naranja', ROJO:'Rojo'} as const)[a.severity],
+          mensaje: a.message, estado: 'Resuelta' }));
+        this.loading = false; this.cdr.markForCheck();
       },
-      {
-        id: 2,
-        fecha: '19/08/2026 09:10',
-        fenomeno: 'Inundación',
-        sensorName: 'Sensor de río',
-        community: 'Comunidad Las Flores',
-        severity: 'Rojo',
-        mensaje: 'Nivel del río por encima del rango seguro',
-        estado: 'Resuelta'
-      },
-      {
-        id: 3,
-        fecha: '18/08/2026 22:45',
-        fenomeno: 'Tormenta',
-        sensorName: 'Sensor de viento',
-        community: 'Comunidad Las Flores',
-        severity: 'Amarillo',
-        mensaje: 'Ráfagas de viento en aumento',
-        estado: 'Resuelta'
+      error: error => {
+        this.error = error.status === 401 ? 'Sesion expirada. Inicia sesion nuevamente.' :
+          error.status === 403 ? 'No tienes permiso para consultar el historial.' : 'No se pudo consultar el historial real de alertas.';
+        this.loading = false; this.cdr.markForCheck();
       }
-    ];
-
-    localStorage.setItem(
-      'climateguard_historial',
-      JSON.stringify(this.eventos)
-    );
+    });
   }
 
   get eventosFiltrados(): EventoHistorial[] {

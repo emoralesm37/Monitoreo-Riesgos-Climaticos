@@ -4,7 +4,7 @@
     <div>
       <h1>Historial de eventos</h1>
       <p>
-        Consulta las alertas y eventos atendidos en ClimateGuard.
+        Consulta las alertas resueltas y persistidas en Alert Service.
       </p>
     </div>
   </div>
@@ -54,6 +54,9 @@
 
   </div>
 
+  @if (loading) { <p role="status">Cargando historial real...</p> }
+  @else if (error) { <p role="alert">{{ error }}</p><button class="btn-limpiar" (click)="cargarHistorial()">Reintentar</button> }
+  @else {
   <div class="historial-card">
 
     <div class="historial-card-header">
@@ -86,7 +89,7 @@
             <tr>
 
               <td>
-                {{ evento.fecha }}
+                {{ evento.fecha | date:'dd/MM/yyyy HH:mm:ss':'UTC' }} UTC
               </td>
 
               <td>
@@ -139,4 +142,5 @@
 
   </div>
 
+  }
 </section>

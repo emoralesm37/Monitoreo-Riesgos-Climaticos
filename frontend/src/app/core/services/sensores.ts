@@ -21,6 +21,14 @@ export interface SensorCommunity {
   name: string;
 }
 
+export interface SensorReading {
+  sensorReadingId: number;
+  sensorId: number;
+  value: number;
+  timestamp: string;
+  alertEvaluationPending?: boolean;
+}
+
 export interface SensorType {
   sensorTypeId: number;
   code: string;
@@ -53,6 +61,15 @@ export class SensoresService {
 
   getById(id: number): Observable<Sensor> {
     return this.http.get<Sensor>(`${this.baseUrl}/${id}`);
+  }
+
+  getReadings(id: number): Observable<SensorReading[]> {
+    return this.http.get<SensorReading[]>(`${this.baseUrl}/${id}/readings`, {
+      params: { limit: 100 },
+    });
+  }
+  retryEvaluation(sensorId: number, readingId: number) {
+    return this.http.post<{ alertEvaluationPending: boolean }>(`${this.baseUrl}/${sensorId}/readings/${readingId}/evaluate`, {});
   }
 
   create(data: CreateSensorRequest): Observable<Sensor> {

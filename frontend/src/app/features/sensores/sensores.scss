@@ -134,6 +134,10 @@ button:disabled { opacity: .55; cursor: not-allowed; }
 .success-msg { color: #166534; background: #f0fdf4; padding: .75rem; border-radius: 6px; }
 .empty-state { padding: 1.5rem; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; }
 .table-scroll { overflow-x: auto; }
+.sensor-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+.readings-panel { margin-top: 1.5rem; padding: 1.25rem; border: 1px solid #e5e7eb; border-radius: 10px; background: #fff; }
+.readings-panel p { color: #6b7280; font-size: .9rem; }
+.readings-caption { text-align: left; padding: .75rem 1rem; }
 .sensores-table { min-width: 600px; }
 @media (max-width: 600px) {
   .sensores-header { flex-wrap: wrap; }

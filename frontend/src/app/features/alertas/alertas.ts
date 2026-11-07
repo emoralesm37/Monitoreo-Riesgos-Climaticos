@@ -1,128 +1,114 @@
-import { Component } from '@angular/core';
-
-interface Alerta {
-  alertId: number;
-  sensorName: string;
-  community: string;
-  severity: 'Verde' | 'Amarillo' | 'Naranja' | 'Rojo';
-  phenomenon: string;
-  message: string;
-  createdAt: string;
-}
-
-interface EventoHistorial {
-  id: number;
-  fecha: string;
-  fenomeno: string;
-  sensorName: string;
-  community: string;
-  severity: 'Verde' | 'Amarillo' | 'Naranja' | 'Rojo';
-  mensaje: string;
-  estado: 'Resuelta';
-}
+import { ChangeDetectorRef, Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Alerta, AlertasService } from '../../core/services/alertas';
+import { Auth } from '../../core/services/auth';
 
 @Component({
-  selector: 'app-alertas',
-  standalone: true,
-  imports: [],
-  styleUrl: './alertas.scss',
-  templateUrl: './alertas.html',
+  selector: 'app-alertas', standalone: true, imports: [CommonModule, FormsModule],
+  styleUrl: './alertas.scss', templateUrl: './alertas.html',
 })
-export class Alertas {
+export class Alertas implements OnInit {
   alertas: Alerta[] = [];
   mensaje = '';
+  loading = false;
+  error = '';
+  actionError = '';
+  resolving = new Set<number>();
+  statusFilter = 'ACTIVA';
+  severityFilter = '';
+  sensorFilter = '';
+  fromFilter = '';
+  toFilter = '';
+  selected: Alerta | null = null;
+  detailLoading = false;
+  private readonly destroyRef = inject(DestroyRef);
 
-  constructor() {
-    this.cargarAlertas();
+  constructor(private service: AlertasService, private auth: Auth, private cdr: ChangeDetectorRef) {}
+
+  get canResolve(): boolean {
+    return ['Administrador', 'Operador', 'ADMIN', 'OPERATOR'].includes(this.auth.getCurrentUser()?.role ?? '');
   }
 
-  private cargarAlertas(): void {
-    const guardadas = localStorage.getItem('climateguard_alertas');
+  ngOnInit(): void { this.load(); }
 
-    if (guardadas) {
-      this.alertas = JSON.parse(guardadas);
-      return;
+  load(): void {
+    if (this.loading || this.resolving.size) return;
+    this.loading = true;
+    this.error = '';
+    this.alertas = [];
+    if ([this.fromFilter, this.toFilter].some(value => value && !Number.isFinite(Date.parse(value)))) {
+      this.loading = false; this.error = 'Revisa las fechas de consulta.'; return;
     }
-
-    this.alertas = [
-      {
-        alertId: 1,
-        sensorName: 'Sensor de temperatura',
-        community: 'Comunidad El Progreso',
-        severity: 'Naranja',
-        phenomenon: 'Incendio forestal',
-        message: 'Temperatura elevada y humedad baja',
-        createdAt: '07/10/2026 10:25'
+    if (this.sensorFilter && (!Number.isInteger(Number(this.sensorFilter)) || Number(this.sensorFilter) <= 0)) {
+      this.loading = false; this.error = 'El ID del sensor debe ser un entero positivo.'; return;
+    }
+    const params: Record<string, string> = {};
+    if (this.statusFilter) params['status'] = this.statusFilter;
+    if (this.severityFilter) params['severity'] = this.severityFilter;
+    if (this.sensorFilter) params['sensorId'] = this.sensorFilter;
+    if (this.fromFilter) params['from'] = new Date(this.fromFilter).toISOString();
+    if (this.toFilter) params['to'] = new Date(this.toFilter).toISOString();
+    if (params['from'] && params['to'] && params['from'] > params['to']) {
+      this.loading = false; this.error = 'La fecha inicial debe ser anterior a la final.'; return;
+    }
+    this.service.query(params).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: data => {
+        this.alertas = [...data].sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+        this.loading = false;
+        this.cdr.markForCheck();
       },
-      {
-        alertId: 2,
-        sensorName: 'Sensor de río',
-        community: 'Comunidad Las Flores',
-        severity: 'Rojo',
-        phenomenon: 'Inundación',
-        message: 'Nivel del río por encima del rango seguro',
-        createdAt: '07/10/2026 09:48'
+      error: error => {
+        this.error = this.errorMessage(error);
+        this.loading = false;
+        this.cdr.markForCheck();
       },
-      {
-        alertId: 3,
-        sensorName: 'Sensor de viento',
-        community: 'Comunidad Las Flores',
-        severity: 'Amarillo',
-        phenomenon: 'Tormenta',
-        message: 'Ráfagas de viento en aumento',
-        createdAt: '07/10/2026 08:32'
-      }
-    ];
-
-    this.guardarAlertas();
+    });
   }
 
   resolver(alerta: Alerta): void {
-    this.alertas = this.alertas.filter(
-      item => item.alertId !== alerta.alertId
-    );
-
-    this.guardarAlertas();
-    this.enviarAHistorial(alerta);
-
-    this.mensaje = `Alerta de ${alerta.phenomenon} resuelta correctamente.`;
+    if (!this.canResolve || this.resolving.has(alerta.alertId)) return;
+    this.resolving.add(alerta.alertId);
+    this.actionError = '';
+    this.mensaje = '';
+    this.service.resolve(alerta.alertId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: result => {
+        this.alertas = this.statusFilter === 'ACTIVA' ? this.alertas.filter(item => item.alertId !== alerta.alertId)
+          : this.alertas.map(item => item.alertId === result.alertId ? result : item);
+        if (this.selected?.alertId === result.alertId) this.selected = result;
+        this.resolving.delete(alerta.alertId);
+        this.mensaje = 'Alerta resuelta en el servidor.';
+        this.cdr.markForCheck();
+      },
+      error: error => {
+        this.resolving.delete(alerta.alertId);
+        this.actionError = this.errorMessage(error);
+        this.cdr.markForCheck();
+      },
+    });
   }
 
-  private enviarAHistorial(alerta: Alerta): void {
-    const historialGuardado =
-      localStorage.getItem('climateguard_historial');
-
-    const historial: EventoHistorial[] =
-      historialGuardado
-        ? JSON.parse(historialGuardado)
-        : [];
-
-    const nuevoEvento: EventoHistorial = {
-      id:
-        historial.length > 0
-          ? Math.max(...historial.map(item => item.id)) + 1
-          : 1,
-      fecha: new Date().toLocaleString('es-GT'),
-      fenomeno: alerta.phenomenon,
-      sensorName: alerta.sensorName,
-      community: alerta.community,
-      severity: alerta.severity,
-      mensaje: alerta.message,
-      estado: 'Resuelta'
-    };
-
-    historial.unshift(nuevoEvento);
-
-    localStorage.setItem(
-      'climateguard_historial',
-      JSON.stringify(historial)
-    );
+  phenomenonLabel(value: Alerta['phenomenon']): string {
+    return value ? ({ INUNDACION: 'Inundación', SEQUIA: 'Sequía', TORMENTA: 'Tormenta',
+      HELADA: 'Helada', INCENDIO_FORESTAL: 'Incendio forestal', SISTEMA: 'Sistema' })[value] : 'Sin fenómeno';
   }
 
-  private guardarAlertas(): void {
-    localStorage.setItem(
-      'climateguard_alertas',
-      JSON.stringify(this.alertas)
-    );
+  detail(alerta: Alerta) {
+    if (this.detailLoading) return;
+    this.detailLoading = true;
+    this.actionError = '';
+    this.service.getById(alerta.alertId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: value => { this.selected = value; this.detailLoading = false; this.cdr.markForCheck(); },
+      error: error => { this.actionError = this.errorMessage(error); this.detailLoading = false; this.cdr.markForCheck(); },
+    });
+  }
+
+  private errorMessage(error: HttpErrorResponse): string {
+    if (error.status === 401) return 'Tu sesión expiró. Vuelve a iniciar sesión.';
+    if (error.status === 403) return 'Tu rol no tiene permiso para realizar esta acción.';
+    if (error.status === 409) return 'La alerta cambió de estado. Actualiza la lista.';
+    return 'No se pudo consultar o actualizar el servicio de alertas. Intenta nuevamente.';
   }
 }

@@ -6,6 +6,13 @@
     </div>
   </div>
 
+  <div class="community-summary" aria-label="Resumen de comunidades">
+    <article><span>Comunidades registradas</span><strong>{{cargando || errorCarga ? '—' : comunidades.length}}</strong></article>
+    <article><span>Activas administrativamente</span><strong>{{cargando || errorCarga ? '—' : activeCount}}</strong></article>
+    <article><span>Inactivas</span><strong>{{cargando || errorCarga ? '—' : comunidades.length - activeCount}}</strong></article>
+  </div>
+  @if (mensaje) { <p class="message success" role="status">{{mensaje}}</p> }
+
   <div class="content-grid">
     @if (puedeAdministrar) {
       <div class="form-card">
@@ -17,7 +24,7 @@
 
         <form (ngSubmit)="guardar()" #formulario="ngForm">
           <fieldset
-            [disabled]="guardando"
+            [disabled]="guardando || changingStatus"
             style="border: 0; padding: 0; margin: 0; min-width: 0;"
           >
             <div class="form-group">
@@ -83,7 +90,7 @@
                   min="-90"
                   max="90"
                   step="any"
-                  placeholder="14.6349"
+                  placeholder="Opcional · de -90 a 90"
                 />
               </div>
 
@@ -97,11 +104,12 @@
                   min="-180"
                   max="180"
                   step="any"
-                  placeholder="-90.5069"
+                  placeholder="Opcional · de -180 a 180"
                 />
               </div>
             </div>
 
+            <p class="location-note">La ubicación es opcional. Introduce ambas coordenadas verificadas o deja ambas vacías; no se asigna una ubicación automáticamente. Guardar cambios de ubicación requiere confirmación.</p>
             <div class="form-group">
               <label for="description">Descripción (opcional)</label>
               <textarea
@@ -117,12 +125,6 @@
             @if (error) {
               <div class="message error" role="alert">
                 {{ error }}
-              </div>
-            }
-
-            @if (mensaje) {
-              <div class="message success" role="status">
-                {{ mensaje }}
               </div>
             }
 
@@ -157,6 +159,13 @@
     <div class="table-card">
       <div class="table-header">
         <h2>Comunidades registradas</h2>
+        <button class="btn-secondary" (click)="cargarComunidades()" [disabled]="cargando || guardando || changingStatus">Actualizar</button>
+      </div>
+      <div class="community-filters">
+        <label for="community-search">Buscar<input id="community-search" type="search" [(ngModel)]="search" placeholder="Nombre, municipio o departamento"></label>
+        <label for="community-status">Estado<select id="community-status" [(ngModel)]="statusFilter"><option value="">Todos</option><option value="active">Activas</option><option value="inactive">Inactivas</option></select></label>
+        <label for="community-department">Departamento<select id="community-department" [(ngModel)]="departmentFilter"><option value="">Todos</option>@for (department of departments; track department) { <option [value]="department">{{department}}</option> }</select></label>
+        <button class="btn-secondary" (click)="clearFilters()">Limpiar filtros</button>
       </div>
 
       @if (cargando) {
@@ -174,9 +183,9 @@
             Reintentar
           </button>
         </div>
-      } @else if (comunidades.length === 0) {
+      } @else if (filtered.length === 0) {
         <div class="empty-state">
-          No hay comunidades registradas.
+          {{comunidades.length ? 'No hay coincidencias para estos filtros.' : 'No hay comunidades registradas.'}}
         </div>
       } @else {
         <div class="table-responsive">
@@ -188,6 +197,7 @@
                 <th>Departamento</th>
                 <th>País</th>
                 <th>Sensores</th>
+                <th>Ubicación registrada</th>
                 <th>Estado</th>
                 @if (puedeAdministrar) {
                   <th>Acciones</th>
@@ -196,13 +206,14 @@
             </thead>
 
             <tbody>
-              @for (comunidad of comunidades; track comunidad.communityId) {
-                <tr>
+              @for (comunidad of filtered; track comunidad.communityId) {
+                <tr [attr.data-community-id]="comunidad.communityId">
                   <td>{{ comunidad.name }}</td>
                   <td>{{ comunidad.municipality }}</td>
                   <td>{{ comunidad.department }}</td>
                   <td>{{ comunidad.country }}</td>
                   <td>{{ comunidad.sensorCount }}</td>
+                  <td>{{ comunidad.latitude !== null && comunidad.longitude !== null ? comunidad.latitude + ', ' + comunidad.longitude : 'Sin ubicación completa' }}</td>
                   <td>
                     {{ comunidad.isActive ? 'Activa' : 'Inactiva' }}
                   </td>
@@ -211,11 +222,12 @@
                       <button
                         type="button"
                         class="btn-link"
-                        [disabled]="guardando"
+                        [disabled]="guardando || changingStatus || cargando"
                         (click)="editar(comunidad)"
                       >
                         Editar
                       </button>
+                      <button type="button" class="btn-link status-community" [disabled]="guardando || changingStatus || cargando" (click)="requestStatus(comunidad)" [attr.aria-label]="(comunidad.isActive ? 'Desactivar ' : 'Activar ') + comunidad.name">{{comunidad.isActive ? 'Desactivar' : 'Activar'}}</button>
                     </td>
                   }
                 </tr>
@@ -226,4 +238,19 @@
       }
     </div>
   </div>
+  <dialog #coordinateConfirmation aria-labelledby="location-confirm-title" (cancel)="cancelarUbicacion()">
+    <h2 id="location-confirm-title">Confirmar ubicación</h2>
+    <p>Comunidad: <strong>{{name}}</strong></p>
+    <p>{{latitude !== null && longitude !== null ? 'Guardar latitud ' + latitude + ' y longitud ' + longitude + '.' : 'Guardar sin ubicación geográfica registrada.'}}</p>
+    <p>Confirma que la ubicación corresponde al registro. Una coordenada dentro del rango válido no garantiza que esté en Guatemala.</p>
+    <div class="form-actions"><button type="button" class="btn-secondary" autofocus (click)="cancelarUbicacion()">Volver al formulario</button><button type="button" class="btn-primary" (click)="guardar(true)" [disabled]="guardando">Confirmar y guardar</button></div>
+  </dialog>
+  <dialog #statusConfirmation aria-labelledby="community-status-title" (cancel)="cancelStatus($event)" [attr.aria-busy]="changingStatus">
+    @if (statusTarget; as target) {
+      <h2 id="community-status-title">{{target.isActive ? 'Desactivar' : 'Activar'}} comunidad</h2>
+      <p>{{target.name}}</p><p>Solo cambia el estado administrativo. No elimina la comunidad, sus sensores ni sus coordenadas.</p>
+      @if (statusError) { <p class="message error" role="alert">{{statusError}}</p> }
+      <div class="form-actions"><button class="btn-secondary" autofocus (click)="cancelStatus()" [disabled]="changingStatus">Cancelar</button><button class="btn-primary confirm-community-status" (click)="confirmStatus()" [disabled]="changingStatus">{{changingStatus ? 'Actualizando...' : 'Confirmar estado'}}</button></div>
+    }
+  </dialog>
 </section>

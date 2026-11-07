@@ -37,17 +37,22 @@
     </li>
 
     <li>
-      <a routerLink="/historial" routerLinkActive="active">
-        Historial
+      <a routerLink="/historial-alertas" routerLinkActive="active">
+        Alertas resueltas
       </a>
     </li>
 
     @if (esAdministrador) {
+      <li><a routerLink="/historial" routerLinkActive="active">Auditoría</a></li>
+      <li>
+        <a routerLink="/reportes" routerLinkActive="active">Reportes</a>
+      </li>
       <li>
         <a routerLink="/usuarios" routerLinkActive="active">
           Usuarios
         </a>
       </li>
     }
+    <li><a routerLink="/cuenta" routerLinkActive="active">Mi cuenta</a></li>
   </ul>
 </nav>

@@ -1,0 +1,113 @@
+<section class="reports-page" aria-labelledby="reports-title">
+  <header class="page-heading">
+    <div><span class="eyebrow">CLIMATEGUARD / INFORMACIÓN AMBIENTAL</span>
+      <h1 id="reports-title">Reportes</h1>
+      <p>Información de tus comunidades, lista para consultar y compartir.</p>
+    </div>
+    <span class="format-tag">DOCUMENTOS PDF</span>
+  </header>
+
+  <article class="generator-card" aria-labelledby="generator-title">
+    <div class="document-icon" aria-hidden="true">↗</div>
+    <div class="generator-copy"><span class="eyebrow">REPORTE DISPONIBLE</span>
+      <h2 id="generator-title">{{ typeLabel(reportType) }}</h2>
+      <label class="type-picker">Tipo de reporte
+        <select aria-label="Tipo de reporte" [(ngModel)]="reportType" (ngModelChange)="selectType()" [disabled]="generating()">
+          <option value="communities">Comunidades</option><option value="sensors">Sensores</option><option value="readings">Lecturas</option><option value="alerts">Alertas</option><option value="events">Historial de fen?menos</option><option value="sensor_status">Estado de sensores</option><option value="climate_statistics">Estad?sticas clim?ticas</option><option value="executive">Resumen ejecutivo</option>
+        </select>
+      </label>
+      <p>Genera un PDF con datos persistidos y los filtros seleccionados.</p>
+      <span class="access-note">Acceso exclusivo para administradores</span>
+    </div>
+    <button class="primary" (click)="generate()" [disabled]="generating() || loading() || optionsLoading() || !!optionsError()" [attr.aria-busy]="generating()">
+      {{ generating() ? 'Generando PDF…' : 'Generar reporte' }}
+    </button>
+  </article>
+
+  @if (reportType !== 'communities') {
+    <section class="filters-card" aria-label="Filtros del reporte">
+      @if (optionsLoading()) { <p role="status">Cargando filtros…</p> }
+      @if (optionsError()) { <p role="alert">{{ optionsError() }}</p><button class="secondary" (click)="loadOptions()">Reintentar filtros</button> }
+      <fieldset [disabled]="generating() || optionsLoading() || !!optionsError()">
+        <legend>Seleccionar datos</legend>
+        <label>Sensor<select aria-label="Sensor" [(ngModel)]="filters.sensorId"><option [ngValue]="undefined">Todos los sensores</option>
+          @for (sensor of sensors(); track sensor.sensorId) { <option [ngValue]="sensor.sensorId">{{ sensor.name }}</option> }
+        </select></label>
+        <label>Comunidad<select [(ngModel)]="filters.communityId"><option [ngValue]="undefined">Todas las comunidades</option>
+          @for (community of communities(); track community.communityId) { <option [ngValue]="community.communityId">{{ community.name }}</option> }
+        </select></label>
+        <label>Tipo de sensor<select [(ngModel)]="filters.sensorTypeId"><option [ngValue]="undefined">Todos los tipos</option>
+          @for (type of types(); track type.sensorTypeId) { <option [ngValue]="type.sensorTypeId">{{ type.code }} ({{ type.unit }})</option> }
+        </select></label>
+        <label>Estado del sensor<select [(ngModel)]="filters.isActive"><option [ngValue]="undefined">Todos</option>
+          <option [ngValue]="true">Activo</option><option [ngValue]="false">Inactivo</option>
+        </select></label>
+        @if (reportType !== 'sensors' && reportType !== 'sensor_status') {
+          <label>Desde (hora local)<input type="datetime-local" [(ngModel)]="startDate"></label>
+          <label>Hasta (hora local)<input type="datetime-local" [(ngModel)]="endDate"></label>
+          <label>Evaluación<select [(ngModel)]="filters.evaluationStatus"><option [ngValue]="undefined">Todas</option>
+            <option value="delivered">Evaluación entregada</option><option value="pending">Pendiente de evaluación</option><option value="unrecorded">Sin evaluación registrada</option>
+          </select></label>
+        }
+      </fieldset>
+      <p>Los filtros se combinan. Las fechas del PDF se expresan en UTC. Un resultado vacío se informa sin crear mediciones.</p>
+      @if (reportType === 'alerts' || reportType === 'events' || reportType === 'executive') {
+        <label>Estado de alerta<select aria-label="Estado de alerta" [(ngModel)]="filters.alertStatus"><option [ngValue]="undefined">Todos</option><option value="ACTIVA">Activa</option><option value="RESUELTA">Resuelta</option></select></label>
+        <label>Nivel<select aria-label="Nivel de alerta" [(ngModel)]="filters.severity"><option [ngValue]="undefined">Todos</option><option>VERDE</option><option>AMARILLO</option><option>NARANJA</option><option>ROJO</option></select></label>
+        <label>Fenómeno<select aria-label="Fenómeno" [(ngModel)]="filters.phenomenon"><option [ngValue]="undefined">Todos</option><option>INUNDACION</option><option>SEQUIA</option><option>TORMENTA</option><option>HELADA</option><option>INCENDIO_FORESTAL</option><option>SISTEMA</option></select></label>
+      }
+      @if (reportType === 'sensor_status') { <label>Minutos sin lectura reciente<input type="number" min="1" max="525600" [(ngModel)]="filters.staleAfterMinutes" placeholder="60"></label> }
+      @if (reportType === 'climate_statistics' || reportType === 'executive') {
+        <label>Semántica del pluviómetro (declarada por su responsable)<select aria-label="Semántica de lluvia" [(ngModel)]="filters.accumulationMode"><option [ngValue]="undefined">No declarada: no calcular acumulado</option><option value="increments">Cantidad por intervalo: sumar incrementos</option><option value="counter">Contador acumulado: diferencia entre primera y última</option></select></label>
+        <p>No selecciones una interpretación sin conocer el firmware. No se estiman reinicios de contador ni datos ausentes.</p>
+      }
+      @if (reportType === 'readings') { <p>El estado indica la entrega registrada al servicio de alertas; no clasifica retrospectivamente el riesgo. Máximo 20 000 lecturas por PDF.</p> }
+    </section>
+  }
+
+  @if (actionError()) { <div class="notice error" role="alert">{{ actionError() }}</div> }
+  @if (success()) { <div class="notice success" role="status">{{ success() }}</div> }
+
+  <section class="history-card" aria-labelledby="history-title" [attr.aria-busy]="loading()">
+    <header class="history-heading">
+      <div><h2 id="history-title">Historial de reportes</h2><p>{{ total() }} registros · fechas en UTC</p></div>
+      <button class="secondary" (click)="load()" [disabled]="loading() || generating()">{{ loading() ? 'Actualizando…' : 'Actualizar' }}</button>
+    </header>
+    <div class="history-controls"><label>Tipo en historial
+      <select [(ngModel)]="historyType" (ngModelChange)="changeHistory()" [disabled]="loading() || generating()">
+        <option value="">Todos</option><option value="communities">Comunidades</option><option value="sensors">Sensores</option><option value="readings">Lecturas</option><option value="alerts">Alertas</option><option value="events">Historial de fen?menos</option><option value="sensor_status">Estado de sensores</option><option value="climate_statistics">Estad?sticas clim?ticas</option><option value="executive">Resumen ejecutivo</option>
+      </select></label>
+      <button class="secondary" (click)="page(-1)" [disabled]="loading() || generating() || offset() === 0">Anterior</button>
+      <span>{{ total() ? offset() + 1 : 0 }}–{{ offset() + reports().length }} de {{ total() }}</span>
+      <button class="secondary" (click)="page(1)" [disabled]="loading() || generating() || offset() + 50 >= total()">Siguiente</button>
+    </div>
+    @if (loading()) {
+      <div class="state" role="status"><span class="loader" aria-hidden="true"></span>Consultando reportes…</div>
+    } @else if (historyError()) {
+      <div class="state error" role="alert"><h3>No pudimos cargar el historial</h3><p>{{ historyError() }}</p>
+        <button class="secondary" (click)="load()">Reintentar</button>
+      </div>
+    } @else if (!reports().length) {
+      <div class="state empty"><span class="empty-icon" aria-hidden="true">≡</span><h3>Aún no hay reportes</h3><p>Genera un reporte para verlo aquí.</p></div>
+    } @else {
+      <div class="table-scroll"><table>
+        <caption class="sr-only">Últimos reportes generados, del más reciente al más antiguo</caption>
+        <thead><tr><th scope="col">Documento</th><th scope="col">Fecha de creación (UTC)</th><th scope="col">Estado</th><th scope="col">Archivo</th></tr></thead>
+        <tbody>
+          @for (report of reports(); track report._id) {
+            <tr><td><strong>{{ report.file_name || 'Archivo aún no disponible' }}</strong><span class="report-type">{{ typeLabel(report.report_type) }}</span><span class="report-parameters">{{ parametersLabel(report.parameters) }}</span>@if (report.row_count !== undefined) { <span class="report-type">{{ report.row_count }} filas</span> }</td>
+              <td>{{ report.created_at | date:'dd/MM/yyyy · HH:mm:ss':'UTC' }}</td>
+              <td><span class="status" [class]="'status ' + report.status">{{ statusLabel(report.status) }}</span></td>
+              <td>@if (canDownload(report)) {
+                <button class="download" (click)="download(report)" [disabled]="downloading().has(report._id)" [attr.aria-label]="'Descargar ' + report.file_name">
+                  {{ downloading().has(report._id) ? 'Descargando…' : 'Descargar PDF' }}
+                </button>
+              } @else { <span class="unavailable">No disponible</span> }</td>
+            </tr>
+          }
+        </tbody>
+      </table></div>
+    }
+  </section>
+  <p class="scope-note">Historial persistido en el servicio de reportes. Los PDF conservan los datos consultados al generarlos.</p>
+</section>

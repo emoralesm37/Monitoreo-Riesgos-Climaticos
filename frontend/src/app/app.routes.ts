@@ -4,6 +4,7 @@ import { authGuard } from './core/guards/auth-guard';
 import { roleGuard } from './core/guards/role-guard';
 
 export const routes: Routes = [
+  {path:'oauth/callback',loadComponent:()=>import('./features/login/oauth-callback').then(m=>m.OAuthCallback)},
   {
     path: 'login',
     loadComponent: () =>
@@ -20,6 +21,13 @@ export const routes: Routes = [
     canActivate: [authGuard],
 
     children: [
+      {path:'cuenta',loadComponent:()=>import('./features/login/linked-accounts').then(m=>m.LinkedAccounts)},
+      {
+        path: 'reportes',
+        canActivate: [roleGuard],
+        data: { roles: ['Administrador'] },
+        loadComponent: () => import('./features/reportes/reportes').then(m => m.Reportes)
+      },
       {
         path: '',
         redirectTo: 'dashboard',
@@ -65,6 +73,12 @@ export const routes: Routes = [
 
       {
         path: 'historial',
+        canActivate: [roleGuard],
+        data: { roles: ['Administrador'] },
+        loadComponent: () => import('./features/auditoria/auditoria').then(m => m.Auditoria)
+      },
+      {
+        path: 'historial-alertas',
         loadComponent: () =>
           import('./features/historial/historial')
             .then(m => m.Historial)

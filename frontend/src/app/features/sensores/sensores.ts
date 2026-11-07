@@ -1,9 +1,9 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { forkJoin } from 'rxjs';
-import { SensoresService, Sensor, SensorCommunity, SensorType } from '../../core/services/sensores';
+import { forkJoin, Subscription } from 'rxjs';
+import { SensoresService, Sensor, SensorCommunity, SensorType, SensorReading } from '../../core/services/sensores';
 import { Auth } from '../../core/services/auth';
 
 @Component({
@@ -12,7 +12,13 @@ import { Auth } from '../../core/services/auth';
   styleUrl: './sensores.scss',
   templateUrl: './sensores.html',
 })
-export class Sensores implements OnInit {
+export class Sensores implements OnInit, OnDestroy {
+  selectedSensor: Sensor | null = null;
+  readings: SensorReading[] = [];
+  readingsLoading = false;
+  readingsError = '';
+  private readingsRequest?: Subscription;
+  retryingReadings = new Set<number>();
   sensores: Sensor[] = [];
   communities: SensorCommunity[] = [];
   sensorTypes: SensorType[] = [];
@@ -40,6 +46,52 @@ export class Sensores implements OnInit {
 
   ngOnInit(): void {
     this.load();
+  }
+
+  ngOnDestroy(): void {
+    this.readingsRequest?.unsubscribe();
+  }
+
+  viewReadings(sensor: Sensor): void {
+    this.selectedSensor = sensor;
+    this.refreshReadings();
+  }
+
+  refreshReadings(): void {
+    if (!this.selectedSensor) return;
+    this.readingsRequest?.unsubscribe();
+    this.readings = [];
+    this.readingsError = '';
+    this.readingsLoading = true;
+    this.readingsRequest = this.sensoresService.getReadings(this.selectedSensor.sensorId).subscribe({
+      next: readings => {
+        this.readings = [...readings].sort((a, b) =>
+          Date.parse(b.timestamp) - Date.parse(a.timestamp) || b.sensorReadingId - a.sensorReadingId);
+        this.readingsLoading = false;
+        this.cdr.markForCheck();
+      },
+      error: error => {
+        this.readingsError = this.errorMessage(error, 'No se pudieron cargar las lecturas.');
+        this.readingsLoading = false;
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  retryReadingEvaluation(reading: SensorReading) {
+    if (!this.canManage || this.retryingReadings.has(reading.sensorReadingId)) return;
+    this.retryingReadings.add(reading.sensorReadingId);
+    this.sensoresService.retryEvaluation(reading.sensorId, reading.sensorReadingId).subscribe({
+      next: result => {
+        reading.alertEvaluationPending = result.alertEvaluationPending;
+        this.retryingReadings.delete(reading.sensorReadingId);
+        this.cdr.markForCheck();
+      },
+      error: error => {
+        this.readingsError = this.errorMessage(error, 'No se pudo reenviar la lectura.');
+        this.retryingReadings.delete(reading.sensorReadingId); this.cdr.markForCheck();
+      },
+    });
   }
 
   load(): void {
