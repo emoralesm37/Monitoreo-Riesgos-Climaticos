@@ -1,0 +1,108 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Reporte de Lecturas - ClimateGuard</title>
+
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 15mm;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 10px;
+            color: #263238;
+        }
+
+        h1 {
+            color: #1565c0;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            color: #607d8b;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+        th, td {
+            border: 1px solid #cfd8dc;
+            padding: 6px;
+            text-align: left;
+            overflow-wrap: anywhere;
+        }
+
+        th {
+            background-color: #1565c0;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #eceff1;
+        }
+
+        .footer {
+            margin-top: 25px;
+            font-size: 9px;
+            color: #607d8b;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>ClimateGuard</h1>
+
+    <div class="subtitle">
+        Reporte de Lecturas
+        <p>Fecha de generación: {{ generated_at }}</p>
+        <p>Filtros: {% for key, value in parameters.items() %}{{ key }}={{ value }} {% else %}Todos{% endfor %}</p>
+        <p>Total de lecturas: {{ readings | length }}</p>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Sensor</th>
+                <th>Comunidad</th>
+                <th>Fecha UTC</th>
+                <th>Hora UTC</th>
+                <th>Valor</th>
+                <th>Unidad</th>
+                <th>Evaluación registrada</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for reading in readings %}
+            <tr>
+                <td>{{ reading.sensorName }}</td>
+                <td>{{ reading.communityName }}</td>
+                <td>{{ reading.date }}</td>
+                <td>{{ reading.time }}</td>
+                <td>{{ reading.value }}</td>
+                <td>{{ reading.unit }}</td>
+                <td>{{ reading.status }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7">
+                    No hay lecturas disponibles para los filtros seleccionados.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="footer">
+        Documento generado con lecturas persistidas. Evaluación entregada confirma la entrega al servicio de alertas; no representa una clasificación histórica Normal/Crítico.
+    </div>
+</body>
+</html>

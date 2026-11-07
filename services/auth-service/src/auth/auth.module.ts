@@ -1,3 +1,6 @@
+import { OAuthController } from './oauth/oauth.controller';
+import { OAuthService } from './oauth/oauth.service';
+import { OAuthProviderService } from './oauth/oauth-provider.service';
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
@@ -18,17 +21,14 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     JwtModule.register({}),
   ],
   providers: [
+    OAuthService,
+    OAuthProviderService,
     AuthService,
     JwtStrategy,
     JwtAuthGuard,
     RolesGuard,
   ],
-  controllers: [AuthController],
-  exports: [
-    AuthService,
-    JwtModule,
-    JwtAuthGuard,
-    RolesGuard,
-  ],
+  controllers: [AuthController, OAuthController],
+  exports: [AuthService, JwtModule, JwtAuthGuard, RolesGuard],
 })
 export class AuthModule {}

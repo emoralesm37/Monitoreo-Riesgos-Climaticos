@@ -1,0 +1,8 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><title>{{ title }} — ClimateGuard</title>
+<style>@page{size:A4 landscape;margin:16mm;@bottom-right{content:"Página " counter(page) " de " counter(pages)}}body{font:10px sans-serif;color:#17334a}h1{font-size:24px}table{width:100%;border-collapse:collapse;table-layout:fixed}th,td{border:1px solid #b6c4ce;padding:5px;overflow-wrap:anywhere}th{background:#174b68;color:white}thead{display:table-header-group}tr{break-inside:avoid}.note{font-size:9px;color:#40596c}footer{margin-top:12px}</style></head><body>
+<h1>◈ ClimateGuard</h1><h2>{{ title }}</h2><p>Generado: {{ generated_at }} · Usuario: {{ user_id }}</p>
+<p>Filtros: {% for key,value in parameters.items() %}{{ key }}={{ value }}; {% else %}Todos{% endfor %}</p>
+{% for note in notes %}<p class="note">{{ note }}</p>{% endfor %}
+<table><thead><tr>{% for column in columns %}<th>{{ column }}</th>{% endfor %}</tr></thead><tbody>
+{% for row in rows %}<tr>{% for column in columns %}<td>{{ row.get(column) if row.get(column) is not none else 'No informado' }}</td>{% endfor %}</tr>{% else %}<tr><td colspan="{{ columns|length }}">Sin registros para los filtros seleccionados.</td></tr>{% endfor %}
+</tbody></table><footer>Datos persistidos consultados por API. ClimateGuard · {{ rows|length }} filas.</footer></body></html>

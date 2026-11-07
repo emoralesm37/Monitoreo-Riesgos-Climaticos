@@ -14,6 +14,8 @@ import { User } from '../users/entities/user.entity';
 import { LoginRequestDto } from './dto/login-request.dto';
 import { LoginResponseDto } from './dto/login-response.dto';
 import { RefreshToken } from './entities/refresh-token.entity';
+import { permissionsForRole } from './permissions';
+import type { ExternalProvider } from './interfaces/external-profile.interface';
 
 interface RefreshTokenPayload {
   sub: string;
@@ -21,6 +23,7 @@ interface RefreshTokenPayload {
   name: string;
   role: string;
   type: string;
+  provider?: ExternalProvider | 'local';
 }
 
 @Injectable()
@@ -61,6 +64,7 @@ export class AuthService {
       );
     }
 
+    if (!user.passwordHash) throw new UnauthorizedException('Credenciales no validas.');
     const passwordIsValid = await bcrypt.compare(
       request.password,
       user.passwordHash,
@@ -97,6 +101,7 @@ export class AuthService {
               ),
             issuer,
             audience,
+            algorithms: ['HS256'],
           },
         );
     } catch {
@@ -114,45 +119,19 @@ export class AuthService {
       );
     }
 
-    const storedToken =
-      await this.refreshTokenRepository.findOne({
-        where: {
-          tokenHash: this.hashToken(refreshToken),
-          revokedAt: IsNull(),
-        },
-        relations: {
-          user: {
-            role: true,
-          },
-        },
-      });
-
-    if (
-      !storedToken ||
-      storedToken.expiresAt <= new Date()
-    ) {
-      throw new UnauthorizedException(
-        'El refresh token no es válido o expiró.',
-      );
-    }
-
-    if (storedToken.user.id !== payload.sub) {
-      throw new UnauthorizedException(
-        'El refresh token no pertenece al usuario.',
-      );
-    }
-
-    if (!storedToken.user.isActive) {
-      throw new ForbiddenException(
-        'El usuario se encuentra inactivo.',
-      );
-    }
-
-    storedToken.revokedAt = new Date();
-
-    await this.refreshTokenRepository.save(storedToken);
-
-    return this.issueTokenPair(storedToken.user);
+    return this.refreshTokenRepository.manager.transaction(async manager => {
+      await manager.query('SELECT pg_advisory_xact_lock($1)', [1128743491]);
+      const tokens = manager.getRepository(RefreshToken);
+      const stored = await tokens.findOne({where:{tokenHash:this.hashToken(refreshToken),revokedAt:IsNull()},lock:{mode:'pessimistic_write'}});
+      if (!stored || stored.expiresAt <= new Date() || stored.userId !== payload.sub)
+        throw new UnauthorizedException('Refresh invalido o expirado.');
+      const user = await manager.getRepository(User).findOne({where:{id:stored.userId},relations:{role:true}});
+      if (!user?.isActive) throw new ForbiddenException('Cuenta inactiva.');
+      stored.revokedAt = new Date(); await tokens.save(stored);
+      if (payload.provider && !['local', 'google', 'github'].includes(payload.provider))
+        throw new UnauthorizedException('Proveedor de sesión no válido.');
+      return this.issueTokenPair(user, tokens, payload.provider ?? 'local');
+    });
   }
 
   async logout(
@@ -177,8 +156,10 @@ export class AuthService {
     };
   }
 
-  private async issueTokenPair(
+  async issueTokenPair(
     user: User,
+    tokens: Repository<RefreshToken> = this.refreshTokenRepository,
+    provider: ExternalProvider | 'local' = 'local',
   ): Promise<LoginResponseDto> {
     const accessTtl = this.getPositiveInteger(
       'JWT_ACCESS_TTL_SECONDS',
@@ -199,6 +180,9 @@ export class AuthService {
       email: user.email,
       name: user.name,
       role: user.role.name,
+      roles: [user.role.name],
+      permissions: permissionsForRole(user.role.name),
+      provider,
     };
 
     const accessToken = await this.jwtService.signAsync(
@@ -233,7 +217,7 @@ export class AuthService {
     );
 
     const refreshTokenEntity =
-      this.refreshTokenRepository.create({
+      tokens.create({
         tokenHash: this.hashToken(refreshToken),
         userId: user.id,
         expiresAt: new Date(
@@ -242,7 +226,7 @@ export class AuthService {
         revokedAt: null,
       });
 
-    await this.refreshTokenRepository.save(
+    await tokens.save(
       refreshTokenEntity,
     );
 

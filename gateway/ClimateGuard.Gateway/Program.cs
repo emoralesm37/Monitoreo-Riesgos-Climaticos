@@ -42,6 +42,10 @@ builder.Services
 
 builder.Services.AddAuthorization(options =>
 {
+    options.AddPolicy("Administrators", policy => policy
+        .RequireAuthenticatedUser()
+        .RequireRole("Administrador"));
+
     options.FallbackPolicy = new AuthorizationPolicyBuilder()
         .RequireAuthenticatedUser()
         .Build();
@@ -57,7 +61,8 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins(allowedOrigins)
             .AllowAnyHeader()
-            .AllowAnyMethod();
+            .AllowAnyMethod()
+            .AllowCredentials();
     });
 });
 
@@ -68,7 +73,7 @@ builder.Services.AddRateLimiter(options =>
     options.GlobalLimiter =
         PartitionedRateLimiter.Create<HttpContext, string>(context =>
         {
-            if (context.Request.Path == "/health")
+            if (context.Request.Path.StartsWithSegments("/health"))
             {
                 return RateLimitPartition.GetNoLimiter("health");
             }
@@ -111,8 +116,24 @@ builder.Services
         builder.Configuration.GetSection("ReverseProxy"));
 
 builder.Services.AddHealthChecks();
+builder.Services.AddSingleton<AuditDelivery>();
+builder.Services.AddHostedService(provider => provider.GetRequiredService<AuditDelivery>());
 
 var app = builder.Build();
+
+// Temporary write barrier for the reviewed Community/PostgreSQL cutover.
+app.Use(async (context, next) =>
+{
+    if (app.Configuration.GetValue<bool>("Community:MigrationReadOnly") &&
+        context.Request.Path.StartsWithSegments("/api/communities") &&
+        !HttpMethods.IsGet(context.Request.Method) && !HttpMethods.IsHead(context.Request.Method))
+    {
+        context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+        await context.Response.WriteAsJsonAsync(new { message = "Comunidades en migración controlada. Reintenta en unos momentos." });
+        return;
+    }
+    await next(context);
+});
 
 // Registra método, ruta, estado y duración. No registra tokens ni cuerpos.
 app.Use(async (context, next) =>
@@ -178,6 +199,7 @@ app.UseRouting();
 app.UseCors("Frontend");
 app.UseRateLimiter();
 app.UseAuthentication();
+app.Use((context, next) => context.RequestServices.GetRequiredService<AuditDelivery>().Record(context, next));
 app.UseAuthorization();
 
 if (app.Environment.IsDevelopment())
@@ -196,6 +218,9 @@ if (app.Environment.IsDevelopment())
 app.MapHealthChecks("/health")
     .AllowAnonymous();
 
+GatewayHosting.MapClusterReadiness(app);
 app.MapReverseProxy();
 
 app.Run();
+
+public partial class Program { }

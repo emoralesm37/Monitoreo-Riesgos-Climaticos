@@ -44,10 +44,14 @@ public static class DependencyInjection
                 });
         });
         services.AddScoped<ISensorService, SensorService>();
+        services.AddHttpContextAccessor();
+        services.AddHttpClient("CommunityDirectory", client => client.Timeout = TimeSpan.FromSeconds(10));
+        services.AddScoped<CommunityDirectory>();
+        services.AddHttpClient("AlertDelivery", client => client.Timeout = TimeSpan.FromSeconds(10));
+        services.AddScoped<ReadingAlertDispatcher>();
         services.AddScoped<ICommunityService, CommunityService>();
         services.AddScoped<IAlertRuleService, AlertRuleService>();
-        services.AddScoped<IAlertEvaluationService, AlertEvaluationService>();
-        services.AddScoped<IAlertGenerationService, AlertGenerationService>();
+        // Alert Service is the sole evaluator/persistence owner; no SQL evaluator is registered.
         services.AddScoped<ICatalogService, CatalogService>();
         services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
         services.AddScoped<IAuthService, AuthService>();

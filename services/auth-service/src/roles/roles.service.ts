@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 
 import { RoleResponseDto } from './dto/role-response.dto';
 import { Role } from './entities/role.entity';
+import { authPermissions } from './auth-permissions';
 
 @Injectable()
 export class RolesService {
@@ -23,6 +24,8 @@ export class RolesService {
       id: role.id,
       name: role.name,
       description: role.description,
+      permissions: authPermissions.filter(p => (p.roles as readonly string[]).includes(role.name))
+        .map(({ method, path, label }) => ({ method, path, label })),
     }));
   }
 }

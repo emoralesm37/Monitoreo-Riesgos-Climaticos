@@ -1,14 +1,28 @@
+using System.Text;
+using ClimateGuard.Api.Exceptions;
+using ClimateGuard.Infrastructure;
+using ClimateGuard.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.IdentityModel.Tokens;
 using ClimateGuard.Sensor.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using ClimateGuard.Sensor.Api.Endpoints;
-using System.Text;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Configuración de OpenAPI
 builder.Services.AddOpenApi();
+
+// Shared mode preserves existing contracts and alert transactions during migration.
+var sharedDatabase = builder.Configuration.GetValue<bool>("Sensor:UseSharedDatabase");
+if (sharedDatabase)
+{
+    builder.Services.AddInfrastructure(builder.Configuration);
+    builder.Services.AddControllers();
+    builder.Services.AddProblemDetails();
+    builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+}
 
 // Configuración JWT compatible con Auth Service y Gateway
 var jwtKey = builder.Configuration["Jwt:Key"]
@@ -53,6 +67,8 @@ builder.Services.AddAuthorization(options =>
 });
 
 // Configuración de SQL Server
+if (!sharedDatabase)
+{
 var connectionString = builder.Configuration
     .GetConnectionString("SensorDatabase");
 
@@ -65,6 +81,8 @@ if (string.IsNullOrWhiteSpace(connectionString))
 builder.Services.AddDbContext<SensorDbContext>(options =>
     options.UseSqlServer(connectionString));
 
+}
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -72,7 +90,15 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.UseHttpsRedirection();
+// Preserve proxy-terminated TLS in shared mode and HTTPS redirection in standalone mode.
+if (sharedDatabase)
+{
+    app.UseExceptionHandler();
+}
+else
+{
+    app.UseHttpsRedirection();
+}
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -86,33 +112,34 @@ app.MapGet("/health", () =>
     });
 }).AllowAnonymous();
 
+
+if (sharedDatabase)
+{
+    app.MapGet("/health/database", async (AppDbContext db, CancellationToken ct) =>
+    {
+        try
+        {
+            return await db.Database.CanConnectAsync(ct)
+                ? (IResult)Results.Ok(new { service = "ClimateGuard.Sensor", status = "Connected", mode = "shared-database" })
+                : Results.StatusCode(503);
+        }
+        catch { return Results.StatusCode(503); }
+    }).AllowAnonymous();
+    app.MapControllers();
+}
+else
+{
     app.MapGet("/health/database", async (SensorDbContext db) =>
     {
         try
         {
-            var connected = await db.Database.CanConnectAsync();
-
-            if (!connected)
-            {
-                return Results.Problem(
-                    "No se pudo establecer conexión con SensorDatabase.",
-                statusCode: 503);
-            }
-
-            return Results.Ok(new
-            {
-                service = "ClimateGuard.Sensor",
-                database = "ClimateGuardSensorDb",
-                status = "Connected"
-            });
+            return await db.Database.CanConnectAsync()
+                ? (IResult)Results.Ok(new { service = "ClimateGuard.Sensor", database = "ClimateGuardSensorDb", status = "Connected" })
+                : Results.StatusCode(503);
         }
-        catch
-        {
-            return Results.Problem(
-                "Error al verificar la conexión con SQL Server.",
-                statusCode: 503);
-        }
+        catch { return Results.StatusCode(503); }
     }).AllowAnonymous();
     app.MapSensorEndpoints();
+}
 app.Run();
 public partial class Program { }

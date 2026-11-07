@@ -1,0 +1,28 @@
+name: climateguard-alerts-integrated
+services:
+  alert-service:
+    build: .
+    image: climateguard-alert-service:local
+    ports:
+      - "127.0.0.1:7301:7301"
+    environment:
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?JWT local requerido}
+      JWT_ISSUER: ${JWT_ISSUER:?JWT issuer requerido}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:?JWT audience requerido}
+      SPRING_DATASOURCE_URL: ${ALERT_DB_URL:?Conexion PostgreSQL local existente requerida}
+      SPRING_DATASOURCE_USERNAME: ${ALERT_DB_USER:?Usuario PostgreSQL existente requerido}
+      SPRING_DATASOURCE_PASSWORD: ${ALERT_DB_PASSWORD:?Password PostgreSQL existente requerido}
+      ALERT_RULES_URL: http://host.docker.internal:5147/api/alert-rules/evaluation
+    networks: [alerts-db, app]
+    healthcheck:
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/7301; printf 'GET /actuator/health HTTP/1.0\r\n\r\n' >&3; grep -q UP <&3"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+networks:
+  app:
+    driver: bridge
+  alerts-db:
+    external: true
+    name: cg-alertval-a60ba22_isolated

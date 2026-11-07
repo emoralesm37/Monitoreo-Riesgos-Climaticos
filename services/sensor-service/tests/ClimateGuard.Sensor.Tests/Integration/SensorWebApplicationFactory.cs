@@ -24,6 +24,8 @@ public sealed class SensorWebApplicationFactory
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Development");
+        // This fixture exercises the independent API with SQLite, not shared mode.
+        builder.UseSetting("Sensor:UseSharedDatabase", "false");
 
         builder.UseSetting("ConnectionStrings:SensorDatabase", "Server=localhost;Database=TestOnly;");
 

@@ -1,4 +1,4 @@
-﻿using ClimateGuard.Sensor.Application.Validation;
+using ClimateGuard.Sensor.Application.Validation;
 
 namespace ClimateGuard.Sensor.Tests;
 

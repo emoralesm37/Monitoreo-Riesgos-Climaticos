@@ -1,0 +1,16 @@
+# Only application sources and dependency declarations belong in the build context.
+**
+!requirements.txt
+!app/
+!app/*.py
+!app/templates/
+!app/templates/*.html
+app/**/__pycache__/
+app/**/*.pyc
+app/generated/
+app/**/.env
+app/**/.env.*
+app/**/*.pem
+app/**/*.key
+app/**/*.pfx
+app/**/tests/

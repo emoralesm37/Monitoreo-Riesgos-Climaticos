@@ -1,0 +1,42 @@
+name: climateguard-reports-local
+
+services:
+  report-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: climateguard-report-service:local
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      # Override the Windows-host defaults deliberately. No root/audit credentials.
+      MONGO_HOST: climateguard-mongodb
+      MONGO_PORT: "27017"
+      MONGO_DATABASE: ClimateGuardReports
+      MONGO_REPORT_USERNAME: ${MONGO_REPORT_USERNAME:?Falta MONGO_REPORT_USERNAME}
+      MONGO_REPORT_PASSWORD: ${MONGO_REPORT_PASSWORD:?Falta MONGO_REPORT_PASSWORD}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?Falta JWT_ACCESS_SECRET}
+      JWT_ISSUER: ${JWT_ISSUER:?Falta JWT_ISSUER}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:?Falta JWT_AUDIENCE}
+      # The client appends /api/communities. Windows Gateway remains on port 5147.
+      COMMUNITY_SERVICE_URL: http://host.docker.internal:5147
+      SENSOR_SERVICE_URL: http://host.docker.internal:5147
+    volumes:
+      - report_pdfs:/opt/climateguard/services/report-service/app/generated
+    networks:
+      - mongodb
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=5).close()"]
+      interval: 20s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+volumes:
+  report_pdfs:
+    name: climateguard-report-pdfs-local
+
+networks:
+  mongodb:
+    external: true
+    name: climateguard-mongodb-network

@@ -11,6 +11,15 @@ namespace ClimateGuard.Api.Controllers;
 public sealed class SensorsController(
     ISensorService sensorService) : ControllerBase
 {
+    [HttpGet("community-counts")]
+    public async Task<IActionResult> CommunityCounts(
+        [FromServices] ClimateGuard.Infrastructure.Persistence.AppDbContext db, CancellationToken ct)
+    {
+        var rows = await Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync(
+            System.Linq.Queryable.Select(System.Linq.Queryable.GroupBy(db.Sensors, s => s.CommunityId),
+                g => new { CommunityId = g.Key, Count = g.Count() }), ct);
+        return Ok(rows.ToDictionary(x => x.CommunityId, x => x.Count));
+    }
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<SensorDto>>>
         GetAll(CancellationToken cancellationToken)

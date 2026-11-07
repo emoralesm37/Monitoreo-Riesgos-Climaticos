@@ -1,3 +1,6 @@
+import { databaseSchema } from './schema';
+import { ExternalAccount } from '../auth/entities/external-account.entity';
+import { OAuthFlow } from '../auth/oauth/oauth-flow.entity';
 import 'reflect-metadata';
 import { config } from 'dotenv';
 import { DataSource } from 'typeorm';
@@ -26,13 +29,15 @@ for (const variable of requiredVariables) {
 
 export default new DataSource({
   type: 'postgres',
+  schema: databaseSchema(process.env.DB_SCHEMA),
+  extra: {options: '-c search_path='+databaseSchema(process.env.DB_SCHEMA)+',public'},
   host: process.env.DB_HOST,
   port: Number(process.env.DB_PORT),
   database: process.env.DB_NAME,
   username: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
 
-  entities: [User, Role, RefreshToken],
+  entities: [User, Role, RefreshToken, ExternalAccount, OAuthFlow],
 
   migrations: [
     `${__dirname}/migrations/*{.ts,.js}`,

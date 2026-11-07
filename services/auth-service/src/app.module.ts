@@ -1,3 +1,6 @@
+import { databaseSchema } from './database/schema';
+import { ExternalAccount } from './auth/entities/external-account.entity';
+import { OAuthFlow } from './auth/oauth/oauth-flow.entity';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -22,6 +25,8 @@ import { DatabaseModule } from './database/database.module';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
+        schema: databaseSchema(configService.get<string>('DB_SCHEMA')),
+        extra: {options: '-c search_path='+databaseSchema(configService.get<string>('DB_SCHEMA'))+',public'},
         host: configService.getOrThrow<string>('DB_HOST'),
         port: Number(
           configService.getOrThrow<string>('DB_PORT'),
@@ -33,7 +38,7 @@ import { DatabaseModule } from './database/database.module';
         password:
           configService.getOrThrow<string>('DB_PASSWORD'),
 
-        entities: [User, Role, RefreshToken],
+        entities: [User, Role, RefreshToken, ExternalAccount, OAuthFlow],
 
         synchronize: false,
         migrationsRun: false,
