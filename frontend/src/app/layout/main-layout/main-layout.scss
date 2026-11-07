@@ -31,4 +31,80 @@ app-sidebar {
   app-sidebar {
     width: 100%;
   }
+}/* Notificaciones automáticas ClimateGuard */
+.cg-alert-toast {
+  position: fixed;
+  top: 85px;
+  right: 22px;
+  z-index: 99999;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: min(410px, calc(100vw - 32px));
+  padding: 18px;
+  border-left: 6px solid #f97316;
+  border-radius: 12px;
+  background: #fff;
+  color: #17364a;
+  box-shadow: 0 10px 35px rgba(0,0,0,.22);
+  animation: cg-toast-in .3s ease-out;
+}
+.cg-alert-toast.cg-alert-red {
+  border-left-color: #dc2626;
+}
+.cg-alert-icon {
+  color: #ea580c;
+  font-size: 28px;
+  line-height: 1;
+}
+.cg-alert-red .cg-alert-icon {
+  color: #dc2626;
+}
+.cg-alert-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.cg-alert-info strong {
+  font-size: 16px;
+}
+.cg-alert-level {
+  font-size: 12px;
+  font-weight: 800;
+  color: #c2410c;
+}
+.cg-alert-info p {
+  margin: 3px 0;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+.cg-alert-info small {
+  color: #64748b;
+  font-size: 12px;
+}
+.cg-alert-info a {
+  margin-top: 7px;
+  color: #0369a1;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: underline;
+}
+.cg-alert-close {
+  border: 0;
+  background: transparent;
+  color: #64748b;
+  font-size: 23px;
+  cursor: pointer;
+}
+@keyframes cg-toast-in {
+  from { opacity: 0; transform: translateX(30px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@media (max-width: 600px) {
+  .cg-alert-toast {
+    top: 70px;
+    right: 16px;
+  }
 }

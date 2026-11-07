@@ -1,9 +1,39 @@
 <app-header></app-header>
-
 <div class="layout-body">
   <app-sidebar></app-sidebar>
-
   <main class="layout-content">
     <router-outlet></router-outlet>
   </main>
 </div>
+@if (aviso; as alerta) {
+  <div
+    class="cg-alert-toast"
+    [class.cg-alert-red]="alerta.severity === 'ROJO'"
+    role="alert"
+    aria-live="assertive"
+  >
+    <div class="cg-alert-icon">⚠</div>
+    <div class="cg-alert-info">
+      <strong>¡Nueva alerta climática!</strong>
+      <span class="cg-alert-level">
+        {{ alerta.severity }} · {{ alerta.phenomenon || 'RIESGO' }}
+      </span>
+      <p>{{ alerta.message }}</p>
+      <small>
+        {{ alerta.sensorName || 'Sensor climático' }}
+        @if (alerta.triggerValue !== null) {
+          · {{ alerta.triggerValue }} {{ alerta.unit || '' }}
+        }
+      </small>
+      <a routerLink="/alertas" (click)="cerrarAviso()">
+        Ver alerta
+      </a>
+    </div>
+    <button
+      type="button"
+      class="cg-alert-close"
+      aria-label="Cerrar notificación"
+      (click)="cerrarAviso()"
+    >×</button>
+  </div>
+}
