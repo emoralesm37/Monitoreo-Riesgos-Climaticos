@@ -1,0 +1,40 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: redirect-https
+  namespace: climateguard
+spec:
+  redirectScheme:
+    scheme: https
+    permanent: true
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+    traefik.ingress.kubernetes.io/router.middlewares: climateguard-redirect-https@kubernetescrd
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: public-http
+  namespace: climateguard
+spec:
+  ingressClassName: traefik
+  rules:
+  - host: climateguard.garher.lat
+    http:
+      paths:
+      - backend:
+          service:
+            name: gateway
+            port:
+              number: 8080
+        path: /api
+        pathType: Prefix
+      - backend:
+          service:
+            name: frontend
+            port:
+              number: 8080
+        path: /
+        pathType: Prefix

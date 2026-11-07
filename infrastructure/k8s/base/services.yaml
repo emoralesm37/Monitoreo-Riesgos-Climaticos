@@ -1,0 +1,127 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: frontend
+    app.kubernetes.io/part-of: climateguard
+  ports:
+  - name: http
+    port: 8080
+    targetPort: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gateway
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: gateway
+    app.kubernetes.io/part-of: climateguard
+  ports:
+  - name: http
+    port: 8080
+    targetPort: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-service
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: auth-service
+    app.kubernetes.io/part-of: climateguard
+  ports:
+  - name: http
+    port: 7101
+    targetPort: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: legacy-api
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: legacy-api
+    app.kubernetes.io/part-of: climateguard
+  ports:
+  - name: http
+    port: 8080
+    targetPort: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sensor-service
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: sensor-service
+    app.kubernetes.io/part-of: climateguard
+  ports:
+  - name: http
+    port: 8080
+    targetPort: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: alert-service
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: alert-service
+    app.kubernetes.io/part-of: climateguard
+  ports:
+  - name: http
+    port: 7301
+    targetPort: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: report-service
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: report-service
+    app.kubernetes.io/part-of: climateguard
+  ports:
+  - name: http
+    port: 8000
+    targetPort: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: audit-service
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: audit-service
+    app.kubernetes.io/part-of: climateguard
+  ports:
+  - name: http
+    port: 8001
+    targetPort: http

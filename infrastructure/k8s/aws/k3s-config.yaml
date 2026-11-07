@@ -1,0 +1,11 @@
+# Proposed native EC2 configuration. NOT installed. New mounted data volume required.
+# Keep SG 6443/10250/8472 private; administer via SSH/SSM tunnel.
+write-kubeconfig-mode: '0600'
+secrets-encryption: true
+default-local-storage-path: /srv/climateguard-v2/pv
+kubelet-arg:
+  - system-reserved=cpu=500m,memory=512Mi
+  - kube-reserved=cpu=500m,memory=1Gi
+  - eviction-hard=memory.available<512Mi,nodefs.available<10%
+# Keep packaged Traefik, CoreDNS, ServiceLB and Metrics Server.
+# ServiceLB needs approved ownership of ports 80/443 before K3s starts.

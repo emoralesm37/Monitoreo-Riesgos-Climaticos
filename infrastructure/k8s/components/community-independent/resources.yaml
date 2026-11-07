@@ -1,0 +1,247 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: community-service
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  replicas: 0
+  revisionHistoryLimit: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: community-service
+      app.kubernetes.io/part-of: climateguard
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: community-service
+        app.kubernetes.io/part-of: climateguard
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1654
+        runAsGroup: 1654
+        fsGroup: 1654
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: community-service
+        image: climateguard/community-service:candidate
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 8080
+        env:
+        - name: ASPNETCORE_ENVIRONMENT
+          value: Production
+        - name: ASPNETCORE_HTTP_PORTS
+          value: '8080'
+        - name: Jwt__AccessSecret
+          valueFrom:
+            secretKeyRef:
+              name: jwt
+              key: access-key
+        - name: Jwt__Issuer
+          valueFrom:
+            configMapKeyRef:
+              name: runtime
+              key: JWT_ISSUER
+        - name: Jwt__Audience
+          valueFrom:
+            configMapKeyRef:
+              name: runtime
+              key: JWT_AUDIENCE
+        - name: ConnectionStrings__CommunityDatabase
+          valueFrom:
+            secretKeyRef:
+              name: community-db
+              key: connection-string
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 1000m
+            memory: 768Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: settings
+          mountPath: /app/appsettings.json
+          subPath: appsettings.json
+          readOnly: true
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: http
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          periodSeconds: 20
+          timeoutSeconds: 5
+          failureThreshold: 3
+        startupProbe:
+          httpGet:
+            path: /health
+            port: http
+          periodSeconds: 5
+          timeoutSeconds: 5
+          failureThreshold: 60
+      volumes:
+      - name: tmp
+        emptyDir:
+          sizeLimit: 256Mi
+      - name: settings
+        configMap:
+          name: dotnet-settings
+      terminationGracePeriodSeconds: 60
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: community-service
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: community-service
+    app.kubernetes.io/part-of: climateguard
+  ports:
+  - name: http
+    port: 8080
+    targetPort: http
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: community-db
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  serviceName: community-db
+  replicas: 0
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: community-db
+      app.kubernetes.io/part-of: climateguard
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: community-db
+        app.kubernetes.io/part-of: climateguard
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        fsGroup: 999
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: community-db
+        image: postgres:17-bookworm
+        ports:
+        - name: db
+          containerPort: 5432
+        env:
+        - name: POSTGRES_USER
+          value: postgres
+        - name: POSTGRES_DB
+          value: postgres
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: community-db-admin
+              key: password
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 1000m
+            memory: 768Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/postgresql/data
+        - name: tmp
+          mountPath: /tmp
+        startupProbe:
+          tcpSocket:
+            port: db
+          periodSeconds: 5
+          failureThreshold: 60
+        livenessProbe:
+          tcpSocket:
+            port: db
+          periodSeconds: 20
+          timeoutSeconds: 5
+        readinessProbe:
+          exec:
+            command:
+            - sh
+            - -ec
+            - PGPASSWORD="$POSTGRES_PASSWORD" psql -h 127.0.0.1 -U postgres -d postgres
+              -tAc "SELECT 1" >/dev/null
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+      volumes:
+      - name: tmp
+        emptyDir:
+          sizeLimit: 256Mi
+      terminationGracePeriodSeconds: 120
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      storageClassName: local-path
+      resources:
+        requests:
+          storage: 20Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: community-db
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  clusterIP: None
+  selector:
+    app.kubernetes.io/name: community-db
+    app.kubernetes.io/part-of: climateguard
+  ports:
+  - name: db
+    port: 5432
+    targetPort: db

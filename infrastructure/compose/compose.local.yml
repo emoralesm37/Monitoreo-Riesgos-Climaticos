@@ -12,6 +12,8 @@ services:
       Jwt__Audience: ${JWT_AUDIENCE:?Falta JWT_AUDIENCE}
       ReverseProxy__Clusters__auth-service__Destinations__primary__Address: http://host.docker.internal:7101/
       ReverseProxy__Clusters__legacy-api__Destinations__primary__Address: http://host.docker.internal:7000/
+      ReverseProxy__Clusters__sensor-service__Destinations__primary__Address: ${SENSOR_SERVICE_URL:-http://host.docker.internal:5026/}
+      ReverseProxy__Clusters__alert-service__Destinations__primary__Address: ${ALERT_SERVICE_URL:-http://host.docker.internal:7301/}
     networks:
       - gateway-network
     restart: unless-stopped

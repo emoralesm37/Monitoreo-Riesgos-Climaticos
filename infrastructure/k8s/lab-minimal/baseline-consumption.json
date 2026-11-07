@@ -1,0 +1,42 @@
+{
+  "measuredAt": "2026-11-06T17:19:48.960Z",
+  "clusterCreated": false,
+  "clusterMemoryMiB": 0,
+  "existingContainers": [
+    {
+      "name": "climateguard-reports-local-report-service-1",
+      "cpu": "0.20%",
+      "memory": "82.73MiB / 6.619GiB"
+    },
+    {
+      "name": "climateguard-audit-local-audit-service-1",
+      "cpu": "31.09%",
+      "memory": "49.86MiB / 6.619GiB"
+    },
+    {
+      "name": "climateguard-alerts-integrated-alert-service-1",
+      "cpu": "0.22%",
+      "memory": "389.8MiB / 6.619GiB"
+    },
+    {
+      "name": "climateguard-mongodb",
+      "cpu": "0.70%",
+      "memory": "94.08MiB / 6.619GiB"
+    },
+    {
+      "name": "cg-alertval-a60ba22-db-1",
+      "cpu": "0.03%",
+      "memory": "83.06MiB / 6.619GiB"
+    },
+    {
+      "name": "climateguard-auth-postgres",
+      "cpu": "0.00%",
+      "memory": "45.57MiB / 6.619GiB"
+    },
+    {
+      "name": "climateguard-sqlserver",
+      "cpu": "1.66%",
+      "memory": "1.083GiB / 6.619GiB"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: public-response-security
+  namespace: climateguard
+spec:
+  headers:
+    contentTypeNosniff: true
+    frameDeny: true
+    referrerPolicy: no-referrer
+    stsSeconds: 86400
+    stsIncludeSubdomains: false
+    stsPreload: false

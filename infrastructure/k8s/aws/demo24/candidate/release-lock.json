@@ -1,0 +1,1832 @@
+{
+  "createdAt": "2026-11-06T18:06:29.454Z",
+  "head": "a244f2caa2c5bdcfd460d56dd8abe2095b12a5ab",
+  "dirtyTree": true,
+  "sourceFingerprint": "f0048fcb2ff219e0903c30027a05e467ed5a95e7c79cf963997be74acb4f45f2",
+  "sourceScope": "Application sources and image/config inputs; excludes credentials, appsettings and generated artifacts. Not a backup of the entire worktree.",
+  "tag": "release-20261106-f0048fcb2ff2",
+  "sources": [
+    {
+      "file": "backend/ClimateGuard.Api/ClimateGuard.Api.csproj",
+      "sha256": "e25a2b21a29d3cd20acdfa711cfcd22ef590bb475cb9cc8214f0ec61f4148310"
+    },
+    {
+      "file": "backend/ClimateGuard.Api/ClimateGuard.Api.http",
+      "sha256": "535fed2438cbeef871470d1a9b9ce963f402ec4acd8ecb65bf47802622fae8e5"
+    },
+    {
+      "file": "backend/ClimateGuard.Api/Controllers/AlertRulesController.cs",
+      "sha256": "35021993ac2e33be43961313f7fba95d2a2eb5bdc81bb9301d7eb89e99148ff8"
+    },
+    {
+      "file": "backend/ClimateGuard.Api/Controllers/AuthController.cs",
+      "sha256": "04b50d68dfbc3595cf04ccd78fd51e67b256fcb798555a1b6809610c9c05002c"
+    },
+    {
+      "file": "backend/ClimateGuard.Api/Controllers/CatalogsController.cs",
+      "sha256": "5c6caceefe6ebed11b9f4fef85c5d0ac22c645d03d3b160baeb1dd509545d9e2"
+    },
+    {
+      "file": "backend/ClimateGuard.Api/Controllers/CommunitiesController.cs",
+      "sha256": "5c7e0628cd668fa95f798d759ca0b4fcaf6829b854f337e5713e21baf6aa52c1"
+    },
+    {
+      "file": "backend/ClimateGuard.Api/Controllers/EvaluationRulesController.cs",
+      "sha256": "96ccff219209d858ddcc83da373b58b9f154132a79f8d89a2028417976522f8c"
+    },
+    {
+      "file": "backend/ClimateGuard.Api/Controllers/ReadingEvaluationsController.cs",
+      "sha256": "e9a156bfff8c5ed5f6949250e8e4e893e412a5d92d69d00f6b742125c3b2b348"
+    },
+    {
+      "file": "backend/ClimateGuard.Api/Controllers/ReadingReportsController.cs",
+      "sha256": "e2b7d2c25c07a2a39e15975060fbfeeef57e5a6571267a82e9f25c0ef46dc8e0"
+    },
+    {
+      "file": "backend/ClimateGuard.Api/Controllers/SensorsController.cs",
+      "sha256": "328055720f2d64ff0c015ecda42f6ae1def726f0518886a4a7c93f6c133949d5"
+    },
+    {
+      "file": "backend/ClimateGuard.Api/Exceptions/GlobalExceptionHandler.cs",
+      "sha256": "6c605fad3c45786be659aac6c336e64b0cb7dd95543c4caef282d07851caad1e"
+    },
+    {
+      "file": "backend/ClimateGuard.Api/OpenApi/BearerSecuritySchemeTransformer.cs",
+      "sha256": "a644f00eb12d6534662d6a29912387dcc072180bc563028562a5f568398e7e02"
+    },
+    {
+      "file": "backend/ClimateGuard.Api/Program.cs",
+      "sha256": "1b9cbc898decee4240cb8eebc23b42165777d6e4596abe6a230d5b553ef34cb7"
+    },
+    {
+      "file": "backend/ClimateGuard.Api/Properties/launchSettings.json",
+      "sha256": "caf6e3e9ad12bf291c072373b582673fb0e4f596397e6a97a52962652f18b48d"
+    },
+    {
+      "file": "backend/ClimateGuard.Application/Abstractions/AlertRules/IAlertRuleService.cs",
+      "sha256": "67a035fb4d33c135a2b14f55ff8d1babf8e2fe1a4dc393a732910fc0fbcd7c8c"
+    },
+    {
+      "file": "backend/ClimateGuard.Application/Abstractions/Alerts/IAlertEvaluationService.cs",
+      "sha256": "c18403309b05cfa3852213fa7d9c04b1f1a829382f053a067cbce1d277aa601d"
+    },
+    {
+      "file": "backend/ClimateGuard.Application/Abstractions/Alerts/IAlertGenerationService.cs",
+      "sha256": "8aba58f3c456d7e914c4871128f0624bf94805fd788880cbeb30d622ee89719f"
+    },
+    {
+      "file": "backend/ClimateGuard.Application/Abstractions/Auth/IAuthService.cs",
+      "sha256": "5e3b8a2a65078689c7b8bd7160954f6060de5da81e3a88a63f15e5f725d4ba16"
+    },
+    {
+      "file": "backend/ClimateGuard.Application/Abstractions/Auth/IJwtTokenService.cs",
+      "sha256": "c3dfed78a6e663cf0404c168d28db64c4f5a08588e24782d9a24c1c4fc7fd4a7"
+    },
+    {
+      "file": "backend/ClimateGuard.Application/Abstractions/Catalogs/ICatalogService.cs",
+      "sha256": "a591cea3d137123300bc6f7a1ae0215ecce8f786f1a7deb3170572d26613fcc0"
+    },
+    {
+      "file": "backend/ClimateGuard.Application/Abstractions/Communities/ICommunityService.cs",
+      "sha256": "9b6c84488cb6ef2a45e05f97d3577dd441bbddb4387039a64479ce5dea998cd9"
+    },
+    {
+      "file": "backend/ClimateGuard.Application/Abstractions/Sensors/ISensorService.cs",
+      "sha256": "c4c9bbd3800d9f321bf5ee091f9f983dbe8c377e79e5c91724ddbbfc714c7d4d"
+    },
+    {
+      "file": "backend/ClimateGuard.Application/ClimateGuard.Application.csproj",
+      "sha256": "78b074777b2fcb7a03903750756db798d8154d5bbe9301946758844715d42953"
+    },
+    {
+      "file": "backend/ClimateGuard.Application/Contracts/AlertRules/AlertRuleDto.cs",
+      "sha256": "de164c4358096d47bb1ee50b1820297ee028808fad79e006f9afae9c75321232"
+    },
+    {
+      "file": "backend/ClimateGuard.Application/Contracts/AlertRules/ChangeAlertRuleStatusRequest.cs",
+      "sha256": "626c4864574e8b3c8d080f9cf0acc25a82448f4033570b22feee524e34078f91"
+    },
+    {
+      "file": "backend/ClimateGuard.Application/Contracts/AlertRules/CreateAlertRuleRequest.cs",
+      "sha256": "77a536af24ab71f4ae444e8d508cbc1c32dfc8ebbc0fff903edd7866eb2d8089"
+    },
+    {
+      "file": "backend/ClimateGuard.Application/Contracts/AlertRules/UpdateAlertRuleRequest.cs",
+      "sha256": "e58cea700976fc703e5d7645b9b3b0d3b8f03c93189895dd6eaa84619497f5e3"
+    },
+    {
+      "file": "backend/ClimateGuard.Application/Contracts/Auth/LoginRequest.cs",
+      "sha256": "75dd72b8ea856e68f358fcb30362ff29b1b92a223f504aed0b8f5086790dd66d"
+    },
+    {
+      "file": "backend/ClimateGuard.Application/Contracts/Auth/LoginResponse.cs",
+      "sha256": "bec347578d9b9974f979df7f6380ec6cb9e9f7fb7d18c3334082c23b6757d1ce"
+    },
+    {
+      "file": "backend/ClimateGuard.Application/Contracts/Catalogs/AlertSeverityDto.cs",
+      "sha256": "3988f7f8dabdc1761f1d69c6e46c648fd88d37bb510d808f5bad7d3a25af86ab"
+    },
+    {
+      "file": "backend/ClimateGuard.Application/Contracts/Catalogs/SensorTypeDto.cs",
+      "sha256": "ac8b64e27761ffe4bfc1e9d7c3fb309418fa8a49339fd59851cba6fa2aa286eb"
+    },
+    {
+      "file": "backend/ClimateGuard.Application/Contracts/Communities/ChangeCommunityStatusRequest.cs",
+      "sha256": "b5c50f735c3c240085e8793a3fc390bf44ac86f10d450b09d1d179b3b3da6385"
+    },
+    {
+      "file": "backend/ClimateGuard.Application/Contracts/Communities/CommunityDto.cs",
+      "sha256": "73d19db674eb48443787fe67cfe196992ed512c6a67edac9fa682c8bd1fae3bf"
+    },
+    {
+      "file": "backend/ClimateGuard.Application/Contracts/Communities/CommunityFilterRequest.cs",
+      "sha256": "fd65df242c05cec33380feb056e0db1d0b54eccf470bb7ccc2e3c41623f972c2"
+    },
+    {
+      "file": "backend/ClimateGuard.Application/Contracts/Communities/CreateCommunityRequest.cs",
+      "sha256": "1107552548b97d2acae006c7a72e1ec0f262b0f8f9685da32e03044b7fcda129"
+    },
+    {
+      "file": "backend/ClimateGuard.Application/Contracts/Communities/UpdateCommunityRequest.cs",
+      "sha256": "2381c614861dcc5d94aaacacf0658dad94e7d61a99d123819a276f05a0f04958"
+    },
+    {
+      "file": "backend/ClimateGuard.Application/Contracts/Sensors/ChangeSensorStatusRequest.cs",
+      "sha256": "44a25485a67b455e27e2675aed2a9f6c1ab18d4d347e165b873c10d88de9602e"
+    },
+    {
+      "file": "backend/ClimateGuard.Application/Contracts/Sensors/CreateSensorRequest.cs",
+      "sha256": "3254a80351a687fba90d029ea9b6149743a6d46ee4a0b4c24e3cd4acc374ad7e"
+    },
+    {
+      "file": "backend/ClimateGuard.Application/Contracts/Sensors/ManualSensorValueRequest.cs",
+      "sha256": "56e2a140c8a7bab095e94e1705c553a5296df8013abb4d88125437f3ee98a512"
+    },
+    {
+      "file": "backend/ClimateGuard.Application/Contracts/Sensors/SensorDto.cs",
+      "sha256": "c9a36a160e58349180420222041c858cc4ca4d8ee515d2cc1ded1aba5137f9c0"
+    },
+    {
+      "file": "backend/ClimateGuard.Application/Contracts/Sensors/SensorReadingDto.cs",
+      "sha256": "97717b713bef5c735085632f9af738fd1203d0429974359ea05aae0083c5c454"
+    },
+    {
+      "file": "backend/ClimateGuard.Application/Contracts/Sensors/UpdateSensorRequest.cs",
+      "sha256": "535cad409a361b56ff3e166e6002aa04b122dd05995dbcd5c6076c4522a20a2d"
+    },
+    {
+      "file": "backend/ClimateGuard.Domain/ClimateGuard.Domain.csproj",
+      "sha256": "61e3f2d043e37f0db4be1d8083dd31bebbfbb8fde2cf027327db2556c16bc385"
+    },
+    {
+      "file": "backend/ClimateGuard.Domain/Entities/Alert.cs",
+      "sha256": "ddc93d1dba2d9f4724f5eaca87ac0e1b4e74c8582951fc653763bfeda713c83a"
+    },
+    {
+      "file": "backend/ClimateGuard.Domain/Entities/AlertRule.cs",
+      "sha256": "3f3224c528919b40182997f16fb0cea94f596d58adbe6d0f4c53821d45f060b4"
+    },
+    {
+      "file": "backend/ClimateGuard.Domain/Entities/AlertSeverity.cs",
+      "sha256": "206cc57ad7885881de476713ce9fa87b14a0fca5e455a4f51eaef12c42bd7518"
+    },
+    {
+      "file": "backend/ClimateGuard.Domain/Entities/AuditLogEntry.cs",
+      "sha256": "34811d5ac49779f46dfea32a3c6809e85e8aa87b493c86de84d050c290009802"
+    },
+    {
+      "file": "backend/ClimateGuard.Domain/Entities/Community.cs",
+      "sha256": "25a6c102cdfe6d4907bff2cfe606e8fb4b5c0b29834be6c394f4500dc3945e34"
+    },
+    {
+      "file": "backend/ClimateGuard.Domain/Entities/PhenomenonType.cs",
+      "sha256": "b233ec4246aacf9f0acb9ed8d6cf38ed7a5000c32b79ebc8f0e7e0cd008b47d4"
+    },
+    {
+      "file": "backend/ClimateGuard.Domain/Entities/ReadingAlertDelivery.cs",
+      "sha256": "5e8a335a0e8c6a7dc5bf2fcea256d87001ea839cb2bfae4701b6511014b4ee8b"
+    },
+    {
+      "file": "backend/ClimateGuard.Domain/Entities/RefreshToken.cs",
+      "sha256": "eedb82cac6f06c05c970e7f4cca147b14d5c6d6c3ffcb4ae1899c0103c594268"
+    },
+    {
+      "file": "backend/ClimateGuard.Domain/Entities/Role.cs",
+      "sha256": "7608bc7f3191e3f70f29af93af704a8aec019ea799feb43bd99bdb971b0ff1c1"
+    },
+    {
+      "file": "backend/ClimateGuard.Domain/Entities/Sensor.cs",
+      "sha256": "6ead6018b868dddaa27a03ad0660d7e30276609ce406e8df82a5acb39d68c488"
+    },
+    {
+      "file": "backend/ClimateGuard.Domain/Entities/SensorReading.cs",
+      "sha256": "02d5f35878e9f8df100b94640cb54804f63928a86a552a58df6817072cf0bba9"
+    },
+    {
+      "file": "backend/ClimateGuard.Domain/Entities/SensorType.cs",
+      "sha256": "c4a3b957e538f9dd7fbabdb52c4cf61f52a9493b3e8b9075779e2e6c62b6a499"
+    },
+    {
+      "file": "backend/ClimateGuard.Domain/Entities/User.cs",
+      "sha256": "27255938cef072810d56178fc80a74fc80804409f74f5992a9b6872e2717eb7f"
+    },
+    {
+      "file": "backend/ClimateGuard.Infrastructure/ClimateGuard.Infrastructure.csproj",
+      "sha256": "b6610346ddb3db8eedb1f3d024754f1a95770832bf631151a902414fe5f54b5f"
+    },
+    {
+      "file": "backend/ClimateGuard.Infrastructure/DependencyInjection.cs",
+      "sha256": "6b18c2b4740ec56e50c88c45ff562b5502f361dbd4f4a765393b264e5438b5ee"
+    },
+    {
+      "file": "backend/ClimateGuard.Infrastructure/Migrations/20260822030138_InitialCreate.Designer.cs",
+      "sha256": "16d4445e643708bb6462fe6f28f2858d6bcd82c02adff39e269822e4086ab914"
+    },
+    {
+      "file": "backend/ClimateGuard.Infrastructure/Migrations/20260822030138_InitialCreate.cs",
+      "sha256": "f0940ba17a75a22adcf087ea105c536c84f52fb1efeae80b51d96d3095817728"
+    },
+    {
+      "file": "backend/ClimateGuard.Infrastructure/Migrations/20261007050429_ExpandCommunityAdministration.Designer.cs",
+      "sha256": "765bb6467c1fc34bad9284e9d05c7cc72d0f1b70cd8a7c926f46021ddd453fd3"
+    },
+    {
+      "file": "backend/ClimateGuard.Infrastructure/Migrations/20261007050429_ExpandCommunityAdministration.cs",
+      "sha256": "0a81f2bd3f6d56e1758a84c0457b885677c3a7091212002f681823dbeb94ee6c"
+    },
+    {
+      "file": "backend/ClimateGuard.Infrastructure/Migrations/20261007063923_AddAlertRules.Designer.cs",
+      "sha256": "9be4fd122a64d49422d5b9461c42816e94415d622fcb1d39599183271648ce9f"
+    },
+    {
+      "file": "backend/ClimateGuard.Infrastructure/Migrations/20261007063923_AddAlertRules.cs",
+      "sha256": "8ea0a3250a2378f58d673d67f77597e4808accee7d731ad00197f273bf7a0282"
+    },
+    {
+      "file": "backend/ClimateGuard.Infrastructure/Migrations/AppDbContextModelSnapshot.cs",
+      "sha256": "ee117a8cccd6502a160f1139b6814c1dd949417cbb5d3b75b9fdfe94f784c7cb"
+    },
+    {
+      "file": "backend/ClimateGuard.Infrastructure/Persistence/AppDbContext.cs",
+      "sha256": "4582f24106c5d6613fdd54f4b256b2bf470a6a92b5413c98ea16909c71bf4663"
+    },
+    {
+      "file": "backend/ClimateGuard.Infrastructure/Persistence/Configurations/AlertConfiguration.cs",
+      "sha256": "c393de4813b061de1cb1dd83f12c734b83650382acadb1690efc06b3b9c638c6"
+    },
+    {
+      "file": "backend/ClimateGuard.Infrastructure/Persistence/Configurations/AlertRuleConfiguration.cs",
+      "sha256": "fa23712bd3781f03d31aa3a35fff5ccd3b2af66529ba21eadb770ed744598a8a"
+    },
+    {
+      "file": "backend/ClimateGuard.Infrastructure/Persistence/Configurations/AlertSeverityConfiguration.cs",
+      "sha256": "45cf16aa45acc2b8ec9ceac1b34e2f3841520c673802d26d8274a8ed7daf3e58"
+    },
+    {
+      "file": "backend/ClimateGuard.Infrastructure/Persistence/Configurations/AuditLogEntryConfiguration.cs",
+      "sha256": "ebca449f5f9deacd542f4c080ccdb182b3c893f70841a5a09ca4e755d3400ac3"
+    },
+    {
+      "file": "backend/ClimateGuard.Infrastructure/Persistence/Configurations/CommunityConfiguration.cs",
+      "sha256": "2d6e2ce93d3fc8dad6ae3b1671d4faf750c1dd898404bda26b3b83390f178404"
+    },
+    {
+      "file": "backend/ClimateGuard.Infrastructure/Persistence/Configurations/PhenomenonTypeConfiguration.cs",
+      "sha256": "85a3a860d6a0ca63eb2b3b02478c7bfd6564db102f053dd8be6ab0f8fd9beb8e"
+    },
+    {
+      "file": "backend/ClimateGuard.Infrastructure/Persistence/Configurations/RefreshTokenConfiguration.cs",
+      "sha256": "8227468e3cff2f3003e58738a0b3db799c8bc990d2b4f06c30779d3c1bb95221"
+    },
+    {
+      "file": "backend/ClimateGuard.Infrastructure/Persistence/Configurations/RoleConfiguration.cs",
+      "sha256": "13fd6af5b07242eb41c3e82291e158e5f96bdddbcb375343973278d84dc5bc8d"
+    },
+    {
+      "file": "backend/ClimateGuard.Infrastructure/Persistence/Configurations/SensorConfiguration.cs",
+      "sha256": "7d370ba48fbee722429253d5353fd5bc05cf719130a4bfb51905e260d7a50b46"
+    },
+    {
+      "file": "backend/ClimateGuard.Infrastructure/Persistence/Configurations/SensorReadingConfiguration.cs",
+      "sha256": "00004128638839a755e98015cec8574ea40b196f16e82fa14c377c991d9780e2"
+    },
+    {
+      "file": "backend/ClimateGuard.Infrastructure/Persistence/Configurations/SensorTypeConfiguration.cs",
+      "sha256": "2597201d96023a10977879c4bf55277e88b2db61c0ca76c0cb854a4e8f6886c0"
+    },
+    {
+      "file": "backend/ClimateGuard.Infrastructure/Persistence/Configurations/UserConfiguration.cs",
+      "sha256": "ff04eaee83ada122bbad2ca5c924f214441148df656a8a73ee38903728147bbe"
+    },
+    {
+      "file": "backend/ClimateGuard.Infrastructure/Persistence/Initialization/InitialAdminSeeder.cs",
+      "sha256": "6103e41993272690b42d1902c47f2be3a6320d7152ac54da66aa253386d1a13a"
+    },
+    {
+      "file": "backend/ClimateGuard.Infrastructure/Services/AlertRules/AlertRuleService.cs",
+      "sha256": "0e226bdd1b86ac7f3535ff796146c16e7c8f457bbfc497de9cd0e1c97f51a48f"
+    },
+    {
+      "file": "backend/ClimateGuard.Infrastructure/Services/Alerts/AlertEvaluationService.cs",
+      "sha256": "e4ab55949b0f6459ccd53670cfd096cbd401d598071ff7ffadf0335a7dc647c5"
+    },
+    {
+      "file": "backend/ClimateGuard.Infrastructure/Services/Alerts/AlertGenerationService.cs",
+      "sha256": "662044882004abba06728dd40c07b2473b5223fa23cbe1d43f5d30e4a4a934f2"
+    },
+    {
+      "file": "backend/ClimateGuard.Infrastructure/Services/Alerts/ReadingAlertDispatcher.cs",
+      "sha256": "ee6f615322a4fea27457c74ea82308f0bb6a8a92e500658b27614eb2429bf356"
+    },
+    {
+      "file": "backend/ClimateGuard.Infrastructure/Services/Auth/AuthService.cs",
+      "sha256": "a504cbeae2945d21c830f7a80e49b79677237c6f026a23a00f6b10218f9704bb"
+    },
+    {
+      "file": "backend/ClimateGuard.Infrastructure/Services/Auth/JwtTokenService.cs",
+      "sha256": "6121dd76707fb0f235ca8572f8cff775159a44d6c9795aec088ed83c4315b95f"
+    },
+    {
+      "file": "backend/ClimateGuard.Infrastructure/Services/Catalogs/CatalogService.cs",
+      "sha256": "378d703c7ee1374cba8b33a4f6c00419bd9b6bf1f10763d3fd979b595cdc330b"
+    },
+    {
+      "file": "backend/ClimateGuard.Infrastructure/Services/Communities/CommunityService.cs",
+      "sha256": "250eaeb0efc7957722df22676a8001ba0c022d85cc7ee396fe253cf6ea9db21b"
+    },
+    {
+      "file": "backend/ClimateGuard.Infrastructure/Services/Sensors/SensorService.cs",
+      "sha256": "20d764b2db29462c73d9290739dc9492ab55d20e4c4ab3308315c060011d1655"
+    },
+    {
+      "file": "backend/ClimateGuard.sln",
+      "sha256": "d496a2a9d3ec5e03d48fdac94fdb52be5b92ae7f362801d925bacd2f980a667d"
+    },
+    {
+      "file": "backend/tests/ClimateGuard.Report.Tests/ClimateGuard.Report.Tests.csproj",
+      "sha256": "0cd8c48c03e00ce4c5ef2740c8ea87fa37b9d101ed27f1b4acf141c98dd62bae"
+    },
+    {
+      "file": "backend/tests/ClimateGuard.Report.Tests/ReadingExportTests.cs",
+      "sha256": "2953ef9506c1318f3a45a9ecd56019ccf688533b63bdd41e2dd4bb054cc3246e"
+    },
+    {
+      "file": "frontend/.editorconfig",
+      "sha256": "9da1d179fa691e796ec7cb26d719e2308a073594b7c7c77756d1ba4560e295be"
+    },
+    {
+      "file": "frontend/.gitignore",
+      "sha256": "ae6d22f040c44292c421a5c0715e28b9330b8c26d9f2bf08c7935374c6147967"
+    },
+    {
+      "file": "frontend/.gitkeep",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "frontend/.prettierrc",
+      "sha256": "7bbd911f1ad35a68fd6c04d83c101b4ab1d08c1f8008623c056a27070a735532"
+    },
+    {
+      "file": "frontend/.vscode/extensions.json",
+      "sha256": "2f13a5bb182525a4150f20e023a17eacb5411eaf6877d60209ac3cea86ab5c85"
+    },
+    {
+      "file": "frontend/.vscode/launch.json",
+      "sha256": "0dd378135c3d394a1e07e9c28af48edea54c5690a805de42c7df101d5e195574"
+    },
+    {
+      "file": "frontend/.vscode/tasks.json",
+      "sha256": "63d74d916c9875099b559cfaed85a493c9297a7c03805e18132ca383db045895"
+    },
+    {
+      "file": "frontend/AUTH.local.md",
+      "sha256": "340293fcf8b3b2b52ec5ff5345776eaa49860a045ea834d47369bb3051e7af7f"
+    },
+    {
+      "file": "frontend/COMUNIDADES-ROLES.local.md",
+      "sha256": "17687ad41990ecba8868aaae58d4be54f20ea5350f801fde83517c48b611a936"
+    },
+    {
+      "file": "frontend/DASHBOARD.local.md",
+      "sha256": "d9d2ac5bab8ef529c7af6efbdb36329e6328189d9dd409a6e6bc71158318f249"
+    },
+    {
+      "file": "frontend/LECTURAS-SENSORES.md",
+      "sha256": "25cf32fa82bd2ccadd60d64bde30e8b56934cb3328aa6cd1d2b1db66892ddfe1"
+    },
+    {
+      "file": "frontend/README.md",
+      "sha256": "1a2adbef66f7ba97e845132575b7501bd1d089805fd52fa1e498a70f7f56c004"
+    },
+    {
+      "file": "frontend/USUARIOS.local.md",
+      "sha256": "2fa743a6f438e8488a568520a9bcbbd37222b1f4ebc2db69abcc448d2b3445ef"
+    },
+    {
+      "file": "frontend/angular.json",
+      "sha256": "1200dd0b24281b2da05293b95ea991236f72e3d6a72db070df7e5df2b28351e9"
+    },
+    {
+      "file": "frontend/package-lock.json",
+      "sha256": "c95427e69dcf91968a577c95da5472132824b26a73f86fad6983426edf54ab6a"
+    },
+    {
+      "file": "frontend/package.json",
+      "sha256": "d77cb0c7172e152aeed2e31892d42cf541780b9b6939babd8632f29a9405a7ea"
+    },
+    {
+      "file": "frontend/public/favicon.ico",
+      "sha256": "f9102be80297c0529207607be5277b4f90bca89d65988fa1771b91c7894e815f"
+    },
+    {
+      "file": "frontend/src/app/app.config.ts",
+      "sha256": "3257c5ea3f036bb2351a040af582bc25f80a4ce0b93fa1a381a982d7be470814"
+    },
+    {
+      "file": "frontend/src/app/app.html",
+      "sha256": "b47a63d8d3e24ba92bfd9d2aea79bebe857723c517c55a94545a94483a8ea333"
+    },
+    {
+      "file": "frontend/src/app/app.routes.ts",
+      "sha256": "4116eb1638cf786d64a49e519a1e16c8574ad5c95e230e6cd32dee05e3732f0f"
+    },
+    {
+      "file": "frontend/src/app/app.scss",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "frontend/src/app/app.spec.ts",
+      "sha256": "8cedc99b3f46c28fd93def1f531ca1a04691be11985753c6f9bb3aebd5d8ee74"
+    },
+    {
+      "file": "frontend/src/app/app.ts",
+      "sha256": "c7d1c4fb482721967c3b7966b1f69c78b677038acbf06561d9ff5b1db3f3ddb0"
+    },
+    {
+      "file": "frontend/src/app/core/guards/auth-guard.spec.ts",
+      "sha256": "c8019c8999fba7b59d482fe56581a20b870bd7e3dd4ffc3765ce2b213512ab03"
+    },
+    {
+      "file": "frontend/src/app/core/guards/auth-guard.ts",
+      "sha256": "d6fdb8123d7a44d7ff988101214e7e254c6055cc8859062bdde2b1fd5633c46a"
+    },
+    {
+      "file": "frontend/src/app/core/guards/role-guard.ts",
+      "sha256": "dd41bbad1e2e3f49770c947d1abd0aa1d16340a836896e2c835f81319eb3012d"
+    },
+    {
+      "file": "frontend/src/app/core/interceptors/auth-interceptor.spec.ts",
+      "sha256": "53a44761744674d8a8fd3727c2dd85bc55140b2b19b376268a3df337d8b3e561"
+    },
+    {
+      "file": "frontend/src/app/core/interceptors/auth-interceptor.ts",
+      "sha256": "c43b18f8e1c675a17f8456f470e1ce7a634a49847314d10d90a2adef61aef7d4"
+    },
+    {
+      "file": "frontend/src/app/core/services/alertas.ts",
+      "sha256": "dbb708eba4dbb3b48495f40914e48ba1001fd969a1f41113ab0ebc79552ba008"
+    },
+    {
+      "file": "frontend/src/app/core/services/auditoria.ts",
+      "sha256": "05328b9269d9a61472a46fb85fb43c169ce1188f02d285a55288d6e91f17cf1f"
+    },
+    {
+      "file": "frontend/src/app/core/services/auth-simulado.spec.ts",
+      "sha256": "e851cdc706389328518e2e0b30e9c928c9a76ea842d0336b8531f92f29dad5ad"
+    },
+    {
+      "file": "frontend/src/app/core/services/auth-simulado.ts",
+      "sha256": "2f073cb4ddd0084456a2813e7849c8e3341412e492f241010d0375bdbbdd7388"
+    },
+    {
+      "file": "frontend/src/app/core/services/auth.spec.ts",
+      "sha256": "44844a547299fbf2ecd46ba05cd3e89b30b86b61ada37c02c0047e94910db80c"
+    },
+    {
+      "file": "frontend/src/app/core/services/auth.ts",
+      "sha256": "74aa42a4c3591297b740636d92984bd0a346c53feb5901876e7696e7fac42e6c"
+    },
+    {
+      "file": "frontend/src/app/core/services/comunidades.ts",
+      "sha256": "2e966ebb8a96bc3f5835dde5c364afb2d12a3e93b1604dd94beb354a3eb1ede0"
+    },
+    {
+      "file": "frontend/src/app/core/services/reportes.spec.ts",
+      "sha256": "7def5992a3608730f4219e25e2722222f34ffd007590bcbca8ed26929606bbb2"
+    },
+    {
+      "file": "frontend/src/app/core/services/reportes.ts",
+      "sha256": "62505422f621339731047452ca6e804fdd9f4c2485ab4804aa8161534a8d4823"
+    },
+    {
+      "file": "frontend/src/app/core/services/sensores.spec.ts",
+      "sha256": "a84c06ad1988591b4cc6feee73723fd74c08bc0d2ea44700709da7a9078fdfbc"
+    },
+    {
+      "file": "frontend/src/app/core/services/sensores.ts",
+      "sha256": "941c605130f2f5d485d8ee832ced81a35e0eff17efc6843bb710d9123009d50d"
+    },
+    {
+      "file": "frontend/src/app/core/services/usuarios.spec.ts",
+      "sha256": "4c9220780e01f775cc1dbf1b5ec8b317411e8dfe48a02e436d40e13ef1b2212c"
+    },
+    {
+      "file": "frontend/src/app/core/services/usuarios.ts",
+      "sha256": "569b326f7cc57a306ab4ffa42ba17f424b57c297f24e043503656cf3a98e8b94"
+    },
+    {
+      "file": "frontend/src/app/features/alertas/alertas.html",
+      "sha256": "68b1c6767109f7fb4fba935fad179c447f9faa5c73f18b6d69383b0b3d475a7d"
+    },
+    {
+      "file": "frontend/src/app/features/alertas/alertas.scss",
+      "sha256": "7aa0850ee00093d75f39f3f025d093cfab264f65819cf0bf4333bc0c83f5f901"
+    },
+    {
+      "file": "frontend/src/app/features/alertas/alertas.spec.ts",
+      "sha256": "34fb4886451e75555924fdb8455f08eec6f2b7261f15fb5e2c23b288a391c44e"
+    },
+    {
+      "file": "frontend/src/app/features/alertas/alertas.ts",
+      "sha256": "3075c89dedaac1cdedfb4860c19299f972524fdac05082d8b0487144093ae5f7"
+    },
+    {
+      "file": "frontend/src/app/features/auditoria/auditoria.html",
+      "sha256": "c11ff2a9a0eabb50dada3086851ab0e25a11af3656dbc60be193deafc34a8c62"
+    },
+    {
+      "file": "frontend/src/app/features/auditoria/auditoria.scss",
+      "sha256": "c367640b8b0623f63faf11065398eb8d05b039eeb3c12c996d0caaa0da0a0e2f"
+    },
+    {
+      "file": "frontend/src/app/features/auditoria/auditoria.spec.ts",
+      "sha256": "f1c58f9f87e43168d778147df6550dd260cb3f44df79719bebc7c4d20053c74a"
+    },
+    {
+      "file": "frontend/src/app/features/auditoria/auditoria.ts",
+      "sha256": "782e8e7494bd991fbbef5db8294c43ef18e0f361b51254b52e6d96b9e71085d7"
+    },
+    {
+      "file": "frontend/src/app/features/comunidades/comunidades.html",
+      "sha256": "526c053cd313cb975c79dfa07e6f1118ea83609db5aa73c7ecd4e6556087b3c6"
+    },
+    {
+      "file": "frontend/src/app/features/comunidades/comunidades.scss",
+      "sha256": "ce81dd91e2516f66dff90b8dbcbefa5e6697f4a394d10ccaf78bde4c2587b490"
+    },
+    {
+      "file": "frontend/src/app/features/comunidades/comunidades.spec.ts",
+      "sha256": "86dd82f4bbe60d93087b33b92e43f5df59a1a4982703ee338507a3ee062cbcb3"
+    },
+    {
+      "file": "frontend/src/app/features/comunidades/comunidades.ts",
+      "sha256": "83ecd2b253b42e4247806ccd7c09befc272fe2b2329f6dc9faaae1f5587ef96f"
+    },
+    {
+      "file": "frontend/src/app/features/dashboard/dashboard.html",
+      "sha256": "8ca930a94e5b6664e5cfebc598dc20f71bb05c48cc30beb9dbd755d91b6851d1"
+    },
+    {
+      "file": "frontend/src/app/features/dashboard/dashboard.scss",
+      "sha256": "aab0cdc8eb12bfe83cd0ca6f5a2c8067eee42a6986eb7eca40bacc0903e429f4"
+    },
+    {
+      "file": "frontend/src/app/features/dashboard/dashboard.spec.ts",
+      "sha256": "0be914c19b7e6f63659464a9736ccf3ceafa8ebeb38515ee0ba126efce27b071"
+    },
+    {
+      "file": "frontend/src/app/features/dashboard/dashboard.ts",
+      "sha256": "632864a88a1ebbfaf30628faa138fe407b8bc14a6c324b84b1811bb1a977e70a"
+    },
+    {
+      "file": "frontend/src/app/features/dashboard/monitoring-map/README.md",
+      "sha256": "5bc045676128c8a50ee3cf38f84996fd7480f0ddfb9ac0e5722eed00c31731e9"
+    },
+    {
+      "file": "frontend/src/app/features/dashboard/monitoring-map/monitoring-map.html",
+      "sha256": "7b836d45a8e806327eab4b44ab2e3534614e3bfd5e14a3b043b88ccb5a6b5b6e"
+    },
+    {
+      "file": "frontend/src/app/features/dashboard/monitoring-map/monitoring-map.scss",
+      "sha256": "a53b5375f719e5c4bdf28e6e17a42f9e202e7f3bbce0100ca8e095a95f91068c"
+    },
+    {
+      "file": "frontend/src/app/features/dashboard/monitoring-map/monitoring-map.spec.ts",
+      "sha256": "6937827ae6c7d901fc9489af74fa1e1de35c4dfd7d14ec01ec865988bfe09c66"
+    },
+    {
+      "file": "frontend/src/app/features/dashboard/monitoring-map/monitoring-map.ts",
+      "sha256": "95f2fe404826e802a4c5ddcbb3e144d8278897afa3f23b46bad5f2a26d2b9632"
+    },
+    {
+      "file": "frontend/src/app/features/historial/historial.html",
+      "sha256": "251380e7e9ce214f6b3bc92c6bef4c3d6ab553065ee99685fdc5d42b2d6bf204"
+    },
+    {
+      "file": "frontend/src/app/features/historial/historial.scss",
+      "sha256": "5516c0259a7ff0d0f5c3874f00b2aa62a3535eed194b098d64cfed4e68ebbf71"
+    },
+    {
+      "file": "frontend/src/app/features/historial/historial.spec.ts",
+      "sha256": "be90a0de2d9715b7f6075548b3039696f311cbf430fea996e63ddfc575d48dee"
+    },
+    {
+      "file": "frontend/src/app/features/historial/historial.ts",
+      "sha256": "3f697c4136ee37b5038f6836101ad86f2deb8547b60642bea19fb1a143f6710d"
+    },
+    {
+      "file": "frontend/src/app/features/login/linked-accounts.ts",
+      "sha256": "6c1bea573636885662a03224645c266b0efcb0945cda89fa4182fd65fea49cce"
+    },
+    {
+      "file": "frontend/src/app/features/login/login.html",
+      "sha256": "a186e1e18f6aa71f56d62938e31ea62ec423d1ad2d8dca4f3e7df4ecf9d70bbd"
+    },
+    {
+      "file": "frontend/src/app/features/login/login.scss",
+      "sha256": "3def71dea75e407cc5155591a06276b8f407be1ee103e5e181b55534b3016442"
+    },
+    {
+      "file": "frontend/src/app/features/login/login.spec.ts",
+      "sha256": "aca70fcd0c59c7b8c9d13b24c595073b0ae1449702b86bbd2dc14a9631c4218c"
+    },
+    {
+      "file": "frontend/src/app/features/login/login.ts",
+      "sha256": "618b7e40fd434009c73fd5974bc2eda586af4d69c8b8d198d13be4083fbf4a21"
+    },
+    {
+      "file": "frontend/src/app/features/login/oauth-callback.spec.ts",
+      "sha256": "e7ab8df4bdf2489eaf0a89ade1d5d979ad80ef9ae45e957b901ea74827a13a2e"
+    },
+    {
+      "file": "frontend/src/app/features/login/oauth-callback.ts",
+      "sha256": "e574a40fdb2a9718486af800912801b867b0f9b7c71ca79880dc7e6ab8d0499f"
+    },
+    {
+      "file": "frontend/src/app/features/reglas/reglas.html",
+      "sha256": "2d75e11beabb33affe002ed32539b10cd32f06b463e22e91bce1e0062cbfdf4b"
+    },
+    {
+      "file": "frontend/src/app/features/reglas/reglas.scss",
+      "sha256": "bf4180592ec5038b46447cfe73104ee2bfa69066d2a72c70a049adc2acdef56d"
+    },
+    {
+      "file": "frontend/src/app/features/reglas/reglas.spec.ts",
+      "sha256": "67a07d4d681da98b8f69ba0244815d0d855f5b3d76a44cbb7456292083b7bdb4"
+    },
+    {
+      "file": "frontend/src/app/features/reglas/reglas.ts",
+      "sha256": "90d091b93fcabb73a1fdcf0fa1011c119e215aa3489cd638c90dd8e088d74993"
+    },
+    {
+      "file": "frontend/src/app/features/reportes/reportes.html",
+      "sha256": "b82a876477f467e7853669d299bec7e52e229557ffc4ea3d97796098466d5cc9"
+    },
+    {
+      "file": "frontend/src/app/features/reportes/reportes.scss",
+      "sha256": "3336d7b7eeee3d6e534dffc9964b133161d0c4c4b28712569679afd8432c4a4e"
+    },
+    {
+      "file": "frontend/src/app/features/reportes/reportes.spec.ts",
+      "sha256": "0d0fd128798b9a224ca04b1bd3aa090cb481d9d9450151bfab42c9ae3321e326"
+    },
+    {
+      "file": "frontend/src/app/features/reportes/reportes.ts",
+      "sha256": "0c09722e19a04826f9d1f6633511f49db3070bdd58d3f92f0615193b540a942a"
+    },
+    {
+      "file": "frontend/src/app/features/sensores/sensores.html",
+      "sha256": "6564033c0b5fba9cc5cf0d7c01aa14c94d63d55062a86f13bf79754b607f95fd"
+    },
+    {
+      "file": "frontend/src/app/features/sensores/sensores.scss",
+      "sha256": "34c0387655ccd60c50d5d8453e5fda79fa3cc7fb61795224b2dc3b67023395ad"
+    },
+    {
+      "file": "frontend/src/app/features/sensores/sensores.spec.ts",
+      "sha256": "635914574c988c858600c1dbe319cc4f758f1f7cc4fb766e9418cdd8c419c15e"
+    },
+    {
+      "file": "frontend/src/app/features/sensores/sensores.ts",
+      "sha256": "4ac65f8a16e0d3549cf74b9fa813452a518c2a7872454f37c7f3475894a5cb8c"
+    },
+    {
+      "file": "frontend/src/app/features/usuarios/roles-catalog.ts",
+      "sha256": "e584e66f6cef74b9158832af84401403468317fb9cd3a820647779883249fa5b"
+    },
+    {
+      "file": "frontend/src/app/features/usuarios/usuarios.html",
+      "sha256": "c9c64a811223aed8f5b230dd7d3c02a23814d4a8c07e2f3139a4bb68e463facc"
+    },
+    {
+      "file": "frontend/src/app/features/usuarios/usuarios.scss",
+      "sha256": "50e275cada1babf6efb54d40fdf282792d2d7815576496c6bf0489d35cd3c0d3"
+    },
+    {
+      "file": "frontend/src/app/features/usuarios/usuarios.spec.ts",
+      "sha256": "c6ae0a0dc7a3e480f0d9b4d1612e308a671b33091e5a050c30dc8eedf1c8fed6"
+    },
+    {
+      "file": "frontend/src/app/features/usuarios/usuarios.ts",
+      "sha256": "af5de4ec20791c287f52a577d42c6e38fd939155bb49d0a63e7d95ababfacf89"
+    },
+    {
+      "file": "frontend/src/app/layout/header/header.html",
+      "sha256": "81a1ba9d1b72195d20379dda70ab62e98bcfa9ba1a72185a99043e1b58adaf37"
+    },
+    {
+      "file": "frontend/src/app/layout/header/header.scss",
+      "sha256": "1c4e9064424068d4df287beb03b12a1ed037329a0d940bfe8667cb42b77e5745"
+    },
+    {
+      "file": "frontend/src/app/layout/header/header.spec.ts",
+      "sha256": "7921adf02c5b0b4c94bcf6676bfdd04186ec048fbfc76f14d13c699e20ac105d"
+    },
+    {
+      "file": "frontend/src/app/layout/header/header.ts",
+      "sha256": "ab5060fec43a6feaed5d878f7b4b8eefc69cc6d4bade0acbd52b6eec1c855437"
+    },
+    {
+      "file": "frontend/src/app/layout/main-layout/main-layout.html",
+      "sha256": "197a3309fb453f6ef200a14e41e5962f05c550e310913d1be355577fa9a3ddc9"
+    },
+    {
+      "file": "frontend/src/app/layout/main-layout/main-layout.scss",
+      "sha256": "f2ca1abf85151b11445794b21e75eabeb57972518162135353c026da88944b66"
+    },
+    {
+      "file": "frontend/src/app/layout/main-layout/main-layout.spec.ts",
+      "sha256": "89668080da646bc9dec54d2066842cf610531139726a7244b2bfbb213296415b"
+    },
+    {
+      "file": "frontend/src/app/layout/main-layout/main-layout.ts",
+      "sha256": "9c328f7e42dcf82cc313bff876a3a6e85e4b32d68bf6b772137af6524f803ac3"
+    },
+    {
+      "file": "frontend/src/app/layout/sidebar/sidebar.html",
+      "sha256": "c948d0b8a44b4faa6ebbf1516c6f66fd52495a88d05f240dd617f0b55fe185b6"
+    },
+    {
+      "file": "frontend/src/app/layout/sidebar/sidebar.scss",
+      "sha256": "183b3fd35ba60ee0fa87c587161e7dbd873d4f560817f663e9b97c7dc0553d3f"
+    },
+    {
+      "file": "frontend/src/app/layout/sidebar/sidebar.spec.ts",
+      "sha256": "7b2fda9bfae7c86e51293340531c712bb7c22ebe43cf8d7977bf8b16a184c4bf"
+    },
+    {
+      "file": "frontend/src/app/layout/sidebar/sidebar.ts",
+      "sha256": "5e7b45370384666b11b0320db48afa95ec05d7ea5330080ce98098b086c61a47"
+    },
+    {
+      "file": "frontend/src/app/shared/components/severity-badge/severity-badge.html",
+      "sha256": "d417953d2c4d9f7ab8752745fefbffe6cf70e593df1fc38c000c6e179d1ad7ac"
+    },
+    {
+      "file": "frontend/src/app/shared/components/severity-badge/severity-badge.scss",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "frontend/src/app/shared/components/severity-badge/severity-badge.spec.ts",
+      "sha256": "5cff64dad35b6535c99d4f58581c119fe46ca60e43cbb2e0adc8799384c125bb"
+    },
+    {
+      "file": "frontend/src/app/shared/components/severity-badge/severity-badge.ts",
+      "sha256": "909a73ba9c33726bfa039bff3b19acdfe89aeb85c1a1eb773c42689ad507098d"
+    },
+    {
+      "file": "frontend/src/environments/environment.production.ts",
+      "sha256": "271162f06de3035bb686660e339688214bac014004714aa2bacc50d5709e8f23"
+    },
+    {
+      "file": "frontend/src/environments/environment.ts",
+      "sha256": "6f5793cd252ca4faf68434cc1d6a3d7d5e6f6c91f9b7592b081667322afb4cbc"
+    },
+    {
+      "file": "frontend/src/index.html",
+      "sha256": "74bd949b4fa19da6ba10bd48d0730c510cecbbef5d338b821e44f6e279bfc452"
+    },
+    {
+      "file": "frontend/src/main.ts",
+      "sha256": "a53d8bf50034149a8d8b171377d40bfa2cb72535f30894af63a4429355332c76"
+    },
+    {
+      "file": "frontend/src/styles.scss",
+      "sha256": "cd9cc5d39175022bd85e589bca1298d3754921abf8370d8dba3c61fb20920f0d"
+    },
+    {
+      "file": "frontend/tsconfig.app.json",
+      "sha256": "ef0951130d6161f26968e606a4a5b7fa0b72d282e638bca68364fa154f9b7966"
+    },
+    {
+      "file": "frontend/tsconfig.json",
+      "sha256": "a4810e927e51717b4811de61a9c61c7a903abbcb2862baa6aadc781cbf6f9ed0"
+    },
+    {
+      "file": "frontend/tsconfig.spec.json",
+      "sha256": "9b0620adcb42ef8500deee34709d053fedf51b673321f744ee28436735c98fd8"
+    },
+    {
+      "file": "gateway/ClimateGuard.Gateway/AuditDelivery.cs",
+      "sha256": "edab68596c06c962eb5c85e4504673eb73a1aa7b5ea4786b68f933052c6e4f7d"
+    },
+    {
+      "file": "gateway/ClimateGuard.Gateway/ClimateGuard.Gateway.csproj",
+      "sha256": "47b9869a5655554b5e221d385fd10208284245e0aee17086f5fa26bfddc75c2a"
+    },
+    {
+      "file": "gateway/ClimateGuard.Gateway/Dockerfile",
+      "sha256": "421d4a0f5af7c2575fe39370f941150ae7e4ab8b276e3335c92c128e06fe0396"
+    },
+    {
+      "file": "gateway/ClimateGuard.Gateway/Dockerfile.dockerignore",
+      "sha256": "45b5d0c507e80e9ee9e5c4d81e0ffe865fe4fa2c3d70a372df54669be48baea2"
+    },
+    {
+      "file": "gateway/ClimateGuard.Gateway/Program.cs",
+      "sha256": "781004052fce49100ae7028b3ab85c41a6eab39492bdbce8edb72b8ec47006c2"
+    },
+    {
+      "file": "gateway/ClimateGuard.Gateway/Properties/launchSettings.json",
+      "sha256": "d47ae11aba0d8ea4bfc3912d4a29540158e39b01c881677dd133f72de2b0421f"
+    },
+    {
+      "file": "infrastructure/k8s/base/config/dotnet.json",
+      "sha256": "73f95f9e0ceb205fc1c4dc50c07697fcfa29d7087868c2aef1d504cb38c771ec"
+    },
+    {
+      "file": "infrastructure/k8s/base/config/gateway.json",
+      "sha256": "9390e53d0f1ee98d65128461a469ff4afee810b8d4d6da3a9721733c3ae73ac2"
+    },
+    {
+      "file": "infrastructure/k8s/base/config/nginx.conf",
+      "sha256": "d29f60f1d83ca1e8720f7bfcf99b749d159e73571a332f357b458b1711c39955"
+    },
+    {
+      "file": "infrastructure/k8s/images/GatewayHosting.cs",
+      "sha256": "679c933cb9879d30a3d69611b17793ef6b05379f607407c5fc8e465396e83117"
+    },
+    {
+      "file": "infrastructure/k8s/images/LegacyHosting.cs",
+      "sha256": "902d8541052a8dc584e1f8f4ad0873ee5c4b5e354550797af8932e5ad4a7d02e"
+    },
+    {
+      "file": "infrastructure/k8s/images/alert-service.Dockerfile",
+      "sha256": "3fd46f0b6ae8e8d87b122f3d470ab1ddbd1cd3d8cd08c3ef80b851ef874d7e9a"
+    },
+    {
+      "file": "infrastructure/k8s/images/alert-service.Dockerfile.dockerignore",
+      "sha256": "3e7a9a99bfc6dde36eb119b0b187f0dec04456484f20b40657c08276287d6663"
+    },
+    {
+      "file": "infrastructure/k8s/images/auth-service.Dockerfile",
+      "sha256": "8445049b2eafde3dc80678d055201f1d5334d6bebd1cc574a75cd6f6142502ca"
+    },
+    {
+      "file": "infrastructure/k8s/images/auth-service.Dockerfile.dockerignore",
+      "sha256": "3e7a9a99bfc6dde36eb119b0b187f0dec04456484f20b40657c08276287d6663"
+    },
+    {
+      "file": "infrastructure/k8s/images/community-service.Dockerfile",
+      "sha256": "a786f23e0fd63d89474a949e18d5b4c37eb7a0775846119a51f20c16dc4a11e3"
+    },
+    {
+      "file": "infrastructure/k8s/images/community-service.Dockerfile.dockerignore",
+      "sha256": "3e7a9a99bfc6dde36eb119b0b187f0dec04456484f20b40657c08276287d6663"
+    },
+    {
+      "file": "infrastructure/k8s/images/frontend.Dockerfile",
+      "sha256": "103db99dfc042f30b4dc32cc829ebdbbcce936303319ab3fee67e0829387e7c1"
+    },
+    {
+      "file": "infrastructure/k8s/images/frontend.Dockerfile.dockerignore",
+      "sha256": "3e7a9a99bfc6dde36eb119b0b187f0dec04456484f20b40657c08276287d6663"
+    },
+    {
+      "file": "infrastructure/k8s/images/gateway.Dockerfile",
+      "sha256": "5d13aae6296a0a04413ad24cb9316a55933887e64b2adfc5c80a421f75910e13"
+    },
+    {
+      "file": "infrastructure/k8s/images/gateway.Dockerfile.dockerignore",
+      "sha256": "3e7a9a99bfc6dde36eb119b0b187f0dec04456484f20b40657c08276287d6663"
+    },
+    {
+      "file": "infrastructure/k8s/images/legacy-api.Dockerfile",
+      "sha256": "689c55e77c06f07602799fbdc385dde4cec5199900f967ef8d7201f393fd516e"
+    },
+    {
+      "file": "infrastructure/k8s/images/legacy-api.Dockerfile.dockerignore",
+      "sha256": "3e7a9a99bfc6dde36eb119b0b187f0dec04456484f20b40657c08276287d6663"
+    },
+    {
+      "file": "infrastructure/k8s/images/sensor-service.Dockerfile",
+      "sha256": "c5cb22adb09e30c819febe1a5e7fc5605dd8a99dec5045ffd5fba9c54b88d4ac"
+    },
+    {
+      "file": "infrastructure/k8s/images/sensor-service.Dockerfile.dockerignore",
+      "sha256": "3e7a9a99bfc6dde36eb119b0b187f0dec04456484f20b40657c08276287d6663"
+    },
+    {
+      "file": "services/alert-service/.dockerignore",
+      "sha256": "7e93d9e772ffacdfb5a255bed9b5795ad30762082f88d251435ecd0e50ce5aff"
+    },
+    {
+      "file": "services/alert-service/.gitattributes",
+      "sha256": "18be76f9008af08719be1d98d291e1286907ad6df86e7bd4e2dbed4ce0903fe8"
+    },
+    {
+      "file": "services/alert-service/.gitignore",
+      "sha256": "9a9e0230c9cb7f94a54a5033d6b204d66287d0c97081ebe4083997670d89398a"
+    },
+    {
+      "file": "services/alert-service/.mvn/wrapper/maven-wrapper.properties",
+      "sha256": "1ab96d08531c63667c46b26524958688fb9805358642be28579f6d6adfbece8d"
+    },
+    {
+      "file": "services/alert-service/Dockerfile",
+      "sha256": "4d24bacd6e590512961bb1aad817ad90eae3f7e2beb7094e2e40b97be891fc27"
+    },
+    {
+      "file": "services/alert-service/INTEGRATION.local.md",
+      "sha256": "be837b3175c51048c837a9aa9b6cb450738e7a1c8bae15066385637ee036091a"
+    },
+    {
+      "file": "services/alert-service/docker-compose.local.yml",
+      "sha256": "56e92a9df9cb13c5931145080fb280a54fc0ca9f39a8bf15782fa661a710914a"
+    },
+    {
+      "file": "services/alert-service/mvnw",
+      "sha256": "cae96cef89ebea3531221f4ae17c23cf8edf67d00eae8306d4186ae1bbed4d02"
+    },
+    {
+      "file": "services/alert-service/mvnw.cmd",
+      "sha256": "46eedb8419bd14fe70d5bb2916d7b6f51806e51b39d5b76a42610384ca929c1c"
+    },
+    {
+      "file": "services/alert-service/pom.xml",
+      "sha256": "3200e41d653567286772ae2af527abc1aaf3e3553b124c6ecd58550a0ded802e"
+    },
+    {
+      "file": "services/alert-service/src/main/java/com/climateguard/alert/AlertServiceApplication.java",
+      "sha256": "87660e83311ccb6d3b47ef48113106d75d13f82335381e680307750f6fce563f"
+    },
+    {
+      "file": "services/alert-service/src/main/java/com/climateguard/alert/api/AlertController.java",
+      "sha256": "9a9b6f59a697d5adc60352668b1678bd4ec164a7dc794bf258350c0555954150"
+    },
+    {
+      "file": "services/alert-service/src/main/java/com/climateguard/alert/api/ApiExceptionHandler.java",
+      "sha256": "9745b056fb915d6f80e4b6dde959ecea521afbefe195726905ce9305018da968"
+    },
+    {
+      "file": "services/alert-service/src/main/java/com/climateguard/alert/api/EvaluationConflictHandler.java",
+      "sha256": "7f733181effeafeb73c0e32bc3919562d3167b11029ff14771adb41b97379c46"
+    },
+    {
+      "file": "services/alert-service/src/main/java/com/climateguard/alert/config/SecurityConfig.java",
+      "sha256": "91437114523156059196513b6c64b44aaa129dc3c57b2ec6e2eb22a336f90e7c"
+    },
+    {
+      "file": "services/alert-service/src/main/java/com/climateguard/alert/domain/Alert.java",
+      "sha256": "da224dc133d072ca2fdca99fd18ee07346d43dd8f98a5ca9eaa50034beb426f2"
+    },
+    {
+      "file": "services/alert-service/src/main/java/com/climateguard/alert/domain/ReadingEvaluation.java",
+      "sha256": "bbebc909e81a9c68da84cf0a405932ca21e56f85d821a2c44de44475282d0926"
+    },
+    {
+      "file": "services/alert-service/src/main/java/com/climateguard/alert/domain/SensorReadingType.java",
+      "sha256": "f53ff539906dcefcb962c134a79461a9408dfe0acaf0c1b4c45047603fe2dfe3"
+    },
+    {
+      "file": "services/alert-service/src/main/java/com/climateguard/alert/repository/AlertRepository.java",
+      "sha256": "6d4063815ed75d5cdfac60749c7f2430423a265b612d6cce48bf127cbb785cb9"
+    },
+    {
+      "file": "services/alert-service/src/main/java/com/climateguard/alert/repository/ReadingEvaluationRepository.java",
+      "sha256": "5eb66c34bfb117b8de555c95fdcb4ef9a7810eb35ca5a0cc4009452f47b97586"
+    },
+    {
+      "file": "services/alert-service/src/main/java/com/climateguard/alert/service/AlertService.java",
+      "sha256": "de82f219ed57338bd7dd3b0b82697aeaadbb27d682cb5492e53c58938fdfb898"
+    },
+    {
+      "file": "services/alert-service/src/main/java/com/climateguard/alert/service/ReadingEvaluationService.java",
+      "sha256": "eb0520c4d42b68bb5c751a1fa80d0dee94f03f1b09c34e50b790966294b385e8"
+    },
+    {
+      "file": "services/alert-service/src/main/java/com/climateguard/alert/service/RuleProvider.java",
+      "sha256": "30446abd9baf7367bc86273693c32f5b2609222fbef4de2f979437e6a25b833f"
+    },
+    {
+      "file": "services/alert-service/src/main/resources/application.properties",
+      "sha256": "60ab887535fba5988349f5d282ce3fd260a82f8b304b2a53fc9d0157b92a581e"
+    },
+    {
+      "file": "services/alert-service/src/main/resources/db/migration/V1__create_alerts_table.sql",
+      "sha256": "67fc7165b42549397e6e7ff4dcf34f01462a6e6bcc79a631987170caad699cb6"
+    },
+    {
+      "file": "services/alert-service/src/main/resources/db/migration/V2__persistent_reading_evaluation.sql",
+      "sha256": "9110efdd01bf7a28851cfbc1ca67a3b53a8465706cf8d009057478448982b938"
+    },
+    {
+      "file": "services/alert-service/src/test/java/com/climateguard/alert/AlertServiceApplicationTests.java",
+      "sha256": "27728a6cab896c39df7792b287ab667baabfbe445820703cac4d23e57189ef36"
+    },
+    {
+      "file": "services/alert-service/src/test/java/com/climateguard/alert/api/AlertControllerTests.java",
+      "sha256": "e7b9ac7102c9a0be1925923f2b2f2f6bac4698703867fc0da11ff8b18e128eae"
+    },
+    {
+      "file": "services/alert-service/src/test/java/com/climateguard/alert/service/RuleBoundaryTests.java",
+      "sha256": "c01f812acbbab301d46975539e6a4863e096ae82474df8e965e68ff9328042db"
+    },
+    {
+      "file": "services/alert-service/src/test/resources/application.properties",
+      "sha256": "5ee90bc91b3966987141e7bd6f809556f4bc0e70386349ae15c34278ab77bdc6"
+    },
+    {
+      "file": "services/alert-service/start-local.cjs",
+      "sha256": "235d2579d04439f066d6083dd1aee513141c2555a8d20075ad064ab04128e7cf"
+    },
+    {
+      "file": "services/audit-service/.dockerignore",
+      "sha256": "57ce708131a3184b6f6474e37f2d2e88fb19228066d8d4b6cd9c6af0c59e4b76"
+    },
+    {
+      "file": "services/audit-service/Dockerfile",
+      "sha256": "8c00124fc862a3c5d15bc3ada24f67d57a38fd7345ade841df2039fa8d61ebf7"
+    },
+    {
+      "file": "services/audit-service/README.local.md",
+      "sha256": "ea9c516b56900b8e554c25c98f6e143c66f86cb8cfd5bcc93363f4abfac8b1f5"
+    },
+    {
+      "file": "services/audit-service/app/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "services/audit-service/app/main.py",
+      "sha256": "00cda973aa7e473c83809f7eb5fa2f3e260f8c3e7e99f9da60b5c536f568b587"
+    },
+    {
+      "file": "services/audit-service/configure-local.cjs",
+      "sha256": "5e51ff6769d277d9c2ac62d940277d7b80edd62e777458c38888e22304fbfe09"
+    },
+    {
+      "file": "services/audit-service/docker-compose.local.yml",
+      "sha256": "561803b84614e0f556d787c2f834f6fdad4a7eb36fc38f171eafdfb7fc1bb482"
+    },
+    {
+      "file": "services/audit-service/requirements.txt",
+      "sha256": "c0baa815c5d38ba526c671daf97970807dc2ddb1885dc4bc1759d2af866f150e"
+    },
+    {
+      "file": "services/audit-service/tests/test_audit.py",
+      "sha256": "209ade1be96cc8b9b5bc4aae79ed9c910c67e1abebd3d9a2bcac51e43c9dc759"
+    },
+    {
+      "file": "services/audit-service/tests/validate-local.cjs",
+      "sha256": "35f7c35603cd932d41b18844fdf55d2cfc5346e733efcc4698a61c71303e5a43"
+    },
+    {
+      "file": "services/auth-service/.dockerignore",
+      "sha256": "36717989eb4d69fa0b8a553743af9222ce3029b216156817faa6bc31bc8b4cf0"
+    },
+    {
+      "file": "services/auth-service/.gitattributes",
+      "sha256": "d60f352d0db1404c70afb4bb8b2ca3fd1c610572aa40720e8a0b7baa7885418c"
+    },
+    {
+      "file": "services/auth-service/.oxlintrc.json",
+      "sha256": "92720f97aa024f019bc61058826ed5428c7d09dda98868d56487e873e3e8e21c"
+    },
+    {
+      "file": "services/auth-service/.prettierrc",
+      "sha256": "e51419e8206a0a5493e85ef1f4dea080982dc9187992bb253220a93d0784f6b2"
+    },
+    {
+      "file": "services/auth-service/Dockerfile",
+      "sha256": "3968df2cc9cbb44e5b4e3dd15d6284b6eb5f2739d08ba50f9558090cb6211216"
+    },
+    {
+      "file": "services/auth-service/OAUTH.integration.md",
+      "sha256": "871ae184d882e5ef56bc3fe05fbe45e0d4dafb9738499d3d4a4d5dcc00f96fd2"
+    },
+    {
+      "file": "services/auth-service/README.md",
+      "sha256": "51614a9ed1210b2f4fc73baa22e1da88494991143415590dc062bcc6660321c0"
+    },
+    {
+      "file": "services/auth-service/jest.config.ts",
+      "sha256": "0c8e1b242cf5bb73d9ed4cb016157e2793722262205404c4e8f9a1ef5ac63938"
+    },
+    {
+      "file": "services/auth-service/nest-cli.json",
+      "sha256": "bcb15e3049ff5d131762d2bfe3a6f917c3c64c83ac772467a4073975cd423b5b"
+    },
+    {
+      "file": "services/auth-service/package-lock.json",
+      "sha256": "961aae25f2aaefd9f650d6d3fd0fd86256d76c26e6f8c1b9cd3276ce27c3356b"
+    },
+    {
+      "file": "services/auth-service/package.json",
+      "sha256": "641564387ff05b447ab2e22c18a6a6992a735bc58a53d43ad242f72d75c263a2"
+    },
+    {
+      "file": "services/auth-service/src/app.controller.spec.ts",
+      "sha256": "88faf5523fd7f5dae5a6c78be2dd1709eb6c20ee82c64fc399f8a2e8fb767527"
+    },
+    {
+      "file": "services/auth-service/src/app.controller.ts",
+      "sha256": "260f889b9e2b69f77be1155348eb345166aec664b3efff6720053c6844a41f28"
+    },
+    {
+      "file": "services/auth-service/src/app.module.ts",
+      "sha256": "b43883aa1f471a1aba120a150087abb13379a2e4c9f1ccd7a0436dc6709057a6"
+    },
+    {
+      "file": "services/auth-service/src/app.service.ts",
+      "sha256": "eaf8514ce110fa428a93a27408df4d06d133dbd9ed0a775c315ddfdd507853a9"
+    },
+    {
+      "file": "services/auth-service/src/auth/auth.controller.spec.ts",
+      "sha256": "1191d565200c6c7ca6a2ff20d61b846555f7545dd41c8c8e8ea6c65ba557087b"
+    },
+    {
+      "file": "services/auth-service/src/auth/auth.controller.ts",
+      "sha256": "ba36c7bdacd35e25f0fb2e3695965dd1884311045321adb4c4e8585826602633"
+    },
+    {
+      "file": "services/auth-service/src/auth/auth.module.ts",
+      "sha256": "8ea2ebdc7fc23dc90b0ba1d43571571ca9107e0ef3a4131a0a53305ac8df3d0e"
+    },
+    {
+      "file": "services/auth-service/src/auth/auth.service.spec.ts",
+      "sha256": "42c8e9d4939e5d96e5bedc75f8b9a632f536a8975044ae74cda10cc56ddeb67f"
+    },
+    {
+      "file": "services/auth-service/src/auth/auth.service.ts",
+      "sha256": "571ec0d235ed66f54a0f60fef1446532beef729c03d7a804e7794e3d6253c0bb"
+    },
+    {
+      "file": "services/auth-service/src/auth/decorators/roles.decorator.ts",
+      "sha256": "d31e7e597492bb9e3c79624c24b715bf31558924c356918c2e212333320c8937"
+    },
+    {
+      "file": "services/auth-service/src/auth/dto/login-request.dto.ts",
+      "sha256": "2937544bee48fd36295e63339ad9963cd5dfb007565091bc824c2aed0c8bd282"
+    },
+    {
+      "file": "services/auth-service/src/auth/dto/login-response.dto.ts",
+      "sha256": "9b32837c0d6701ec998375fa67d9cab8a9a65f7337c3fa6d6b2c28f08e44278f"
+    },
+    {
+      "file": "services/auth-service/src/auth/dto/refresh-token-request.dto.ts",
+      "sha256": "46a113708e242d5a0cbed02b7d55d30cffdf403b9fb22b2aa765195a26af3b6e"
+    },
+    {
+      "file": "services/auth-service/src/auth/entities/external-account.entity.ts",
+      "sha256": "24a272b64aa2b64f9f083f40c025bea6699b5c8f8c455e2bc1e0f6fc70ba1f32"
+    },
+    {
+      "file": "services/auth-service/src/auth/entities/refresh-token.entity.ts",
+      "sha256": "5349c99724caf4f54a10270bcf0e85ec43c85f850c2f7a446ab8fc5f0856252b"
+    },
+    {
+      "file": "services/auth-service/src/auth/guards/jwt-auth.guard.ts",
+      "sha256": "ad9ad7d381f17b064be49649f3ae3fef747048155bf9ca6714e497b7ef46d522"
+    },
+    {
+      "file": "services/auth-service/src/auth/guards/roles.guard.spec.ts",
+      "sha256": "629291cbd1edb142791aec288a0d8e1077596b50521cf43a9b40c2e16809355a"
+    },
+    {
+      "file": "services/auth-service/src/auth/guards/roles.guard.ts",
+      "sha256": "f68939d354ef016d76effc95b822a7b5fa338f08564bdddb38f4238ce2f220a7"
+    },
+    {
+      "file": "services/auth-service/src/auth/interfaces/authenticated-user.interface.ts",
+      "sha256": "bfc40544195b63e4f33246ea69317794cd46cac93844dc183f2e42d69616a65f"
+    },
+    {
+      "file": "services/auth-service/src/auth/interfaces/external-profile.interface.ts",
+      "sha256": "9a995052b5b10e447c2ab7b29ea1048e38cd095a525ebb92fe949f8be1d7795c"
+    },
+    {
+      "file": "services/auth-service/src/auth/oauth/oauth-flow.entity.ts",
+      "sha256": "8e5d63ac427592a17f6e0bddc306b0201de6c44c3834d4afdd6612f0125dbf58"
+    },
+    {
+      "file": "services/auth-service/src/auth/oauth/oauth-provider.service.spec.ts",
+      "sha256": "dad4c773b15f08a82b29c7ecbc1af5e69a8945d4949fe0d38b769759778f04e7"
+    },
+    {
+      "file": "services/auth-service/src/auth/oauth/oauth-provider.service.ts",
+      "sha256": "2a504b3434dd832a3575ff5f0f37440b95d3e99b71f5c0d2cc974bd02da560d1"
+    },
+    {
+      "file": "services/auth-service/src/auth/oauth/oauth.controller.ts",
+      "sha256": "9dbdea5ceefb8f9900f67b511d0d5483cd09f6895f179f5f08bf93c76db0cc1f"
+    },
+    {
+      "file": "services/auth-service/src/auth/oauth/oauth.service.spec.ts",
+      "sha256": "710d8c9cb6265a9b21b33e44d757d3d5c75d50eafeabc5b46a458005c9ac7fad"
+    },
+    {
+      "file": "services/auth-service/src/auth/oauth/oauth.service.ts",
+      "sha256": "da214e701e15dcbc010f20623ea50388cd92548223b41632d395fe14ce57864c"
+    },
+    {
+      "file": "services/auth-service/src/auth/permissions.ts",
+      "sha256": "d43fcf486af2ce985394c9201cab0e468031c582dffe57f58c225b273664c1b1"
+    },
+    {
+      "file": "services/auth-service/src/auth/strategies/jwt.strategy.spec.ts",
+      "sha256": "866bf0545432ffecd94827cf8017d8304edd4ff43d4acac8b2a5af6842dcaad2"
+    },
+    {
+      "file": "services/auth-service/src/auth/strategies/jwt.strategy.ts",
+      "sha256": "a02833875874f1b59809804d8bdae6564801afee56b921ea7b4dbbff06488a51"
+    },
+    {
+      "file": "services/auth-service/src/database/data-source.ts",
+      "sha256": "7a5fb606045eeb7a1d50fc98588bcaf41786186ff744620bff1ae0c144806e33"
+    },
+    {
+      "file": "services/auth-service/src/database/database-seeder.service.ts",
+      "sha256": "812067e8a3466baffa31fceac02306168dfaf2940f22301b14ac75a4f9031c31"
+    },
+    {
+      "file": "services/auth-service/src/database/database.module.ts",
+      "sha256": "89614b75f2a42c9192eaebdb8251c6975856670549a75315ac72f8cf136ee18d"
+    },
+    {
+      "file": "services/auth-service/src/database/migrations/1792810077281-InitialAuthSchema.ts",
+      "sha256": "1ac7d964b4c423d55157b636d18194628ca6c7764e710f4b2646010d044118aa"
+    },
+    {
+      "file": "services/auth-service/src/database/migrations/1792813002412-SeedInitialRoles.ts",
+      "sha256": "95db86c13a7a08be954d49e499822bb3d19c87ea9edb24e93d2b8c00cd9fa8f1"
+    },
+    {
+      "file": "services/auth-service/src/database/migrations/1793937600000-AddExternalAuthentication.ts",
+      "sha256": "6429f207c0701456616bfbf1ecdbc6d3c469579e75d3a82861beed840df48368"
+    },
+    {
+      "file": "services/auth-service/src/database/migrations/1793937700000-SecureOAuthFlows.ts",
+      "sha256": "3731ca1e1a3396beec89fd0fc675a486ebb41d24a00580ab611461da16a16573"
+    },
+    {
+      "file": "services/auth-service/src/database/schema.ts",
+      "sha256": "e9c8e671f974e03249680802ebe0bada802955e9a9e8b946b1335220ffab4fde"
+    },
+    {
+      "file": "services/auth-service/src/health/health.controller.ts",
+      "sha256": "a18a3dbf51da2aa44173f60d3d1e00636776e4f11acc60a2b01af497d95da68b"
+    },
+    {
+      "file": "services/auth-service/src/health/health.module.ts",
+      "sha256": "65d1825f89d14d5bca648252e273cd9617f45c5c37a4491adee69d8f47eaa065"
+    },
+    {
+      "file": "services/auth-service/src/main.ts",
+      "sha256": "88331b431ddb541e781d06e567e5eb53aab3cee8bf999c221189aa3e182b2758"
+    },
+    {
+      "file": "services/auth-service/src/roles/auth-permissions.spec.ts",
+      "sha256": "086b8f7aff7e1b400eb5ef79491aa340a447c86ddf3e1f57792a100b8b46b49c"
+    },
+    {
+      "file": "services/auth-service/src/roles/auth-permissions.ts",
+      "sha256": "2480bd8c9e40886ad17622d09e173964e78379aaea70d0cc65c8844211c40912"
+    },
+    {
+      "file": "services/auth-service/src/roles/dto/role-response.dto.ts",
+      "sha256": "582977d8484fdb1a705a1dfe0dff1606e343f9325d8fc9360ee53c57a1eadcca"
+    },
+    {
+      "file": "services/auth-service/src/roles/entities/role.entity.ts",
+      "sha256": "1b30dc027141c673d592d975e4178e943155aa6d91f46482b3629452b903ec56"
+    },
+    {
+      "file": "services/auth-service/src/roles/roles.controller.ts",
+      "sha256": "3a39d2e83209eda9e77f459122d8a90716a54cfd035b68dbadad93838e819672"
+    },
+    {
+      "file": "services/auth-service/src/roles/roles.module.ts",
+      "sha256": "d9e9201224f089b27f421e0e9421ec523194aecf2baee529c5c07eb3ee938437"
+    },
+    {
+      "file": "services/auth-service/src/roles/roles.service.ts",
+      "sha256": "32e71d6c7b9a17acfe539fa3b17b5e1d3847f6b592c77dfa66eaf3a247a51745"
+    },
+    {
+      "file": "services/auth-service/src/users/dto/change-user-status-request.dto.ts",
+      "sha256": "95bddd303d09e45eab516a1854e78181915404f4e4dad3d499de3eaeb832d5db"
+    },
+    {
+      "file": "services/auth-service/src/users/dto/create-user-request.dto.ts",
+      "sha256": "fbfb6727a4eedc8f13faeed20d76a2366180a2661734d58f2e1715718a3b6e4d"
+    },
+    {
+      "file": "services/auth-service/src/users/dto/update-user-request.dto.ts",
+      "sha256": "dde8b5c6c4ac35e6554b3e98cccd9c94773fd207cc7a770da3e7ccfd16c1a000"
+    },
+    {
+      "file": "services/auth-service/src/users/dto/user-response.dto.ts",
+      "sha256": "151f055c168ec073e361e784be40ae842fb6fe746a1c5bee800c9c8c2b516ad3"
+    },
+    {
+      "file": "services/auth-service/src/users/entities/user.entity.ts",
+      "sha256": "0ffb4a35a2e9ec121e8c6cdd7983639a03eb0178de5ab712f503443d8edc2a07"
+    },
+    {
+      "file": "services/auth-service/src/users/users.controller.ts",
+      "sha256": "6b52c22813e2f617eaaf9fc83a850b324b6a7c7a30e01f1e9258f8e80eae560e"
+    },
+    {
+      "file": "services/auth-service/src/users/users.module.ts",
+      "sha256": "67964ba3736b87bcd2cbc26d8e4721298803a289d0cfc85e57eed4e019bf9562"
+    },
+    {
+      "file": "services/auth-service/src/users/users.service.spec.ts",
+      "sha256": "2a7f36e9e4e52a0b0a0dcecc14bdd006bac3b87ac88f76a599160bfeb7bcbb6b"
+    },
+    {
+      "file": "services/auth-service/src/users/users.service.ts",
+      "sha256": "54d2db8c6f55b6d75f16552b4e51c72c708f472075f26839d471cb85c454b73b"
+    },
+    {
+      "file": "services/auth-service/test/admin-invariants.local.cjs",
+      "sha256": "f8677555cb47b5233a6fd8f702b79bbd4fcd4568be11112846d04edc861a8605"
+    },
+    {
+      "file": "services/auth-service/test/app.e2e-spec.ts",
+      "sha256": "c875e581ca1c51e3c2c99108c599d6f015c6ab9320aed9a23eb7bbcd3f5c8969"
+    },
+    {
+      "file": "services/auth-service/test/jest-e2e.json",
+      "sha256": "8263868744540f44fb89e142ba721cd92f64918b6b97b115f1f672dba5a1d2bc"
+    },
+    {
+      "file": "services/auth-service/tsconfig.build.json",
+      "sha256": "4d3e73204cf9fbad4e5396f70aab7aa88cb1e93f0ab307123c3265b9c74e1504"
+    },
+    {
+      "file": "services/auth-service/tsconfig.json",
+      "sha256": "6c29e54dde3a06221f00cae3613f7890efaa634290d66545cfcdc4a16dcdb996"
+    },
+    {
+      "file": "services/community-service/.dockerignore",
+      "sha256": "06de11dc950588c2c3064b8efeb4075fa1b32a5371138eeb1e5797ee12b370ef"
+    },
+    {
+      "file": "services/community-service/ClimateGuard.Community.Api/ClimateGuard.Community.Api.csproj",
+      "sha256": "3c0bd996ed95c78417bb7c6fcb30323fd8a354948ed870cc91f8247f2f64788e"
+    },
+    {
+      "file": "services/community-service/ClimateGuard.Community.Api/Controllers/CommunitiesController.cs",
+      "sha256": "726290bc9802110f5ca4a4bafb172a31c98f77379509e277759f2b066a2c0a2e"
+    },
+    {
+      "file": "services/community-service/ClimateGuard.Community.Api/Program.cs",
+      "sha256": "65c4f6d87eb62940e3bc4856cd5e80a0207aa6b569f35ee0269cd4cd7c770ca0"
+    },
+    {
+      "file": "services/community-service/ClimateGuard.Community.Api/Properties/launchSettings.json",
+      "sha256": "3e8d4a38c54f62cbec4bd3fb50307323861bff661bf9ffc392da4a7ea3c714e4"
+    },
+    {
+      "file": "services/community-service/ClimateGuard.Community.Application/Abstractions/Communities/ICommunityService.cs",
+      "sha256": "1cae2f832acb86d5019bb6b90e6eef7e04be3be650c14741b2c21dc1bc4d1648"
+    },
+    {
+      "file": "services/community-service/ClimateGuard.Community.Application/ClimateGuard.Community.Application.csproj",
+      "sha256": "fbfb9fb7fc7c469b004ad7144eb3964a45e25b1d74b0d3369a261b1848c0735d"
+    },
+    {
+      "file": "services/community-service/ClimateGuard.Community.Application/Contracts/Communities/ChangeCommunityStatusRequest.cs",
+      "sha256": "960ce8e6f689fe70d8715c3d86c503656ad52236ee3e97b0087719e771355056"
+    },
+    {
+      "file": "services/community-service/ClimateGuard.Community.Application/Contracts/Communities/CommunityDto.cs",
+      "sha256": "5f308ea259e9f0332cc13beadc03f3c0062c9407aef6bdc08d7bb7ea296ee08d"
+    },
+    {
+      "file": "services/community-service/ClimateGuard.Community.Application/Contracts/Communities/CommunityFilterRequest.cs",
+      "sha256": "1d1ce04dc23371386a9526889843957d2cef0d7a1198a4e1bb371c60b6bc63e3"
+    },
+    {
+      "file": "services/community-service/ClimateGuard.Community.Application/Contracts/Communities/CreateCommunityRequest.cs",
+      "sha256": "439eb2351b4dffb6f8033319c5fe7da683032b15f712034e8bbc58943e170842"
+    },
+    {
+      "file": "services/community-service/ClimateGuard.Community.Application/Contracts/Communities/UpdateCommunityRequest.cs",
+      "sha256": "d12ca267c04958867887a500c2deb9ddfce0a3d5b8feac1ec7972462e2a4cb1a"
+    },
+    {
+      "file": "services/community-service/ClimateGuard.Community.Domain/ClimateGuard.Community.Domain.csproj",
+      "sha256": "61e3f2d043e37f0db4be1d8083dd31bebbfbb8fde2cf027327db2556c16bc385"
+    },
+    {
+      "file": "services/community-service/ClimateGuard.Community.Domain/Entities/Community.cs",
+      "sha256": "2c260ce16e9b17a3008a2237505cbc5e62e37b4471e40ea717c532755317a441"
+    },
+    {
+      "file": "services/community-service/ClimateGuard.Community.Infrastructure/ClimateGuard.Community.Infrastructure.csproj",
+      "sha256": "90e814e938590a6543c8e75d8613d701d8da36ff238278bdb00d9423c9d8795a"
+    },
+    {
+      "file": "services/community-service/ClimateGuard.Community.Infrastructure/Persistence/CommunityDbContext.cs",
+      "sha256": "9826cf74c73f6311538fe932fe5c3338a5e91074652662044974bce6cd1eb6ae"
+    },
+    {
+      "file": "services/community-service/ClimateGuard.Community.Infrastructure/Persistence/Configurations/CommunityConfiguration.cs",
+      "sha256": "144d6cf90cac56c245d530033296f2e6c7cfa0fb8ff4ab697b68a40e75b93c4b"
+    },
+    {
+      "file": "services/community-service/ClimateGuard.Community.Infrastructure/Persistence/Migrations/20261029033106_InitialCommunitySchema.Designer.cs",
+      "sha256": "78c4505546d8ba1d17dc87aa141faf7bda549bb2d96e6322e38b2dc1391b6a03"
+    },
+    {
+      "file": "services/community-service/ClimateGuard.Community.Infrastructure/Persistence/Migrations/20261029033106_InitialCommunitySchema.cs",
+      "sha256": "4e32477775c86eb48539973e3aee2213e28165e53e1f31bbf564dd6652b12485"
+    },
+    {
+      "file": "services/community-service/ClimateGuard.Community.Infrastructure/Persistence/Migrations/CommunityDbContextModelSnapshot.cs",
+      "sha256": "68163159d3f90f6ee255218ffd02f52552886fe98a95b6b55f60ba315543b60f"
+    },
+    {
+      "file": "services/community-service/ClimateGuard.Community.Infrastructure/Services/Communities/CommunityService.cs",
+      "sha256": "148da66bf41adf869bdeb4789b593c43e6ddc57b14bdc434e40afb8acec6efa5"
+    },
+    {
+      "file": "services/community-service/ClimateGuard.Community.Tests/ClimateGuard.Community.Tests.csproj",
+      "sha256": "24df01084ad8dad87bb09a6a3416db229fd246a4ff2b03324fe0f7f00f04ada0"
+    },
+    {
+      "file": "services/community-service/ClimateGuard.Community.Tests/CommunityServiceTests.cs",
+      "sha256": "223d68548df0aaeeaaeedcdb987936ff60d4c4d731016e1d23feff81921fc97d"
+    },
+    {
+      "file": "services/community-service/ClimateGuard.Community.slnx",
+      "sha256": "55dc2d0cba8fd5a9486decb365b5cc340bd3317354d3e1e4ece252b72f23485c"
+    },
+    {
+      "file": "services/community-service/Dockerfile",
+      "sha256": "fb5af7b09c9d36433259e070f5ef22f65170ee5c3f6214c7c42fb15223244e9d"
+    },
+    {
+      "file": "services/report-service/.dockerignore",
+      "sha256": "182e41b2c03619f636a5cf1ddb1c73279b48d368169e17c5b091e5fa8800c8fc"
+    },
+    {
+      "file": "services/report-service/Dockerfile",
+      "sha256": "ea4ba06217c0e2f3e60c8a587789fd1db31147c78b31233f5b816f26438baeb8"
+    },
+    {
+      "file": "services/report-service/README.docker.local.md",
+      "sha256": "5ffca39a99b4099dfcd92d1ad02e5e2946c54dc8eab22094da48ab94d86735b3"
+    },
+    {
+      "file": "services/report-service/app/community_client.py",
+      "sha256": "eb39d94cc61ec2c83f24ed7feb77a4142f3ac5125f6d4ecb97199359ca63758e"
+    },
+    {
+      "file": "services/report-service/app/community_mapper.py",
+      "sha256": "e3e249d4312418c61cc93e0dc4a2cb7dc0f38ec82b36872346a1662cd069a6f3"
+    },
+    {
+      "file": "services/report-service/app/config.py",
+      "sha256": "f014d326c914351aa73fd72d74e2914a2ddf2a06d4740a7d4178cd5e71b368e4"
+    },
+    {
+      "file": "services/report-service/app/database.py",
+      "sha256": "f416831a111238f13d8a1c5490e215ac7712ca191d1bc133bd7e324a251d9423"
+    },
+    {
+      "file": "services/report-service/app/main.py",
+      "sha256": "dcf5555508b3a24c2c81c1d0727696a7203a4ccb7da1c6df3eb76fb31d6d2142"
+    },
+    {
+      "file": "services/report-service/app/models.py",
+      "sha256": "975bc18e42b1998e226aa15c59ee111caf6d6dd69556209fcb66bfdabd4d9273"
+    },
+    {
+      "file": "services/report-service/app/pdf_generator.py",
+      "sha256": "905120ef24f80cc85cc47c69b2da313243b81526cbc174384d6230953b9ce21a"
+    },
+    {
+      "file": "services/report-service/app/reading_filters.py",
+      "sha256": "0cf177d4f29eedca7d1976af94ed49e0124b52c6d77f9462f3df66cc74aae54a"
+    },
+    {
+      "file": "services/report-service/app/report_download.py",
+      "sha256": "5581eda31fbd01287647912d73d8184f8fde173eaf395cb54ca9d6ff62fa294b"
+    },
+    {
+      "file": "services/report-service/app/report_filters.py",
+      "sha256": "4c717b8ab0d86032ad698b3b660d2f725ace8344efe77341e8038d15914249d5"
+    },
+    {
+      "file": "services/report-service/app/report_service.py",
+      "sha256": "ebdf4bcc75add11be91f61a91e3fe6a9f422b2e00ffe5734d606e089e1d2de89"
+    },
+    {
+      "file": "services/report-service/app/repository.py",
+      "sha256": "b564ece145fb8c6c267db44757905207e2f06ed7b5fa7d79905b325e11b9c2a1"
+    },
+    {
+      "file": "services/report-service/app/security.py",
+      "sha256": "7b167560845925309c83ed4930b7b03c577b974bfd7368949c5d6ab2fc1c46b5"
+    },
+    {
+      "file": "services/report-service/app/sensor_client.py",
+      "sha256": "6f6bfd3e6e3c279449fe6b47b17570ee24a8ed806f5c514af253dba600b7e719"
+    },
+    {
+      "file": "services/report-service/app/sensor_mapper.py",
+      "sha256": "b6b3ded85bd7a99e7e09e1d961ec922c84b1e15c6db5c6253daac7fa046d6f9b"
+    },
+    {
+      "file": "services/report-service/app/templates/communities.html",
+      "sha256": "60cb08e9ee168497442904bc87d0a7162ce1de1d2925a5a1a8ddf364f5475700"
+    },
+    {
+      "file": "services/report-service/app/templates/readings.html",
+      "sha256": "144bafdf3839403067209fa67c28d1a5525739ef0cb790f5fa3cf537fd1437da"
+    },
+    {
+      "file": "services/report-service/app/templates/sensors.html",
+      "sha256": "15750d07f49777bdae8e6b7d05cc7f79707c14872f5bbcdd877fd9350b8bdb50"
+    },
+    {
+      "file": "services/report-service/docker-compose.local.yml",
+      "sha256": "3915a49b84184fffb26a51377ee6032b557f4117fd891d4c9a559bbdbe2ac4a5"
+    },
+    {
+      "file": "services/report-service/requirements.txt",
+      "sha256": "c83d4b4b4f72cce4636f550a336fd439db02fea68b0a7cf3ce3c2ce8d4904189"
+    },
+    {
+      "file": "services/report-service/tests/test_report_integration.py",
+      "sha256": "453c8424135522092e39c3e0d9e6b3474c312b2e1262c94fcb4f4e262f4915bb"
+    },
+    {
+      "file": "services/report-service/tests/test_report_mappers.py",
+      "sha256": "3ed7490349ef90141f5a0405332aed6cca08062e9338df2ee9181b8a567a0042"
+    },
+    {
+      "file": "services/sensor-service/ClimateGuard.Sensor.Api/ClimateGuard.Sensor.Api.csproj",
+      "sha256": "f8d192ae5e73d515ac178456fa087962fcc46489967e0345fe43e095b92c91a7"
+    },
+    {
+      "file": "services/sensor-service/ClimateGuard.Sensor.Api/ClimateGuard.Sensor.Api.http",
+      "sha256": "074c93c9f4b74308d104ce583b3ebaa768b8e0dd6c9792961f5084782391169e"
+    },
+    {
+      "file": "services/sensor-service/ClimateGuard.Sensor.Api/Endpoints/SensorEndpoints.cs",
+      "sha256": "2fca20ad07e1d2eb2c9fcc5fb046dd1c17f1a7fda61544905de91d8aca7105ca"
+    },
+    {
+      "file": "services/sensor-service/ClimateGuard.Sensor.Api/Program.cs",
+      "sha256": "e62793075bf5e2226785452d1bdb9eafe945edf251f011453d6a2a215c768aac"
+    },
+    {
+      "file": "services/sensor-service/ClimateGuard.Sensor.Api/Properties/launchSettings.json",
+      "sha256": "57a240c6cfaf367dd50031f254f5e038fd10c1b1d85f15757f78809de3bfe0ea"
+    },
+    {
+      "file": "services/sensor-service/ClimateGuard.Sensor.Application/Class1.cs",
+      "sha256": "a787cb197c3430bea43bbc2271dd73db6c553b006ccf97ef1d26419a1d9ca045"
+    },
+    {
+      "file": "services/sensor-service/ClimateGuard.Sensor.Application/ClimateGuard.Sensor.Application.csproj",
+      "sha256": "9c30134912a247109a8c2f8ea9aa5141024823b94a7a14d1582420903e8ee0ae"
+    },
+    {
+      "file": "services/sensor-service/ClimateGuard.Sensor.Application/Validation/SensorValidator.cs",
+      "sha256": "e46e00759459da389eb359b3ab38256f4ba8896470171f89ca0840f5070e77d2"
+    },
+    {
+      "file": "services/sensor-service/ClimateGuard.Sensor.Domain/Class1.cs",
+      "sha256": "7cc86e4bda9561ee266288247deae938d431fd99d493649050b300a13a5c0ca6"
+    },
+    {
+      "file": "services/sensor-service/ClimateGuard.Sensor.Domain/ClimateGuard.Sensor.Domain.csproj",
+      "sha256": "61e3f2d043e37f0db4be1d8083dd31bebbfbb8fde2cf027327db2556c16bc385"
+    },
+    {
+      "file": "services/sensor-service/ClimateGuard.Sensor.Domain/Entities/Sensor.cs",
+      "sha256": "f3f4bbb6c6eb1adb104fc1e0c68dd4a4b9725124125b695bb12cf257ba37bb83"
+    },
+    {
+      "file": "services/sensor-service/ClimateGuard.Sensor.Domain/Entities/SensorReading.cs",
+      "sha256": "fe8cdd96ca847b1fc5eeaab2a52808096286a36e670738482badc1cc08489386"
+    },
+    {
+      "file": "services/sensor-service/ClimateGuard.Sensor.Domain/Entities/SensorType.cs",
+      "sha256": "407af586833be3cfb38a1a0a761e878b7c7498a1fb8741b913c5adf25d8adfbc"
+    },
+    {
+      "file": "services/sensor-service/ClimateGuard.Sensor.Infrastructure/Class1.cs",
+      "sha256": "9c3f12d7277cb7de2bc1d721f9f360f83c2e8b722df6ace653d585a78b7b95d9"
+    },
+    {
+      "file": "services/sensor-service/ClimateGuard.Sensor.Infrastructure/ClimateGuard.Sensor.Infrastructure.csproj",
+      "sha256": "393c3ca113dc9dce384505565d18d46132df91bcfd7ffed56dc33848cf460143"
+    },
+    {
+      "file": "services/sensor-service/ClimateGuard.Sensor.Infrastructure/Persistence/Migrations/20261024023512_InitialSensorSchema.Designer.cs",
+      "sha256": "2a4735126db2009c5990c2644f0ad30939eb3615b106609b90cf0cc90ece0da7"
+    },
+    {
+      "file": "services/sensor-service/ClimateGuard.Sensor.Infrastructure/Persistence/Migrations/20261024023512_InitialSensorSchema.cs",
+      "sha256": "63cbe347a41e39391746ab5a671f1ee511b05d97c28fb35da82ee3a4b925e341"
+    },
+    {
+      "file": "services/sensor-service/ClimateGuard.Sensor.Infrastructure/Persistence/Migrations/SensorDbContextModelSnapshot.cs",
+      "sha256": "e42c5fabbebe8a2d305d87bab4a16b2873e5442f3964780a030e9c076379c665"
+    },
+    {
+      "file": "services/sensor-service/ClimateGuard.Sensor.Infrastructure/Persistence/SensorDbContext.cs",
+      "sha256": "789101392257f56f963d0e130321303bbd9834a3da6b4dcaa057eb00cd7f4308"
+    },
+    {
+      "file": "services/sensor-service/ClimateGuard.Sensor.slnx",
+      "sha256": "c891cc14371e154bac215fae7df188c7e2e720fc8c764882ddf793a71dc35414"
+    },
+    {
+      "file": "services/sensor-service/README.local.md",
+      "sha256": "2864e75e1243fdb6f40b2123a0fcdc245ee7355d3244f0cbfeddea44993ab039"
+    },
+    {
+      "file": "services/sensor-service/STAGE1.local.md",
+      "sha256": "c3553d10b4352ea905f3b27dcb472ff219063506b3d6fd946bf1f1d7477cb64c"
+    },
+    {
+      "file": "services/sensor-service/docker-compose.yml",
+      "sha256": "279a4cea52df00fd029902b36ee96370a75476d67934f32a83b604ae61041099"
+    },
+    {
+      "file": "services/sensor-service/tests/ClimateGuard.Sensor.Tests/ClimateGuard.Sensor.Tests.csproj",
+      "sha256": "b655fb97bf0fba9f6b2241d39e321b4e76bd7ee2ae0a933f535db3229f218319"
+    },
+    {
+      "file": "services/sensor-service/tests/ClimateGuard.Sensor.Tests/CompatibilityTests.cs",
+      "sha256": "78f56f56e30cdef68a1ce5d2cf1f3be09171d7689924f956fe05c8dc3f3d4e5d"
+    },
+    {
+      "file": "services/sensor-service/tests/ClimateGuard.Sensor.Tests/ConfigurationTests.cs",
+      "sha256": "73223fa8cd678a037a3381e8998f4a7c1cc524d9a77c90de6142781d2ca2f48f"
+    },
+    {
+      "file": "services/sensor-service/tests/ClimateGuard.Sensor.Tests/Integration/SensorEndpointsTests.cs",
+      "sha256": "d79a0870c298db2b8dd80fdbf533b8a1bf7e6ef33a7901decf611508677f13a9"
+    },
+    {
+      "file": "services/sensor-service/tests/ClimateGuard.Sensor.Tests/Integration/SensorHealthTests.cs",
+      "sha256": "0166dd04ec7cd68c068893008cf91fb805f5308402bb3619b6c27cf9632d7124"
+    },
+    {
+      "file": "services/sensor-service/tests/ClimateGuard.Sensor.Tests/Integration/SensorWebApplicationFactory.cs",
+      "sha256": "353e5668f849d154b7564e368a78cea9a33b949a2ddb371ca26d1484012d1ef1"
+    },
+    {
+      "file": "services/sensor-service/tests/ClimateGuard.Sensor.Tests/UnitTest1.cs",
+      "sha256": "eaf486750f96aa99763ce7ebc2735399a32c22141b089f98bb42ec760e3cbbc5"
+    }
+  ],
+  "images": [
+    {
+      "name": "frontend",
+      "image": "climateguard/frontend:release-20261106-f0048fcb2ff2",
+      "id": "sha256:21379a9577a5ab5dac974b0bff2f759aca1bfe84ba6fae14ce983d28d84c9e16",
+      "size": 93522797,
+      "platform": "linux/amd64",
+      "user": "101:101",
+      "repoDigests": [
+        "climateguard/frontend@sha256:21379a9577a5ab5dac974b0bff2f759aca1bfe84ba6fae14ce983d28d84c9e16"
+      ],
+      "elapsedSeconds": 10,
+      "dockerfile": "infrastructure/k8s/images/frontend.Dockerfile",
+      "context": "."
+    },
+    {
+      "name": "gateway",
+      "image": "climateguard/gateway:release-20261106-f0048fcb2ff2",
+      "id": "sha256:80e3cf59bf6fbf53f0190e83acf7c2c7d7882b6dae04c7ad8a95f3d601919e43",
+      "size": 343867923,
+      "platform": "linux/amd64",
+      "user": "1654",
+      "repoDigests": [
+        "climateguard/gateway@sha256:80e3cf59bf6fbf53f0190e83acf7c2c7d7882b6dae04c7ad8a95f3d601919e43"
+      ],
+      "elapsedSeconds": 13,
+      "dockerfile": "infrastructure/k8s/images/gateway.Dockerfile",
+      "context": "."
+    },
+    {
+      "name": "auth-service",
+      "image": "climateguard/auth-service:release-20261106-f0048fcb2ff2",
+      "id": "sha256:c65892f1969cc0d22f90b61be1be91f836bf04d50aed476ac1917d5a8a71292a",
+      "size": 490294244,
+      "platform": "linux/amd64",
+      "user": "node",
+      "repoDigests": [
+        "climateguard/auth-service@sha256:c65892f1969cc0d22f90b61be1be91f836bf04d50aed476ac1917d5a8a71292a"
+      ],
+      "elapsedSeconds": 8,
+      "dockerfile": "infrastructure/k8s/images/auth-service.Dockerfile",
+      "context": "."
+    },
+    {
+      "name": "legacy-api",
+      "image": "climateguard/legacy-api:release-20261106-f0048fcb2ff2",
+      "id": "sha256:55898c1be0518aa89fd0be26b1338b967903d95b378d8a0dd1032d1c63ca785f",
+      "size": 455897979,
+      "platform": "linux/amd64",
+      "user": "1654",
+      "repoDigests": [
+        "climateguard/legacy-api@sha256:55898c1be0518aa89fd0be26b1338b967903d95b378d8a0dd1032d1c63ca785f"
+      ],
+      "elapsedSeconds": 1,
+      "dockerfile": "infrastructure/k8s/images/legacy-api.Dockerfile",
+      "context": "."
+    },
+    {
+      "name": "sensor-service",
+      "image": "climateguard/sensor-service:release-20261106-f0048fcb2ff2",
+      "id": "sha256:fbf890219823c796f40d98153ce7c3446befaec099661fd34f77c7c3448f7f9f",
+      "size": 454794513,
+      "platform": "linux/amd64",
+      "user": "1654",
+      "repoDigests": [
+        "climateguard/sensor-service@sha256:fbf890219823c796f40d98153ce7c3446befaec099661fd34f77c7c3448f7f9f"
+      ],
+      "elapsedSeconds": 1,
+      "dockerfile": "infrastructure/k8s/images/sensor-service.Dockerfile",
+      "context": "."
+    },
+    {
+      "name": "alert-service",
+      "image": "climateguard/alert-service:release-20261106-f0048fcb2ff2",
+      "id": "sha256:7535abac9351bad3556da19e61ab476c3d70acfae7b8ecca589dcd2fb9e453a6",
+      "size": 543576072,
+      "platform": "linux/amd64",
+      "user": "10001:10001",
+      "repoDigests": [
+        "climateguard/alert-service@sha256:7535abac9351bad3556da19e61ab476c3d70acfae7b8ecca589dcd2fb9e453a6"
+      ],
+      "elapsedSeconds": 2,
+      "dockerfile": "infrastructure/k8s/images/alert-service.Dockerfile",
+      "context": "."
+    },
+    {
+      "name": "report-service",
+      "image": "climateguard/report-service:release-20261106-f0048fcb2ff2",
+      "id": "sha256:7eb42562a321476d9a2feaf7aa39b8208036c6f093e3e0cb849b9f1f7523d462",
+      "size": 413543979,
+      "platform": "linux/amd64",
+      "user": "reports",
+      "repoDigests": [
+        "climateguard/report-service@sha256:7eb42562a321476d9a2feaf7aa39b8208036c6f093e3e0cb849b9f1f7523d462"
+      ],
+      "elapsedSeconds": 2,
+      "dockerfile": "services/report-service/Dockerfile",
+      "context": "services/report-service"
+    },
+    {
+      "name": "audit-service",
+      "image": "climateguard/audit-service:release-20261106-f0048fcb2ff2",
+      "id": "sha256:bcd8cb38ee9b9fd5de77964e698dc51527e0472d57e44b04b64f381270b904b4",
+      "size": 239161336,
+      "platform": "linux/amd64",
+      "user": "audit",
+      "repoDigests": [
+        "climateguard/audit-service@sha256:bcd8cb38ee9b9fd5de77964e698dc51527e0472d57e44b04b64f381270b904b4"
+      ],
+      "elapsedSeconds": 1,
+      "dockerfile": "services/audit-service/Dockerfile",
+      "context": "services/audit-service"
+    },
+    {
+      "name": "community-service",
+      "image": "climateguard/community-service:release-20261106-f0048fcb2ff2",
+      "id": "sha256:10c8b95b04703d0588b8f3afa789e87d6142bffa43964b2175fb2f829bd4aeae",
+      "size": 359983947,
+      "platform": "linux/amd64",
+      "user": "1654",
+      "repoDigests": [
+        "climateguard/community-service@sha256:10c8b95b04703d0588b8f3afa789e87d6142bffa43964b2175fb2f829bd4aeae"
+      ],
+      "elapsedSeconds": 1,
+      "dockerfile": "infrastructure/k8s/images/community-service.Dockerfile",
+      "context": "."
+    }
+  ],
+  "published": false,
+  "productionReady": false
+}

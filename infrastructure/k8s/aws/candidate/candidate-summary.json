@@ -1,0 +1,159 @@
+{
+  "domain": "climateguard.garher.lat",
+  "tag": "release-20261106-f0048fcb2ff2",
+  "sourceFingerprint": "f0048fcb2ff219e0903c30027a05e467ed5a95e7c79cf963997be74acb4f45f2",
+  "applicationImages": [
+    {
+      "name": "frontend",
+      "image": "climateguard/frontend:release-20261106-f0048fcb2ff2",
+      "id": "sha256:21379a9577a5ab5dac974b0bff2f759aca1bfe84ba6fae14ce983d28d84c9e16",
+      "size": 93522797,
+      "platform": "linux/amd64",
+      "user": "101:101",
+      "repoDigests": [
+        "climateguard/frontend@sha256:21379a9577a5ab5dac974b0bff2f759aca1bfe84ba6fae14ce983d28d84c9e16"
+      ],
+      "elapsedSeconds": 10,
+      "dockerfile": "infrastructure/k8s/images/frontend.Dockerfile",
+      "context": "."
+    },
+    {
+      "name": "gateway",
+      "image": "climateguard/gateway:release-20261106-f0048fcb2ff2",
+      "id": "sha256:80e3cf59bf6fbf53f0190e83acf7c2c7d7882b6dae04c7ad8a95f3d601919e43",
+      "size": 343867923,
+      "platform": "linux/amd64",
+      "user": "1654",
+      "repoDigests": [
+        "climateguard/gateway@sha256:80e3cf59bf6fbf53f0190e83acf7c2c7d7882b6dae04c7ad8a95f3d601919e43"
+      ],
+      "elapsedSeconds": 13,
+      "dockerfile": "infrastructure/k8s/images/gateway.Dockerfile",
+      "context": "."
+    },
+    {
+      "name": "auth-service",
+      "image": "climateguard/auth-service:release-20261106-f0048fcb2ff2",
+      "id": "sha256:c65892f1969cc0d22f90b61be1be91f836bf04d50aed476ac1917d5a8a71292a",
+      "size": 490294244,
+      "platform": "linux/amd64",
+      "user": "node",
+      "repoDigests": [
+        "climateguard/auth-service@sha256:c65892f1969cc0d22f90b61be1be91f836bf04d50aed476ac1917d5a8a71292a"
+      ],
+      "elapsedSeconds": 8,
+      "dockerfile": "infrastructure/k8s/images/auth-service.Dockerfile",
+      "context": "."
+    },
+    {
+      "name": "legacy-api",
+      "image": "climateguard/legacy-api:release-20261106-f0048fcb2ff2",
+      "id": "sha256:55898c1be0518aa89fd0be26b1338b967903d95b378d8a0dd1032d1c63ca785f",
+      "size": 455897979,
+      "platform": "linux/amd64",
+      "user": "1654",
+      "repoDigests": [
+        "climateguard/legacy-api@sha256:55898c1be0518aa89fd0be26b1338b967903d95b378d8a0dd1032d1c63ca785f"
+      ],
+      "elapsedSeconds": 1,
+      "dockerfile": "infrastructure/k8s/images/legacy-api.Dockerfile",
+      "context": "."
+    },
+    {
+      "name": "sensor-service",
+      "image": "climateguard/sensor-service:release-20261106-f0048fcb2ff2",
+      "id": "sha256:fbf890219823c796f40d98153ce7c3446befaec099661fd34f77c7c3448f7f9f",
+      "size": 454794513,
+      "platform": "linux/amd64",
+      "user": "1654",
+      "repoDigests": [
+        "climateguard/sensor-service@sha256:fbf890219823c796f40d98153ce7c3446befaec099661fd34f77c7c3448f7f9f"
+      ],
+      "elapsedSeconds": 1,
+      "dockerfile": "infrastructure/k8s/images/sensor-service.Dockerfile",
+      "context": "."
+    },
+    {
+      "name": "alert-service",
+      "image": "climateguard/alert-service:release-20261106-f0048fcb2ff2",
+      "id": "sha256:7535abac9351bad3556da19e61ab476c3d70acfae7b8ecca589dcd2fb9e453a6",
+      "size": 543576072,
+      "platform": "linux/amd64",
+      "user": "10001:10001",
+      "repoDigests": [
+        "climateguard/alert-service@sha256:7535abac9351bad3556da19e61ab476c3d70acfae7b8ecca589dcd2fb9e453a6"
+      ],
+      "elapsedSeconds": 2,
+      "dockerfile": "infrastructure/k8s/images/alert-service.Dockerfile",
+      "context": "."
+    },
+    {
+      "name": "report-service",
+      "image": "climateguard/report-service:release-20261106-f0048fcb2ff2",
+      "id": "sha256:7eb42562a321476d9a2feaf7aa39b8208036c6f093e3e0cb849b9f1f7523d462",
+      "size": 413543979,
+      "platform": "linux/amd64",
+      "user": "reports",
+      "repoDigests": [
+        "climateguard/report-service@sha256:7eb42562a321476d9a2feaf7aa39b8208036c6f093e3e0cb849b9f1f7523d462"
+      ],
+      "elapsedSeconds": 2,
+      "dockerfile": "services/report-service/Dockerfile",
+      "context": "services/report-service"
+    },
+    {
+      "name": "audit-service",
+      "image": "climateguard/audit-service:release-20261106-f0048fcb2ff2",
+      "id": "sha256:bcd8cb38ee9b9fd5de77964e698dc51527e0472d57e44b04b64f381270b904b4",
+      "size": 239161336,
+      "platform": "linux/amd64",
+      "user": "audit",
+      "repoDigests": [
+        "climateguard/audit-service@sha256:bcd8cb38ee9b9fd5de77964e698dc51527e0472d57e44b04b64f381270b904b4"
+      ],
+      "elapsedSeconds": 1,
+      "dockerfile": "services/audit-service/Dockerfile",
+      "context": "services/audit-service"
+    },
+    {
+      "name": "community-service",
+      "image": "climateguard/community-service:release-20261106-f0048fcb2ff2",
+      "id": "sha256:10c8b95b04703d0588b8f3afa789e87d6142bffa43964b2175fb2f829bd4aeae",
+      "size": 359983947,
+      "platform": "linux/amd64",
+      "user": "1654",
+      "repoDigests": [
+        "climateguard/community-service@sha256:10c8b95b04703d0588b8f3afa789e87d6142bffa43964b2175fb2f829bd4aeae"
+      ],
+      "elapsedSeconds": 1,
+      "dockerfile": "infrastructure/k8s/images/community-service.Dockerfile",
+      "context": "."
+    }
+  ],
+  "databaseImages": {
+    "postgres:17-bookworm": "postgres@sha256:665dc7b37ac52a17e298511414c21d23ffa4e6a6ef6225b3e5d59c7afb35e994",
+    "mongo:7.0": "mongo@sha256:8bb4442761a63a8dda452744082cdac9644b429807eb977b42324a63cef59ca4",
+    "mcr.microsoft.com/mssql/server:2022-latest": "mcr.microsoft.com/mssql/server@sha256:cf8f0ab2ebe61feec2eed2629061a07d247f791c2a8ddda74a4ac9f06a291718"
+  },
+  "deployments": 8,
+  "statefulSets": 4,
+  "services": 12,
+  "migrationJobs": 7,
+  "diagnosticJobs": 1,
+  "requestedMemoryMiB": 5024.0,
+  "memoryLimitsMiB": 11904.0,
+  "persistentGiB": 112.0,
+  "validation": "Offline semantics and official core OpenAPI only; cert-manager/Traefik CRDs and admission not tested",
+  "deployed": false,
+  "productionReady": false,
+  "blockingGates": [
+    "AWS inventory/access and region",
+    "approved capacity, maintenance and rollback",
+    "execute new SQL identity Job and verify matching connection-string",
+    "approved catalog initialization",
+    "OAuth production clients",
+    "SQL Server edition/license",
+    "dependency vulnerability review",
+    "real full-stack E2E and restore"
+  ]
+}

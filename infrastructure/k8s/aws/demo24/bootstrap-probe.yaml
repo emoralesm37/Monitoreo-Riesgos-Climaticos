@@ -1,0 +1,44 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: cg-bootstrap-dns-http-v2
+  namespace: default
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: 120
+  template:
+    spec:
+      restartPolicy: Never
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: probe
+          image: rancher/klipper-helm:v0.13.3-build20261021
+          imagePullPolicy: Never
+          command:
+            - /bin/sh
+            - -ec
+            - |
+              nslookup kubernetes.default.svc.cluster.local
+              nslookup traefik.kube-system.svc.cluster.local
+              headers=$(timeout 20 wget -S -O /dev/null http://traefik.kube-system.svc.cluster.local/ 2>&1 || true)
+              printf '%s\n' "$headers"
+              printf '%s\n' "$headers" | grep -Eq 'HTTP/[0-9.]+ 404'
+              printf 'Internal DNS: PASS; HTTP Traefik: 404 expected with no application Ingress\n'
+          resources:
+            requests:
+              cpu: 25m
+              memory: 32Mi
+            limits:
+              cpu: 250m
+              memory: 64Mi
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: [ALL]

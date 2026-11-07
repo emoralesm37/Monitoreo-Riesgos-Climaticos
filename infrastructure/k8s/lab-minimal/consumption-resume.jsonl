@@ -1,0 +1,13 @@
+{
+    "at":  "2026-11-06T17:56:35.9057955Z",
+    "windowsAvailableMiB":  823,
+    "dockerStats":  [
+                        "k3d-cg-isolated-mini-tools|10.65MiB / 6.619GiB|0.00%",
+                        "k3d-cg-isolated-mini-server-0|519.6MiB / 3GiB|144.44%"
+                    ]
+}
+{
+    "at":  "2026-11-06T17:57:46.6939721Z",
+    "windowsAvailableMiB":  824,
+    "cluster":  "stopped"
+}

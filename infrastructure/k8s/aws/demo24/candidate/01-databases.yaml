@@ -1,0 +1,425 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: alert-db
+  namespace: climateguard
+spec:
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: alert-db
+      app.kubernetes.io/part-of: climateguard
+  serviceName: alert-db
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: alert-db
+        app.kubernetes.io/part-of: climateguard
+      annotations:
+        climateguard.io/config-checksum: cc52c5ef10f3dc24bb8135a7419e0c51c1644bd46760573fd6e0697bd348944d
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - env:
+        - name: POSTGRES_USER
+          value: postgres
+        - name: POSTGRES_DB
+          value: postgres
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: alert-db-admin
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+        image: postgres@sha256:665dc7b37ac52a17e298511414c21d23ffa4e6a6ef6225b3e5d59c7afb35e994
+        livenessProbe:
+          periodSeconds: 20
+          tcpSocket:
+            port: db
+          timeoutSeconds: 5
+        name: alert-db
+        ports:
+        - containerPort: 5432
+          name: db
+        readinessProbe:
+          exec:
+            command:
+            - sh
+            - -ec
+            - PGPASSWORD="$POSTGRES_PASSWORD" psql -h 127.0.0.1 -U postgres -d postgres
+              -tAc "SELECT 1" >/dev/null
+          failureThreshold: 3
+          periodSeconds: 10
+          timeoutSeconds: 5
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 320Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+        startupProbe:
+          failureThreshold: 60
+          periodSeconds: 5
+          tcpSocket:
+            port: db
+        volumeMounts:
+        - mountPath: /var/lib/postgresql/data
+          name: data
+        - mountPath: /tmp
+          name: tmp
+      securityContext:
+        fsGroup: 999
+        fsGroupChangePolicy: OnRootMismatch
+        runAsNonRoot: true
+        runAsUser: 999
+        seccompProfile:
+          type: RuntimeDefault
+      terminationGracePeriodSeconds: 120
+      volumes:
+      - emptyDir:
+          sizeLimit: 256Mi
+        name: tmp
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 2Gi
+      storageClassName: cg-retain
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: auth-db
+  namespace: climateguard
+spec:
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: auth-db
+      app.kubernetes.io/part-of: climateguard
+  serviceName: auth-db
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: auth-db
+        app.kubernetes.io/part-of: climateguard
+      annotations:
+        climateguard.io/config-checksum: cc52c5ef10f3dc24bb8135a7419e0c51c1644bd46760573fd6e0697bd348944d
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - env:
+        - name: POSTGRES_USER
+          value: postgres
+        - name: POSTGRES_DB
+          value: postgres
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: auth-db-admin
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+        image: postgres@sha256:665dc7b37ac52a17e298511414c21d23ffa4e6a6ef6225b3e5d59c7afb35e994
+        livenessProbe:
+          periodSeconds: 20
+          tcpSocket:
+            port: db
+          timeoutSeconds: 5
+        name: auth-db
+        ports:
+        - containerPort: 5432
+          name: db
+        readinessProbe:
+          exec:
+            command:
+            - sh
+            - -ec
+            - PGPASSWORD="$POSTGRES_PASSWORD" psql -h 127.0.0.1 -U postgres -d postgres
+              -tAc "SELECT 1" >/dev/null
+          failureThreshold: 3
+          periodSeconds: 10
+          timeoutSeconds: 5
+        resources:
+          requests:
+            cpu: 50m
+            memory: 128Mi
+          limits:
+            cpu: 500m
+            memory: 320Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+        startupProbe:
+          failureThreshold: 60
+          periodSeconds: 5
+          tcpSocket:
+            port: db
+        volumeMounts:
+        - mountPath: /var/lib/postgresql/data
+          name: data
+        - mountPath: /tmp
+          name: tmp
+      securityContext:
+        fsGroup: 999
+        fsGroupChangePolicy: OnRootMismatch
+        runAsNonRoot: true
+        runAsUser: 999
+        seccompProfile:
+          type: RuntimeDefault
+      terminationGracePeriodSeconds: 120
+      volumes:
+      - emptyDir:
+          sizeLimit: 256Mi
+        name: tmp
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 2Gi
+      storageClassName: cg-retain
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: mongodb
+  namespace: climateguard
+spec:
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mongodb
+      app.kubernetes.io/part-of: climateguard
+  serviceName: mongodb
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mongodb
+        app.kubernetes.io/part-of: climateguard
+      annotations:
+        climateguard.io/config-checksum: cc52c5ef10f3dc24bb8135a7419e0c51c1644bd46760573fd6e0697bd348944d
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - env:
+        - name: MONGO_INITDB_ROOT_USERNAME
+          valueFrom:
+            secretKeyRef:
+              key: username
+              name: mongo-admin
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: mongo-admin
+        - name: HOME
+          value: /tmp
+        image: mongo@sha256:8bb4442761a63a8dda452744082cdac9644b429807eb977b42324a63cef59ca4
+        livenessProbe:
+          periodSeconds: 20
+          tcpSocket:
+            port: db
+          timeoutSeconds: 5
+        name: mongodb
+        ports:
+        - containerPort: 27017
+          name: db
+        readinessProbe:
+          exec:
+            command:
+            - mongosh
+            - --quiet
+            - --nodb
+            - --eval
+            - try {const c=new Mongo('mongodb://127.0.0.1:27017'); if(!c.getDB('admin').auth(process.env.MONGO_INITDB_ROOT_USERNAME,process.env.MONGO_INITDB_ROOT_PASSWORD))quit(1);if(c.getDB('admin').runCommand({ping:1}).ok!==1)quit(1)}catch(e){quit(1)}
+          failureThreshold: 3
+          periodSeconds: 10
+          timeoutSeconds: 5
+        resources:
+          requests:
+            cpu: 75m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+        startupProbe:
+          failureThreshold: 60
+          periodSeconds: 5
+          tcpSocket:
+            port: db
+        volumeMounts:
+        - mountPath: /data/db
+          name: data
+        - mountPath: /tmp
+          name: tmp
+        args:
+        - --wiredTigerCacheSizeGB
+        - '0.25'
+      securityContext:
+        fsGroup: 999
+        fsGroupChangePolicy: OnRootMismatch
+        runAsNonRoot: true
+        runAsUser: 999
+        seccompProfile:
+          type: RuntimeDefault
+      terminationGracePeriodSeconds: 120
+      volumes:
+      - emptyDir:
+          sizeLimit: 256Mi
+        name: tmp
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 4Gi
+      storageClassName: cg-retain
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: sqlserver
+  namespace: climateguard
+spec:
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: sqlserver
+      app.kubernetes.io/part-of: climateguard
+  serviceName: sqlserver
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: sqlserver
+        app.kubernetes.io/part-of: climateguard
+      annotations:
+        climateguard.io/config-checksum: cc52c5ef10f3dc24bb8135a7419e0c51c1644bd46760573fd6e0697bd348944d
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - env:
+        - name: ACCEPT_EULA
+          value: 'Y'
+        - name: MSSQL_PID
+          value: Developer
+        - name: MSSQL_MEMORY_LIMIT_MB
+          value: '2048'
+        - name: MSSQL_SA_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: sql-admin
+        image: mcr.microsoft.com/mssql/server@sha256:cf8f0ab2ebe61feec2eed2629061a07d247f791c2a8ddda74a4ac9f06a291718
+        livenessProbe:
+          periodSeconds: 20
+          tcpSocket:
+            port: db
+          timeoutSeconds: 5
+        name: sqlserver
+        ports:
+        - containerPort: 1433
+          name: db
+        readinessProbe:
+          exec:
+            command:
+            - sh
+            - -ec
+            - SQLCMDPASSWORD="$MSSQL_SA_PASSWORD" /opt/mssql-tools18/bin/sqlcmd -S
+              127.0.0.1 -U sa -C -l 3 -b -Q "SET NOCOUNT ON; SELECT 1" -o /dev/null
+          failureThreshold: 3
+          periodSeconds: 10
+          timeoutSeconds: 5
+        resources:
+          requests:
+            cpu: 400m
+            memory: 2048Mi
+          limits:
+            cpu: 1000m
+            memory: 2304Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+            add:
+            - NET_BIND_SERVICE
+        startupProbe:
+          failureThreshold: 60
+          periodSeconds: 5
+          tcpSocket:
+            port: db
+        volumeMounts:
+        - mountPath: /var/opt/mssql
+          name: data
+        - mountPath: /tmp
+          name: tmp
+      nodeSelector:
+        kubernetes.io/arch: amd64
+        kubernetes.io/os: linux
+      securityContext:
+        fsGroup: 10001
+        fsGroupChangePolicy: OnRootMismatch
+        runAsNonRoot: true
+        runAsUser: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      terminationGracePeriodSeconds: 120
+      volumes:
+      - emptyDir:
+          sizeLimit: 256Mi
+        name: tmp
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 8Gi
+      storageClassName: cg-retain

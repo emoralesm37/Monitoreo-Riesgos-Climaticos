@@ -1,0 +1,1043 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: dns
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector: {}
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: kube-system
+      podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: gateway-to-auth-service
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: gateway
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: auth-service
+    ports:
+    - protocol: TCP
+      port: 7101
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: auth-service-from-gateway
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: auth-service
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: gateway
+    ports:
+    - protocol: TCP
+      port: 7101
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: gateway-to-legacy-api
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: gateway
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: legacy-api
+    ports:
+    - protocol: TCP
+      port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: legacy-api-from-gateway
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: legacy-api
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: gateway
+    ports:
+    - protocol: TCP
+      port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: gateway-to-sensor-service
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: gateway
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: sensor-service
+    ports:
+    - protocol: TCP
+      port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: sensor-service-from-gateway
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: sensor-service
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: gateway
+    ports:
+    - protocol: TCP
+      port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: gateway-to-alert-service
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: gateway
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: alert-service
+    ports:
+    - protocol: TCP
+      port: 7301
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: alert-service-from-gateway
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: alert-service
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: gateway
+    ports:
+    - protocol: TCP
+      port: 7301
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: gateway-to-report-service
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: gateway
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: report-service
+    ports:
+    - protocol: TCP
+      port: 8000
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: report-service-from-gateway
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: report-service
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: gateway
+    ports:
+    - protocol: TCP
+      port: 8000
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: gateway-to-audit-service
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: gateway
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: audit-service
+    ports:
+    - protocol: TCP
+      port: 8001
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: audit-service-from-gateway
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: audit-service
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: gateway
+    ports:
+    - protocol: TCP
+      port: 8001
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: auth-service-to-auth-db
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: auth-service
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: auth-db
+    ports:
+    - protocol: TCP
+      port: 5432
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: auth-db-from-auth-service
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: auth-db
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: auth-service
+    ports:
+    - protocol: TCP
+      port: 5432
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: legacy-api-to-sqlserver
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: legacy-api
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: sqlserver
+    ports:
+    - protocol: TCP
+      port: 1433
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: sqlserver-from-legacy-api
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: sqlserver
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: legacy-api
+    ports:
+    - protocol: TCP
+      port: 1433
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: legacy-api-to-gateway
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: legacy-api
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: gateway
+    ports:
+    - protocol: TCP
+      port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: gateway-from-legacy-api
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: gateway
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: legacy-api
+    ports:
+    - protocol: TCP
+      port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: sensor-service-to-sqlserver
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: sensor-service
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: sqlserver
+    ports:
+    - protocol: TCP
+      port: 1433
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: sqlserver-from-sensor-service
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: sqlserver
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: sensor-service
+    ports:
+    - protocol: TCP
+      port: 1433
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: sensor-service-to-gateway
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: sensor-service
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: gateway
+    ports:
+    - protocol: TCP
+      port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: gateway-from-sensor-service
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: gateway
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: sensor-service
+    ports:
+    - protocol: TCP
+      port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: alert-service-to-alert-db
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: alert-service
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: alert-db
+    ports:
+    - protocol: TCP
+      port: 5432
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: alert-db-from-alert-service
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: alert-db
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: alert-service
+    ports:
+    - protocol: TCP
+      port: 5432
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: alert-service-to-legacy-api
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: alert-service
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: legacy-api
+    ports:
+    - protocol: TCP
+      port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: legacy-api-from-alert-service
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: legacy-api
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: alert-service
+    ports:
+    - protocol: TCP
+      port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: report-service-to-mongodb
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: report-service
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: mongodb
+    ports:
+    - protocol: TCP
+      port: 27017
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: mongodb-from-report-service
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: mongodb
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: report-service
+    ports:
+    - protocol: TCP
+      port: 27017
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: report-service-to-gateway
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: report-service
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: gateway
+    ports:
+    - protocol: TCP
+      port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: gateway-from-report-service
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: gateway
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: report-service
+    ports:
+    - protocol: TCP
+      port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: audit-service-to-mongodb
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: audit-service
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: mongodb
+    ports:
+    - protocol: TCP
+      port: 27017
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: mongodb-from-audit-service
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: mongodb
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: audit-service
+    ports:
+    - protocol: TCP
+      port: 27017
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: bootstrap-to-auth-db
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: bootstrap
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: auth-db
+    ports:
+    - protocol: TCP
+      port: 5432
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: auth-db-from-bootstrap
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: auth-db
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: bootstrap
+    ports:
+    - protocol: TCP
+      port: 5432
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: bootstrap-to-alert-db
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: bootstrap
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: alert-db
+    ports:
+    - protocol: TCP
+      port: 5432
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: alert-db-from-bootstrap
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: alert-db
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: bootstrap
+    ports:
+    - protocol: TCP
+      port: 5432
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: bootstrap-to-mongodb
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: bootstrap
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: mongodb
+    ports:
+    - protocol: TCP
+      port: 27017
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: mongodb-from-bootstrap
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: mongodb
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: bootstrap
+    ports:
+    - protocol: TCP
+      port: 27017
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: bootstrap-to-sqlserver
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: bootstrap
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: sqlserver
+    ports:
+    - protocol: TCP
+      port: 1433
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: sqlserver-from-bootstrap
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: sqlserver
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: bootstrap
+    ports:
+    - protocol: TCP
+      port: 1433
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: frontend-from-ingress
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: frontend
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: kube-system
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: traefik
+    ports:
+    - protocol: TCP
+      port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: gateway-from-ingress
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: gateway
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: kube-system
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: traefik
+    ports:
+    - protocol: TCP
+      port: 8080

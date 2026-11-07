@@ -1,0 +1,150 @@
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning",
+      "Yarp.ReverseProxy": "Warning"
+    }
+  },
+  "Cors": {
+    "AllowedOrigins": [
+      "https://climateguard.invalid"
+    ]
+  },
+  "Audit": {
+    "Enabled": true,
+    "IngestUrl": "http://audit-service:8001/internal/events",
+    "OutboxDirectory": "/var/lib/climateguard/audit-outbox"
+  },
+  "ReverseProxy": {
+    "Routes": {
+      "auth": {
+        "ClusterId": "auth-service",
+        "Match": {
+          "Path": "/api/auth/{**remainder}"
+        },
+        "AuthorizationPolicy": "anonymous",
+        "Transforms": [
+          {
+            "PathRemovePrefix": "/api"
+          }
+        ]
+      },
+      "users": {
+        "ClusterId": "auth-service",
+        "Match": {
+          "Path": "/api/users/{**remainder}"
+        },
+        "AuthorizationPolicy": "Administrators",
+        "Transforms": [
+          {
+            "PathRemovePrefix": "/api"
+          }
+        ]
+      },
+      "roles": {
+        "ClusterId": "auth-service",
+        "Match": {
+          "Path": "/api/roles/{**remainder}"
+        },
+        "AuthorizationPolicy": "Administrators",
+        "Transforms": [
+          {
+            "PathRemovePrefix": "/api"
+          }
+        ]
+      },
+      "communities": {
+        "ClusterId": "legacy-api",
+        "Match": {
+          "Path": "/api/communities/{**remainder}"
+        }
+      },
+      "sensors": {
+        "ClusterId": "sensor-service",
+        "Match": {
+          "Path": "/api/sensors/{**remainder}"
+        }
+      },
+      "catalogs": {
+        "ClusterId": "legacy-api",
+        "Match": {
+          "Path": "/api/catalogs/{**remainder}"
+        }
+      },
+      "rules": {
+        "ClusterId": "legacy-api",
+        "Match": {
+          "Path": "/api/alert-rules/{**remainder}"
+        }
+      },
+      "alerts": {
+        "ClusterId": "alert-service",
+        "Match": {
+          "Path": "/api/alerts/{**remainder}"
+        }
+      },
+      "reports": {
+        "ClusterId": "report-service",
+        "Match": {
+          "Path": "/api/reports/{**remainder}"
+        },
+        "AuthorizationPolicy": "Administrators"
+      },
+      "audit": {
+        "ClusterId": "audit-service",
+        "Match": {
+          "Path": "/api/audit/events",
+          "Methods": [
+            "GET"
+          ]
+        },
+        "AuthorizationPolicy": "Administrators"
+      }
+    },
+    "Clusters": {
+      "auth-service": {
+        "Destinations": {
+          "primary": {
+            "Address": "http://auth-service:7101/"
+          }
+        }
+      },
+      "legacy-api": {
+        "Destinations": {
+          "primary": {
+            "Address": "http://legacy-api:8080/"
+          }
+        }
+      },
+      "sensor-service": {
+        "Destinations": {
+          "primary": {
+            "Address": "http://sensor-service:8080/"
+          }
+        }
+      },
+      "alert-service": {
+        "Destinations": {
+          "primary": {
+            "Address": "http://alert-service:7301/"
+          }
+        }
+      },
+      "report-service": {
+        "Destinations": {
+          "primary": {
+            "Address": "http://report-service:8000/"
+          }
+        }
+      },
+      "audit-service": {
+        "Destinations": {
+          "primary": {
+            "Address": "http://audit-service:8001/"
+          }
+        }
+      }
+    }
+  }
+}

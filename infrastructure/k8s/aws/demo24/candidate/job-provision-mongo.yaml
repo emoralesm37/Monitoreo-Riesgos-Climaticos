@@ -1,0 +1,88 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: provision-mongo
+  namespace: climateguard
+spec:
+  activeDeadlineSeconds: 600
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: bootstrap
+        app.kubernetes.io/part-of: climateguard
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - command:
+        - python
+        - /bootstrap/provision-mongo.py
+        env:
+        - name: ROOT_USER
+          valueFrom:
+            secretKeyRef:
+              key: username
+              name: mongo-admin
+        - name: ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: mongo-admin
+        - name: REPORT_USER
+          valueFrom:
+            secretKeyRef:
+              key: username
+              name: report-db
+        - name: REPORT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: report-db
+        - name: AUDIT_USER
+          valueFrom:
+            secretKeyRef:
+              key: username
+              name: audit-db
+        - name: AUDIT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: audit-db
+        image: climateguard/audit-service:release-20261106-f0048fcb2ff2
+        name: provision-mongo
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+        volumeMounts:
+        - mountPath: /bootstrap
+          name: scripts
+          readOnly: true
+        - mountPath: /tmp
+          name: tmp
+        imagePullPolicy: Never
+      restartPolicy: Never
+      securityContext:
+        fsGroup: 10001
+        runAsGroup: 10001
+        runAsNonRoot: true
+        runAsUser: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      volumes:
+      - configMap:
+          name: bootstrap-scripts-fh4cbgbfdm
+        name: scripts
+      - emptyDir: {}
+        name: tmp

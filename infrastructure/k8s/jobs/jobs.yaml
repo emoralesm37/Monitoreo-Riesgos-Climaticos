@@ -1,0 +1,540 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: provision-auth-db
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: 600
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: bootstrap
+        app.kubernetes.io/part-of: climateguard
+    spec:
+      restartPolicy: Never
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: provision-auth-db
+        image: climateguard/auth-service:candidate
+        command:
+        - node
+        - /bootstrap/provision-postgres.cjs
+        env:
+        - name: PGHOST
+          value: auth-db
+        - name: APP_DATABASE
+          value: climateguard_auth
+        - name: ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: auth-db-admin
+              key: password
+        - name: APP_USER
+          valueFrom:
+            secretKeyRef:
+              name: auth-db-app
+              key: username
+        - name: APP_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: auth-db-app
+              key: password
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 1000m
+            memory: 512Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: scripts
+          mountPath: /bootstrap
+          readOnly: true
+        - name: tmp
+          mountPath: /tmp
+      volumes:
+      - name: scripts
+        configMap:
+          name: bootstrap-scripts
+      - name: tmp
+        emptyDir: {}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: provision-alert-db
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: 600
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: bootstrap
+        app.kubernetes.io/part-of: climateguard
+    spec:
+      restartPolicy: Never
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: provision-alert-db
+        image: climateguard/auth-service:candidate
+        command:
+        - node
+        - /bootstrap/provision-postgres.cjs
+        env:
+        - name: PGHOST
+          value: alert-db
+        - name: APP_DATABASE
+          value: climateguard_alert
+        - name: ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: alert-db-admin
+              key: password
+        - name: APP_USER
+          valueFrom:
+            secretKeyRef:
+              name: alert-db-app
+              key: username
+        - name: APP_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: alert-db-app
+              key: password
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 1000m
+            memory: 512Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: scripts
+          mountPath: /bootstrap
+          readOnly: true
+        - name: tmp
+          mountPath: /tmp
+      volumes:
+      - name: scripts
+        configMap:
+          name: bootstrap-scripts
+      - name: tmp
+        emptyDir: {}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: provision-mongo
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: 600
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: bootstrap
+        app.kubernetes.io/part-of: climateguard
+    spec:
+      restartPolicy: Never
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: provision-mongo
+        image: climateguard/audit-service:candidate
+        command:
+        - python
+        - /bootstrap/provision-mongo.py
+        env:
+        - name: ROOT_USER
+          valueFrom:
+            secretKeyRef:
+              name: mongo-admin
+              key: username
+        - name: ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mongo-admin
+              key: password
+        - name: REPORT_USER
+          valueFrom:
+            secretKeyRef:
+              name: report-db
+              key: username
+        - name: REPORT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: report-db
+              key: password
+        - name: AUDIT_USER
+          valueFrom:
+            secretKeyRef:
+              name: audit-db
+              key: username
+        - name: AUDIT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: audit-db
+              key: password
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 1000m
+            memory: 512Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: scripts
+          mountPath: /bootstrap
+          readOnly: true
+        - name: tmp
+          mountPath: /tmp
+      volumes:
+      - name: scripts
+        configMap:
+          name: bootstrap-scripts
+      - name: tmp
+        emptyDir: {}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: auth-migrate
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: 600
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: bootstrap
+        app.kubernetes.io/part-of: climateguard
+    spec:
+      restartPolicy: Never
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: auth-migrate
+        image: climateguard/auth-service:candidate
+        command:
+        - node
+        - /app/node_modules/typeorm/cli.js
+        - migration:run
+        - -d
+        - /app/dist/database/data-source.js
+        env:
+        - name: JWT_ACCESS_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt
+              key: access-key
+        - name: JWT_ISSUER
+          valueFrom:
+            configMapKeyRef:
+              name: runtime
+              key: JWT_ISSUER
+        - name: JWT_AUDIENCE
+          valueFrom:
+            configMapKeyRef:
+              name: runtime
+              key: JWT_AUDIENCE
+        - name: NODE_ENV
+          value: production
+        - name: PORT
+          value: '7101'
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: runtime
+              key: AUTH_DB_HOST
+        - name: DB_PORT
+          value: '5432'
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: runtime
+              key: AUTH_DB_NAME
+        - name: DB_SSL
+          value: 'false'
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: auth-db-app
+              key: username
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: auth-db-app
+              key: password
+        - name: JWT_REFRESH_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt
+              key: refresh-key
+        - name: JWT_ACCESS_TTL_SECONDS
+          value: '900'
+        - name: JWT_REFRESH_TTL_SECONDS
+          value: '604800'
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 1000m
+            memory: 512Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: scripts
+          mountPath: /bootstrap
+          readOnly: true
+        - name: tmp
+          mountPath: /tmp
+      volumes:
+      - name: scripts
+        configMap:
+          name: bootstrap-scripts
+      - name: tmp
+        emptyDir: {}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: auth-bootstrap-admin
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: 600
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: bootstrap
+        app.kubernetes.io/part-of: climateguard
+    spec:
+      restartPolicy: Never
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: auth-bootstrap-admin
+        image: climateguard/auth-service:candidate
+        command:
+        - node
+        - /bootstrap/bootstrap-admin.cjs
+        env:
+        - name: JWT_ACCESS_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt
+              key: access-key
+        - name: JWT_ISSUER
+          valueFrom:
+            configMapKeyRef:
+              name: runtime
+              key: JWT_ISSUER
+        - name: JWT_AUDIENCE
+          valueFrom:
+            configMapKeyRef:
+              name: runtime
+              key: JWT_AUDIENCE
+        - name: NODE_ENV
+          value: production
+        - name: PORT
+          value: '7101'
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: runtime
+              key: AUTH_DB_HOST
+        - name: DB_PORT
+          value: '5432'
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: runtime
+              key: AUTH_DB_NAME
+        - name: DB_SSL
+          value: 'false'
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: auth-db-app
+              key: username
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: auth-db-app
+              key: password
+        - name: JWT_REFRESH_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt
+              key: refresh-key
+        - name: JWT_ACCESS_TTL_SECONDS
+          value: '900'
+        - name: JWT_REFRESH_TTL_SECONDS
+          value: '604800'
+        - name: INITIAL_ADMIN_NAME
+          valueFrom:
+            secretKeyRef:
+              name: bootstrap-admin
+              key: name
+        - name: INITIAL_ADMIN_EMAIL
+          valueFrom:
+            secretKeyRef:
+              name: bootstrap-admin
+              key: email
+        - name: INITIAL_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: bootstrap-admin
+              key: password
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 1000m
+            memory: 512Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: scripts
+          mountPath: /bootstrap
+          readOnly: true
+        - name: tmp
+          mountPath: /tmp
+      volumes:
+      - name: scripts
+        configMap:
+          name: bootstrap-scripts
+      - name: tmp
+        emptyDir: {}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: sql-empty-schema
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: 600
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: bootstrap
+        app.kubernetes.io/part-of: climateguard
+    spec:
+      restartPolicy: Never
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: sql-empty-schema
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        command:
+        - sh
+        - -ec
+        - export SQLCMDPASSWORD="$MSSQL_SA_PASSWORD"; /opt/mssql-tools18/bin/sqlcmd
+          -S sqlserver -U sa -C -b -Q "IF DB_ID(N'ClimateGuard') IS NULL EXEC('CREATE
+          DATABASE [ClimateGuard]')"; /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U
+          sa -C -b -d ClimateGuard -i /bootstrap/sql-schema.sql
+        env:
+        - name: MSSQL_SA_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: sql-admin
+              key: password
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 1000m
+            memory: 512Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: scripts
+          mountPath: /bootstrap
+          readOnly: true
+        - name: tmp
+          mountPath: /tmp
+      volumes:
+      - name: scripts
+        configMap:
+          name: bootstrap-scripts
+      - name: tmp
+        emptyDir: {}

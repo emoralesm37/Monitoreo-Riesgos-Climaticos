@@ -1,0 +1,77 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: provision-auth-db
+  namespace: climateguard
+spec:
+  activeDeadlineSeconds: 600
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: bootstrap
+        app.kubernetes.io/part-of: climateguard
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - command:
+        - node
+        - /bootstrap/provision-postgres.cjs
+        env:
+        - name: PGHOST
+          value: auth-db
+        - name: APP_DATABASE
+          value: climateguard_auth
+        - name: ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: auth-db-admin
+        - name: APP_USER
+          valueFrom:
+            secretKeyRef:
+              key: username
+              name: auth-db-app
+        - name: APP_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: auth-db-app
+        image: climateguard/auth-service:release-20261106-f0048fcb2ff2
+        name: provision-auth-db
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+        volumeMounts:
+        - mountPath: /bootstrap
+          name: scripts
+          readOnly: true
+        - mountPath: /tmp
+          name: tmp
+        imagePullPolicy: Never
+      restartPolicy: Never
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      volumes:
+      - configMap:
+          name: bootstrap-scripts-fh4cbgbfdm
+        name: scripts
+      - emptyDir: {}
+        name: tmp

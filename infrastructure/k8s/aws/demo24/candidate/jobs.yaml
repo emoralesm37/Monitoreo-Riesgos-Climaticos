@@ -1,0 +1,822 @@
+apiVersion: v1
+data:
+  bootstrap-admin.cjs: "// Explicit one-off application context, not a web server.\
+    \ Uses Auth's own seeder.\nrequire('/app/node_modules/reflect-metadata');\nconst\
+    \ { NestFactory } = require('/app/node_modules/@nestjs/core');\nconst { AppModule\
+    \ } = require('/app/dist/app.module');\nNestFactory.createApplicationContext(AppModule,\
+    \ { logger: false })\n  .then(app => app.close())\n  .then(() => console.log('Auth\
+    \ bootstrap completed; existing account credentials were not changed.'))\n  .catch(()\
+    \ => { console.error('Auth bootstrap failed; inspect configuration privately.');\
+    \ process.exitCode=1; });\n"
+  provision-mongo.py: "import os\nfrom pymongo import MongoClient\n\ntry:\n    root\
+    \ = MongoClient(host='mongodb', port=27017, username=os.environ['ROOT_USER'],\n\
+    \                       password=os.environ['ROOT_PASSWORD'], authSource='admin',\
+    \ serverSelectionTimeoutMS=5000)\n    for db_name, prefix in [('ClimateGuardReports',\
+    \ 'REPORT'), ('ClimateGuardAudit', 'AUDIT')]:\n        username, password = os.environ[prefix\
+    \ + '_USER'], os.environ[prefix + '_PASSWORD']\n        database = root[db_name]\n\
+    \        found = database.command('usersInfo', username)['users']\n        if\
+    \ not found:\n            database.command('createUser', username, pwd=password,\
+    \ roles=[{'role': 'readWrite', 'db': db_name}])\n        elif {'role': 'readWrite',\
+    \ 'db': db_name} not in found[0]['roles']:\n            raise RuntimeError('Privileges\
+    \ require review')\n        check = MongoClient(host='mongodb', port=27017, username=username,\
+    \ password=password,\n                            authSource=db_name, serverSelectionTimeoutMS=5000)\n\
+    \        check[db_name].command('ping')\n        check.close()\n    root.close()\n\
+    \    print('Application users provisioned/verified. Existing users were not altered.')\n\
+    except Exception:\n    raise SystemExit('Mongo bootstrap failed; review privately.\
+    \ No existing credentials were changed.') from None\n"
+  provision-postgres.cjs: "// Explicit bootstrap for a reviewed NEW namespace database.\
+    \ Never rotates a role.\nconst { Client } = require('/app/node_modules/pg');\n\
+    const e = process.env;\nconst identifier = value => {\n  if (!/^[a-z_][a-z0-9_]{0,62}$/.test(value\
+    \ || '')) throw Error('Invalid identifier');\n  return '\"' + value + '\"';\n\
+    };\n(async () => {\n  const username = identifier(e.APP_USER), database = identifier(e.APP_DATABASE);\n\
+    \  if (['postgres','template0','template1'].includes(e.APP_DATABASE) || e.APP_USER\
+    \ === 'postgres') throw Error('Invalid application identity');\n  const root =\
+    \ new Client({host:e.PGHOST,port:5432,user:'postgres',password:e.ROOT_PASSWORD,database:'postgres'});\n\
+    \  await root.connect();\n  try {\n    // Prevent credential-bearing DDL from\
+    \ being printed on statement errors.\n    await root.query(\"SET log_statement\
+    \ = 'none'\");\n    await root.query(\"SET log_min_error_statement = 'panic'\"\
+    );\n    await root.query('SET standard_conforming_strings = on');\n    const role\
+    \ = await root.query('SELECT rolsuper,rolcreatedb,rolcreaterole FROM pg_roles\
+    \ WHERE rolname=$1',[e.APP_USER]);\n    if (!role.rowCount) {\n      if (!e.APP_PASSWORD)\
+    \ throw Error('Missing application credential');\n      await root.query(`CREATE\
+    \ ROLE ${username} LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE PASSWORD '${e.APP_PASSWORD.replaceAll(\"\
+    '\",\"''\")}'`);\n    } else if (role.rows[0].rolsuper || role.rows[0].rolcreatedb\
+    \ || role.rows[0].rolcreaterole) throw Error('Existing role requires privilege\
+    \ review');\n    const db = await root.query('SELECT pg_get_userbyid(datdba) AS\
+    \ owner FROM pg_database WHERE datname=$1',[e.APP_DATABASE]);\n    if (!db.rowCount)\
+    \ await root.query(`CREATE DATABASE ${database} OWNER ${username}`);\n    else\
+    \ if (db.rows[0].owner !== e.APP_USER) throw Error('Existing database requires\
+    \ ownership review');\n    const check = new Client({host:e.PGHOST,port:5432,user:e.APP_USER,password:e.APP_PASSWORD,database:e.APP_DATABASE});\n\
+    \    await check.connect(); await check.query('SELECT 1'); await check.end();\n\
+    \    console.log('Application database provisioned/verified. Existing passwords\
+    \ were not changed.');\n  } finally { await root.end(); }\n})().catch(()=>{console.error('Database\
+    \ bootstrap failed; review privately. No existing credential was replaced.');process.exitCode=1;});\n"
+  sql-schema.sql: "-- Fresh, EMPTY database only. No credentials or business records.\n\
+    SET XACT_ABORT ON;\nBEGIN TRANSACTION;\nIF EXISTS (SELECT 1 FROM sys.tables WHERE\
+    \ is_ms_shipped=0) THROW 51000, 'Database is not empty; refusing initialization.',\
+    \ 1;\nGO\nCREATE TABLE [dbo].[AlertSeverities] (\r\n    [AlertSeverityId] tinyint\
+    \ NOT NULL,\r\n    [Name] nvarchar(20) NOT NULL,\r\n    [Level] tinyint NOT NULL,\r\
+    \n    CONSTRAINT [PK_AlertSeverities] PRIMARY KEY ([AlertSeverityId])\r\n);\r\n\
+    GO\r\n\r\n\r\nCREATE TABLE [dbo].[Communities] (\r\n    [CommunityId] int NOT\
+    \ NULL IDENTITY,\r\n    [Name] nvarchar(120) NOT NULL,\r\n    [Municipality] nvarchar(120)\
+    \ NOT NULL,\r\n    [Department] nvarchar(120) NOT NULL,\r\n    [Country] nvarchar(100)\
+    \ NOT NULL,\r\n    [Latitude] decimal(9,6) NULL,\r\n    [Longitude] decimal(9,6)\
+    \ NULL,\r\n    [Description] nvarchar(500) NULL,\r\n    [IsActive] bit NOT NULL\
+    \ DEFAULT CAST(1 AS bit),\r\n    CONSTRAINT [PK_Communities] PRIMARY KEY ([CommunityId])\r\
+    \n);\r\nGO\r\n\r\n\r\nCREATE TABLE [dbo].[PhenomenonTypes] (\r\n    [PhenomenonTypeId]\
+    \ tinyint NOT NULL,\r\n    [Name] nvarchar(30) NOT NULL,\r\n    CONSTRAINT [PK_PhenomenonTypes]\
+    \ PRIMARY KEY ([PhenomenonTypeId])\r\n);\r\nGO\r\n\r\n\r\nCREATE TABLE [dbo].[Roles]\
+    \ (\r\n    [RoleId] tinyint NOT NULL,\r\n    [Name] nvarchar(30) NOT NULL,\r\n\
+    \    CONSTRAINT [PK_Roles] PRIMARY KEY ([RoleId])\r\n);\r\nGO\r\n\r\n\r\nCREATE\
+    \ TABLE [dbo].[SensorTypes] (\r\n    [SensorTypeId] tinyint NOT NULL,\r\n    [Code]\
+    \ nvarchar(30) NOT NULL,\r\n    [Unit] nvarchar(15) NOT NULL,\r\n    CONSTRAINT\
+    \ [PK_SensorTypes] PRIMARY KEY ([SensorTypeId])\r\n);\r\nGO\r\n\r\n\r\nCREATE\
+    \ TABLE [dbo].[Users] (\r\n    [UserId] int NOT NULL IDENTITY,\r\n    [Name] nvarchar(100)\
+    \ NOT NULL,\r\n    [Email] nvarchar(150) NOT NULL,\r\n    [PasswordHash] nvarchar(300)\
+    \ NOT NULL,\r\n    [RoleId] tinyint NOT NULL,\r\n    [IsActive] bit NOT NULL DEFAULT\
+    \ CAST(1 AS bit),\r\n    [CreatedAt] datetime2 NOT NULL DEFAULT (SYSUTCDATETIME()),\r\
+    \n    [UpdatedAt] datetime2 NULL,\r\n    CONSTRAINT [PK_Users] PRIMARY KEY ([UserId]),\r\
+    \n    CONSTRAINT [FK_Users_Roles] FOREIGN KEY ([RoleId]) REFERENCES [dbo].[Roles]\
+    \ ([RoleId])\r\n);\r\nGO\r\n\r\n\r\nCREATE TABLE [dbo].[AlertRules] (\r\n    [AlertRuleId]\
+    \ int NOT NULL IDENTITY,\r\n    [Name] nvarchar(100) NOT NULL,\r\n    [SensorTypeId]\
+    \ tinyint NOT NULL,\r\n    [MinimumValue] decimal(10,2) NOT NULL,\r\n    [MaximumValue]\
+    \ decimal(10,2) NOT NULL,\r\n    [AlertSeverityId] tinyint NOT NULL,\r\n    [PhenomenonTypeId]\
+    \ tinyint NOT NULL,\r\n    [Message] nvarchar(300) NOT NULL,\r\n    [IsActive]\
+    \ bit NOT NULL DEFAULT CAST(1 AS bit),\r\n    [CreatedAt] datetime2 NOT NULL DEFAULT\
+    \ (SYSUTCDATETIME()),\r\n    [UpdatedAt] datetime2 NULL,\r\n    CONSTRAINT [PK_AlertRules]\
+    \ PRIMARY KEY ([AlertRuleId]),\r\n    CONSTRAINT [FK_AlertRules_AlertSeverities]\
+    \ FOREIGN KEY ([AlertSeverityId]) REFERENCES [dbo].[AlertSeverities] ([AlertSeverityId])\
+    \ ON DELETE NO ACTION,\r\n    CONSTRAINT [FK_AlertRules_PhenomenonTypes] FOREIGN\
+    \ KEY ([PhenomenonTypeId]) REFERENCES [dbo].[PhenomenonTypes] ([PhenomenonTypeId])\
+    \ ON DELETE NO ACTION,\r\n    CONSTRAINT [FK_AlertRules_SensorTypes] FOREIGN KEY\
+    \ ([SensorTypeId]) REFERENCES [dbo].[SensorTypes] ([SensorTypeId]) ON DELETE NO\
+    \ ACTION\r\n);\r\nGO\r\n\r\n\r\nCREATE TABLE [dbo].[Sensors] (\r\n    [SensorId]\
+    \ int NOT NULL IDENTITY,\r\n    [Name] nvarchar(100) NOT NULL,\r\n    [SensorTypeId]\
+    \ tinyint NOT NULL,\r\n    [CommunityId] int NOT NULL,\r\n    [IsActive] bit NOT\
+    \ NULL DEFAULT CAST(1 AS bit),\r\n    [LastValue] decimal(10,2) NULL,\r\n    [LastUpdatedAt]\
+    \ datetime2 NULL,\r\n    [CreatedAt] datetime2 NOT NULL DEFAULT (SYSUTCDATETIME()),\r\
+    \n    [UpdatedAt] datetime2 NULL,\r\n    CONSTRAINT [PK_Sensors] PRIMARY KEY ([SensorId]),\r\
+    \n    CONSTRAINT [FK_Sensors_Communities] FOREIGN KEY ([CommunityId]) REFERENCES\
+    \ [dbo].[Communities] ([CommunityId]),\r\n    CONSTRAINT [FK_Sensors_SensorTypes]\
+    \ FOREIGN KEY ([SensorTypeId]) REFERENCES [dbo].[SensorTypes] ([SensorTypeId])\r\
+    \n);\r\nGO\r\n\r\n\r\nCREATE TABLE [dbo].[AuditLogEntries] (\r\n    [AuditLogEntryId]\
+    \ int NOT NULL IDENTITY,\r\n    [UserId] int NOT NULL,\r\n    [Action] nvarchar(60)\
+    \ NOT NULL,\r\n    [EntityAffected] nvarchar(60) NULL,\r\n    [Timestamp] datetime2\
+    \ NOT NULL DEFAULT (SYSUTCDATETIME()),\r\n    [Details] nvarchar(500) NULL,\r\n\
+    \    CONSTRAINT [PK_AuditLogEntries] PRIMARY KEY ([AuditLogEntryId]),\r\n    CONSTRAINT\
+    \ [FK_AuditLogEntries_Users] FOREIGN KEY ([UserId]) REFERENCES [dbo].[Users] ([UserId])\r\
+    \n);\r\nGO\r\n\r\n\r\nCREATE TABLE [dbo].[RefreshTokens] (\r\n    [RefreshTokenId]\
+    \ int NOT NULL IDENTITY,\r\n    [UserId] int NOT NULL,\r\n    [TokenHash] nvarchar(300)\
+    \ NOT NULL,\r\n    [ExpiresAt] datetime2 NOT NULL,\r\n    [CreatedAt] datetime2\
+    \ NOT NULL DEFAULT (SYSUTCDATETIME()),\r\n    [RevokedAt] datetime2 NULL,\r\n\
+    \    [ReplacedByTokenId] int NULL,\r\n    [CreatedByIp] nvarchar(45) NULL,\r\n\
+    \    CONSTRAINT [PK_RefreshTokens] PRIMARY KEY ([RefreshTokenId]),\r\n    CONSTRAINT\
+    \ [FK_RefreshTokens_ReplacedBy] FOREIGN KEY ([ReplacedByTokenId]) REFERENCES [dbo].[RefreshTokens]\
+    \ ([RefreshTokenId]),\r\n    CONSTRAINT [FK_RefreshTokens_Users] FOREIGN KEY ([UserId])\
+    \ REFERENCES [dbo].[Users] ([UserId])\r\n);\r\nGO\r\n\r\n\r\nCREATE TABLE [dbo].[Alerts]\
+    \ (\r\n    [AlertId] bigint NOT NULL IDENTITY,\r\n    [SensorId] int NULL,\r\n\
+    \    [AlertSeverityId] tinyint NOT NULL,\r\n    [PhenomenonTypeId] tinyint NULL,\r\
+    \n    [TriggerValue] decimal(10,2) NULL,\r\n    [Message] nvarchar(300) NOT NULL,\r\
+    \n    [CreatedAt] datetime2 NOT NULL DEFAULT (SYSUTCDATETIME()),\r\n    [ResolvedAt]\
+    \ datetime2 NULL,\r\n    [ResolvedByUserId] int NULL,\r\n    CONSTRAINT [PK_Alerts]\
+    \ PRIMARY KEY ([AlertId]),\r\n    CONSTRAINT [FK_Alerts_AlertSeverities] FOREIGN\
+    \ KEY ([AlertSeverityId]) REFERENCES [dbo].[AlertSeverities] ([AlertSeverityId]),\r\
+    \n    CONSTRAINT [FK_Alerts_PhenomenonTypes] FOREIGN KEY ([PhenomenonTypeId])\
+    \ REFERENCES [dbo].[PhenomenonTypes] ([PhenomenonTypeId]),\r\n    CONSTRAINT [FK_Alerts_Sensors]\
+    \ FOREIGN KEY ([SensorId]) REFERENCES [dbo].[Sensors] ([SensorId]),\r\n    CONSTRAINT\
+    \ [FK_Alerts_Users_ResolvedBy] FOREIGN KEY ([ResolvedByUserId]) REFERENCES [dbo].[Users]\
+    \ ([UserId])\r\n);\r\nGO\r\n\r\n\r\nCREATE TABLE [dbo].[SensorReadings] (\r\n\
+    \    [SensorReadingId] bigint NOT NULL IDENTITY,\r\n    [SensorId] int NOT NULL,\r\
+    \n    [Value] decimal(10,2) NOT NULL,\r\n    [Timestamp] datetime2 NOT NULL DEFAULT\
+    \ (SYSUTCDATETIME()),\r\n    CONSTRAINT [PK_SensorReadings] PRIMARY KEY ([SensorReadingId]),\r\
+    \n    CONSTRAINT [FK_SensorReadings_Sensors] FOREIGN KEY ([SensorId]) REFERENCES\
+    \ [dbo].[Sensors] ([SensorId])\r\n);\r\nGO\r\n\r\n\r\nCREATE TABLE [dbo].[ReadingAlertDeliveries]\
+    \ (\r\n    [SensorReadingId] bigint NOT NULL,\r\n    [Payload] nvarchar(max) NOT\
+    \ NULL,\r\n    [Attempts] int NOT NULL,\r\n    [DeliveredAt] datetime2 NULL,\r\
+    \n    CONSTRAINT [PK_ReadingAlertDeliveries] PRIMARY KEY ([SensorReadingId]),\r\
+    \n    CONSTRAINT [FK_ReadingAlertDeliveries_SensorReadings_SensorReadingId] FOREIGN\
+    \ KEY ([SensorReadingId]) REFERENCES [dbo].[SensorReadings] ([SensorReadingId])\
+    \ ON DELETE NO ACTION\r\n);\r\nGO\r\n\r\n\r\nCREATE INDEX [IX_AlertRules_AlertSeverityId]\
+    \ ON [dbo].[AlertRules] ([AlertSeverityId]);\r\nGO\r\n\r\n\r\nCREATE INDEX [IX_AlertRules_IsActive]\
+    \ ON [dbo].[AlertRules] ([IsActive]);\r\nGO\r\n\r\n\r\nCREATE UNIQUE INDEX [IX_AlertRules_Name]\
+    \ ON [dbo].[AlertRules] ([Name]);\r\nGO\r\n\r\n\r\nCREATE INDEX [IX_AlertRules_PhenomenonTypeId]\
+    \ ON [dbo].[AlertRules] ([PhenomenonTypeId]);\r\nGO\r\n\r\n\r\nCREATE INDEX [IX_AlertRules_SensorTypeId]\
+    \ ON [dbo].[AlertRules] ([SensorTypeId]);\r\nGO\r\n\r\n\r\nCREATE INDEX [IX_Alerts_AlertSeverityId]\
+    \ ON [dbo].[Alerts] ([AlertSeverityId]);\r\nGO\r\n\r\n\r\nCREATE INDEX [IX_Alerts_CreatedAt]\
+    \ ON [dbo].[Alerts] ([CreatedAt] DESC);\r\nGO\r\n\r\n\r\nCREATE INDEX [IX_Alerts_PhenomenonTypeId]\
+    \ ON [dbo].[Alerts] ([PhenomenonTypeId]);\r\nGO\r\n\r\n\r\nCREATE INDEX [IX_Alerts_ResolvedByUserId]\
+    \ ON [dbo].[Alerts] ([ResolvedByUserId]);\r\nGO\r\n\r\n\r\nCREATE INDEX [IX_Alerts_SensorId]\
+    \ ON [dbo].[Alerts] ([SensorId]);\r\nGO\r\n\r\n\r\nCREATE UNIQUE INDEX [IX_AlertSeverities_Name]\
+    \ ON [dbo].[AlertSeverities] ([Name]);\r\nGO\r\n\r\n\r\nCREATE INDEX [IX_AuditLogEntries_UserId]\
+    \ ON [dbo].[AuditLogEntries] ([UserId]);\r\nGO\r\n\r\n\r\nCREATE INDEX [IX_Communities_Department]\
+    \ ON [dbo].[Communities] ([Department]);\r\nGO\r\n\r\n\r\nCREATE INDEX [IX_Communities_IsActive]\
+    \ ON [dbo].[Communities] ([IsActive]);\r\nGO\r\n\r\n\r\nCREATE INDEX [IX_Communities_Municipality]\
+    \ ON [dbo].[Communities] ([Municipality]);\r\nGO\r\n\r\n\r\nCREATE UNIQUE INDEX\
+    \ [IX_Communities_Name] ON [dbo].[Communities] ([Name]);\r\nGO\r\n\r\n\r\nCREATE\
+    \ UNIQUE INDEX [IX_PhenomenonTypes_Name] ON [dbo].[PhenomenonTypes] ([Name]);\r\
+    \nGO\r\n\r\n\r\nCREATE INDEX [IX_RefreshTokens_ReplacedByTokenId] ON [dbo].[RefreshTokens]\
+    \ ([ReplacedByTokenId]);\r\nGO\r\n\r\n\r\nCREATE INDEX [IX_RefreshTokens_UserId]\
+    \ ON [dbo].[RefreshTokens] ([UserId]);\r\nGO\r\n\r\n\r\nCREATE UNIQUE INDEX [IX_Roles_Name]\
+    \ ON [dbo].[Roles] ([Name]);\r\nGO\r\n\r\n\r\nCREATE INDEX [IX_SensorReadings_SensorId_Timestamp]\
+    \ ON [dbo].[SensorReadings] ([SensorId], [Timestamp] DESC);\r\nGO\r\n\r\n\r\n\
+    CREATE INDEX [IX_Sensors_CommunityId] ON [dbo].[Sensors] ([CommunityId]);\r\n\
+    GO\r\n\r\n\r\nCREATE INDEX [IX_Sensors_SensorTypeId] ON [dbo].[Sensors] ([SensorTypeId]);\r\
+    \nGO\r\n\r\n\r\nCREATE UNIQUE INDEX [IX_SensorTypes_Code] ON [dbo].[SensorTypes]\
+    \ ([Code]);\r\nGO\r\n\r\n\r\nCREATE UNIQUE INDEX [IX_Users_Email] ON [dbo].[Users]\
+    \ ([Email]);\r\nGO\r\n\r\n\r\nCREATE INDEX [IX_Users_RoleId] ON [dbo].[Users]\
+    \ ([RoleId]);\r\nGO\r\n\r\n\r\n\nCOMMIT;\n"
+kind: ConfigMap
+metadata:
+  name: bootstrap-scripts-fh4cbgbfdm
+  namespace: climateguard
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: auth-bootstrap-admin
+  namespace: climateguard
+spec:
+  activeDeadlineSeconds: 600
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: bootstrap
+        app.kubernetes.io/part-of: climateguard
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - command:
+        - node
+        - /bootstrap/bootstrap-admin.cjs
+        env:
+        - name: JWT_ACCESS_SECRET
+          valueFrom:
+            secretKeyRef:
+              key: access-key
+              name: jwt
+        - name: JWT_ISSUER
+          valueFrom:
+            configMapKeyRef:
+              key: JWT_ISSUER
+              name: runtime
+        - name: JWT_AUDIENCE
+          valueFrom:
+            configMapKeyRef:
+              key: JWT_AUDIENCE
+              name: runtime
+        - name: NODE_ENV
+          value: production
+        - name: PORT
+          value: '7101'
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              key: AUTH_DB_HOST
+              name: runtime
+        - name: DB_PORT
+          value: '5432'
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              key: AUTH_DB_NAME
+              name: runtime
+        - name: DB_SSL
+          value: 'false'
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              key: username
+              name: auth-db-app
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: auth-db-app
+        - name: JWT_REFRESH_SECRET
+          valueFrom:
+            secretKeyRef:
+              key: refresh-key
+              name: jwt
+        - name: JWT_ACCESS_TTL_SECONDS
+          value: '900'
+        - name: JWT_REFRESH_TTL_SECONDS
+          value: '604800'
+        - name: INITIAL_ADMIN_NAME
+          valueFrom:
+            secretKeyRef:
+              key: name
+              name: bootstrap-admin
+        - name: INITIAL_ADMIN_EMAIL
+          valueFrom:
+            secretKeyRef:
+              key: email
+              name: bootstrap-admin
+        - name: INITIAL_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: bootstrap-admin
+        image: climateguard/auth-service:release-20261106-f0048fcb2ff2
+        name: auth-bootstrap-admin
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+        volumeMounts:
+        - mountPath: /bootstrap
+          name: scripts
+          readOnly: true
+        - mountPath: /tmp
+          name: tmp
+        imagePullPolicy: Never
+      restartPolicy: Never
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      volumes:
+      - configMap:
+          name: bootstrap-scripts-fh4cbgbfdm
+        name: scripts
+      - emptyDir: {}
+        name: tmp
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: auth-migrate
+  namespace: climateguard
+spec:
+  activeDeadlineSeconds: 600
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: bootstrap
+        app.kubernetes.io/part-of: climateguard
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - command:
+        - node
+        - /app/node_modules/typeorm/cli.js
+        - migration:run
+        - -d
+        - /app/dist/database/data-source.js
+        env:
+        - name: JWT_ACCESS_SECRET
+          valueFrom:
+            secretKeyRef:
+              key: access-key
+              name: jwt
+        - name: JWT_ISSUER
+          valueFrom:
+            configMapKeyRef:
+              key: JWT_ISSUER
+              name: runtime
+        - name: JWT_AUDIENCE
+          valueFrom:
+            configMapKeyRef:
+              key: JWT_AUDIENCE
+              name: runtime
+        - name: NODE_ENV
+          value: production
+        - name: PORT
+          value: '7101'
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              key: AUTH_DB_HOST
+              name: runtime
+        - name: DB_PORT
+          value: '5432'
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              key: AUTH_DB_NAME
+              name: runtime
+        - name: DB_SSL
+          value: 'false'
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              key: username
+              name: auth-db-app
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: auth-db-app
+        - name: JWT_REFRESH_SECRET
+          valueFrom:
+            secretKeyRef:
+              key: refresh-key
+              name: jwt
+        - name: JWT_ACCESS_TTL_SECONDS
+          value: '900'
+        - name: JWT_REFRESH_TTL_SECONDS
+          value: '604800'
+        image: climateguard/auth-service:release-20261106-f0048fcb2ff2
+        name: auth-migrate
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+        volumeMounts:
+        - mountPath: /bootstrap
+          name: scripts
+          readOnly: true
+        - mountPath: /tmp
+          name: tmp
+        imagePullPolicy: Never
+      restartPolicy: Never
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      volumes:
+      - configMap:
+          name: bootstrap-scripts-fh4cbgbfdm
+        name: scripts
+      - emptyDir: {}
+        name: tmp
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: provision-alert-db
+  namespace: climateguard
+spec:
+  activeDeadlineSeconds: 600
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: bootstrap
+        app.kubernetes.io/part-of: climateguard
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - command:
+        - node
+        - /bootstrap/provision-postgres.cjs
+        env:
+        - name: PGHOST
+          value: alert-db
+        - name: APP_DATABASE
+          value: climateguard_alert
+        - name: ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: alert-db-admin
+        - name: APP_USER
+          valueFrom:
+            secretKeyRef:
+              key: username
+              name: alert-db-app
+        - name: APP_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: alert-db-app
+        image: climateguard/auth-service:release-20261106-f0048fcb2ff2
+        name: provision-alert-db
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+        volumeMounts:
+        - mountPath: /bootstrap
+          name: scripts
+          readOnly: true
+        - mountPath: /tmp
+          name: tmp
+        imagePullPolicy: Never
+      restartPolicy: Never
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      volumes:
+      - configMap:
+          name: bootstrap-scripts-fh4cbgbfdm
+        name: scripts
+      - emptyDir: {}
+        name: tmp
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: provision-auth-db
+  namespace: climateguard
+spec:
+  activeDeadlineSeconds: 600
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: bootstrap
+        app.kubernetes.io/part-of: climateguard
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - command:
+        - node
+        - /bootstrap/provision-postgres.cjs
+        env:
+        - name: PGHOST
+          value: auth-db
+        - name: APP_DATABASE
+          value: climateguard_auth
+        - name: ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: auth-db-admin
+        - name: APP_USER
+          valueFrom:
+            secretKeyRef:
+              key: username
+              name: auth-db-app
+        - name: APP_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: auth-db-app
+        image: climateguard/auth-service:release-20261106-f0048fcb2ff2
+        name: provision-auth-db
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+        volumeMounts:
+        - mountPath: /bootstrap
+          name: scripts
+          readOnly: true
+        - mountPath: /tmp
+          name: tmp
+        imagePullPolicy: Never
+      restartPolicy: Never
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      volumes:
+      - configMap:
+          name: bootstrap-scripts-fh4cbgbfdm
+        name: scripts
+      - emptyDir: {}
+        name: tmp
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: provision-mongo
+  namespace: climateguard
+spec:
+  activeDeadlineSeconds: 600
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: bootstrap
+        app.kubernetes.io/part-of: climateguard
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - command:
+        - python
+        - /bootstrap/provision-mongo.py
+        env:
+        - name: ROOT_USER
+          valueFrom:
+            secretKeyRef:
+              key: username
+              name: mongo-admin
+        - name: ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: mongo-admin
+        - name: REPORT_USER
+          valueFrom:
+            secretKeyRef:
+              key: username
+              name: report-db
+        - name: REPORT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: report-db
+        - name: AUDIT_USER
+          valueFrom:
+            secretKeyRef:
+              key: username
+              name: audit-db
+        - name: AUDIT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: audit-db
+        image: climateguard/audit-service:release-20261106-f0048fcb2ff2
+        name: provision-mongo
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+        volumeMounts:
+        - mountPath: /bootstrap
+          name: scripts
+          readOnly: true
+        - mountPath: /tmp
+          name: tmp
+        imagePullPolicy: Never
+      restartPolicy: Never
+      securityContext:
+        fsGroup: 10001
+        runAsGroup: 10001
+        runAsNonRoot: true
+        runAsUser: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      volumes:
+      - configMap:
+          name: bootstrap-scripts-fh4cbgbfdm
+        name: scripts
+      - emptyDir: {}
+        name: tmp
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: sql-empty-schema
+  namespace: climateguard
+spec:
+  activeDeadlineSeconds: 600
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: bootstrap
+        app.kubernetes.io/part-of: climateguard
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - command:
+        - sh
+        - -ec
+        - export SQLCMDPASSWORD="$MSSQL_SA_PASSWORD"; /opt/mssql-tools18/bin/sqlcmd
+          -S sqlserver -U sa -C -b -Q "IF DB_ID(N'ClimateGuard') IS NULL EXEC('CREATE
+          DATABASE [ClimateGuard]')"; /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U
+          sa -C -b -d ClimateGuard -i /bootstrap/sql-schema.sql
+        env:
+        - name: MSSQL_SA_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: sql-admin
+        image: mcr.microsoft.com/mssql/server@sha256:cf8f0ab2ebe61feec2eed2629061a07d247f791c2a8ddda74a4ac9f06a291718
+        name: sql-empty-schema
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+        volumeMounts:
+        - mountPath: /bootstrap
+          name: scripts
+          readOnly: true
+        - mountPath: /tmp
+          name: tmp
+      restartPolicy: Never
+      securityContext:
+        fsGroup: 10001
+        runAsGroup: 10001
+        runAsNonRoot: true
+        runAsUser: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      volumes:
+      - configMap:
+          name: bootstrap-scripts-fh4cbgbfdm
+        name: scripts
+      - emptyDir: {}
+        name: tmp
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sql-app-bootstrap-scripts
+  namespace: climateguard
+data:
+  provision-sql-app.sh: "#!/bin/bash\n# Explicit one-off job, only against the NEW\
+    \ namespace SQL instance.\n# Passwords travel through env/SQLCMD substitution,\
+    \ never CLI arguments or output.\nset -euo pipefail\n[[ \"${CG_SQL_APP_USER:-}\"\
+    \ =~ ^[a-z][a-z0-9_]{2,40}$ ]] || exit 2\n# Fresh credentials must use this alphabet;\
+    \ excludes SQL quoting/substitution syntax.\n[[ \"${CG_SQL_APP_PASSWORD:-}\" =~\
+    \ ^[A-Za-z0-9_!@#%+-]{32,128}$ ]] || exit 2\nexport SQLCMDPASSWORD=\"$MSSQL_SA_PASSWORD\"\
+    \nif ! /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -C -b -i /bootstrap/sql-app.sql\
+    \ -o /dev/null >/dev/null 2>&1; then\n  echo 'SQL application provisioning failed;\
+    \ inspect privately. No existing identity was rotated.' >&2\n  exit 1\nfi\necho\
+    \ 'New SQL application identity provisioned; no server administrator role assigned.'\n"
+  sql-app.sql: "-- Only after sql-empty-schema succeeded, on a NEW database instance.\n\
+    SET NOCOUNT ON;\nSET XACT_ABORT ON;\nIF DB_ID(N'ClimateGuard') IS NULL THROW 51000,\
+    \ 'Initialize the new schema first.', 1;\nIF EXISTS (SELECT 1 FROM sys.server_principals\
+    \ WHERE name=N'$(CG_SQL_APP_USER)')\n    THROW 51000, 'Identity already exists;\
+    \ refusing replacement.', 1;\nBEGIN TRANSACTION;\nCREATE LOGIN [$(CG_SQL_APP_USER)]\
+    \ WITH PASSWORD=N'$(CG_SQL_APP_PASSWORD)', CHECK_POLICY=ON;\nUSE [ClimateGuard];\n\
+    CREATE USER [$(CG_SQL_APP_USER)] FOR LOGIN [$(CG_SQL_APP_USER)];\nALTER ROLE db_datareader\
+    \ ADD MEMBER [$(CG_SQL_APP_USER)];\nALTER ROLE db_datawriter ADD MEMBER [$(CG_SQL_APP_USER)];\n\
+    GRANT EXECUTE TO [$(CG_SQL_APP_USER)];\nCOMMIT;\n"
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: provision-sql-app
+  namespace: climateguard
+spec:
+  activeDeadlineSeconds: 600
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: bootstrap
+        app.kubernetes.io/part-of: climateguard
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - command:
+        - bash
+        - /bootstrap/provision-sql-app.sh
+        env:
+        - name: MSSQL_SA_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: sql-admin
+        - name: CG_SQL_APP_USER
+          valueFrom:
+            secretKeyRef:
+              name: sql-app-bootstrap
+              key: username
+        - name: CG_SQL_APP_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: sql-app-bootstrap
+              key: password
+        image: mcr.microsoft.com/mssql/server@sha256:cf8f0ab2ebe61feec2eed2629061a07d247f791c2a8ddda74a4ac9f06a291718
+        name: provision-sql-app
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+        volumeMounts:
+        - mountPath: /bootstrap
+          name: scripts
+          readOnly: true
+        - mountPath: /tmp
+          name: tmp
+      restartPolicy: Never
+      securityContext:
+        fsGroup: 10001
+        runAsGroup: 10001
+        runAsNonRoot: true
+        runAsUser: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      volumes:
+      - configMap:
+          name: sql-app-bootstrap-scripts
+        name: scripts
+      - emptyDir: {}
+        name: tmp
