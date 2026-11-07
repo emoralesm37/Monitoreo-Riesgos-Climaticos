@@ -493,3 +493,31 @@ venv/
 # Auth Service - archivos generados
 /services/auth-service/dist/
 /services/auth-service/*.tsbuildinfo
+# Python - Entornos virtuales
+.venv/
+
+# Report Service - archivos PDF generados
+/services/report-service/app/generated/
+
+# Angular CLI generated cache at repository root
+/.angular/
+
+# Publication safety: real credentials and generated runtime evidence
+**/.env.*
+!**/.env.example
+!**/.env.*.example
+**/*.pem
+**/*.key
+**/*.p12
+**/*.kubeconfig
+**/kubeconfig*
+**/.kube/
+**/.private/
+**/.rendered/
+**/browser-evidence-*/
+/infrastructure/k8s/**/*evidence*.json
+/infrastructure/k8s/**/observations.json
+/infrastructure/k8s/**/closure-active-manifests.json
+/infrastructure/k8s/**/closure-source-hashes.json
+/docs/*VALIDACION*.json
+/docs/*HTTP*.json
