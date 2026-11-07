@@ -1,0 +1,6 @@
+.rendered/
+.private/
+__pycache__/
+*.pyc
+tools/schema-export/bin/
+tools/schema-export/obj/

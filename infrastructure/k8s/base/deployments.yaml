@@ -1,0 +1,976 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: frontend
+      app.kubernetes.io/part-of: climateguard
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: frontend
+        app.kubernetes.io/part-of: climateguard
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 101
+        runAsGroup: 101
+        fsGroup: 101
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: frontend
+        image: climateguard/frontend:candidate
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 8080
+        env: []
+        resources:
+          requests:
+            cpu: 25m
+            memory: 32Mi
+          limits:
+            cpu: 250m
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: nginx
+          mountPath: /etc/nginx/nginx.conf
+          subPath: nginx.conf
+          readOnly: true
+        readinessProbe:
+          httpGet:
+            path: /index.html
+            port: http
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: http
+          periodSeconds: 20
+          timeoutSeconds: 5
+          failureThreshold: 3
+        startupProbe:
+          httpGet:
+            path: /healthz
+            port: http
+          periodSeconds: 5
+          timeoutSeconds: 5
+          failureThreshold: 60
+      volumes:
+      - name: tmp
+        emptyDir:
+          sizeLimit: 256Mi
+      - name: nginx
+        configMap:
+          name: frontend-settings
+      terminationGracePeriodSeconds: 60
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: gateway
+      app.kubernetes.io/part-of: climateguard
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: gateway
+        app.kubernetes.io/part-of: climateguard
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1654
+        runAsGroup: 1654
+        fsGroup: 1654
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: gateway
+        image: climateguard/gateway:candidate
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 8080
+        env:
+        - name: Jwt__Key
+          valueFrom:
+            secretKeyRef:
+              name: jwt
+              key: access-key
+        - name: Jwt__Issuer
+          valueFrom:
+            configMapKeyRef:
+              name: runtime
+              key: JWT_ISSUER
+        - name: Jwt__Audience
+          valueFrom:
+            configMapKeyRef:
+              name: runtime
+              key: JWT_AUDIENCE
+        - name: ASPNETCORE_ENVIRONMENT
+          value: Production
+        - name: ASPNETCORE_HTTP_PORTS
+          value: '8080'
+        - name: Audit__SigningKey
+          valueFrom:
+            secretKeyRef:
+              name: audit-signing
+              key: key
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 1000m
+            memory: 512Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: settings
+          mountPath: /app/appsettings.json
+          subPath: appsettings.json
+          readOnly: true
+        - name: outbox
+          mountPath: /var/lib/climateguard/audit-outbox
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: http
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          periodSeconds: 20
+          timeoutSeconds: 5
+          failureThreshold: 3
+        startupProbe:
+          httpGet:
+            path: /health/ready
+            port: http
+          periodSeconds: 5
+          timeoutSeconds: 5
+          failureThreshold: 60
+      volumes:
+      - name: tmp
+        emptyDir:
+          sizeLimit: 256Mi
+      - name: settings
+        configMap:
+          name: gateway-settings
+      - name: outbox
+        persistentVolumeClaim:
+          claimName: gateway-outbox
+      terminationGracePeriodSeconds: 60
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: auth-service
+      app.kubernetes.io/part-of: climateguard
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: auth-service
+        app.kubernetes.io/part-of: climateguard
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: auth-service
+        image: climateguard/auth-service:candidate
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 7101
+        env:
+        - name: JWT_ACCESS_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt
+              key: access-key
+        - name: JWT_ISSUER
+          valueFrom:
+            configMapKeyRef:
+              name: runtime
+              key: JWT_ISSUER
+        - name: JWT_AUDIENCE
+          valueFrom:
+            configMapKeyRef:
+              name: runtime
+              key: JWT_AUDIENCE
+        - name: NODE_ENV
+          value: production
+        - name: PORT
+          value: '7101'
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: runtime
+              key: AUTH_DB_HOST
+        - name: DB_PORT
+          value: '5432'
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: runtime
+              key: AUTH_DB_NAME
+        - name: DB_SSL
+          value: 'false'
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: auth-db-app
+              key: username
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: auth-db-app
+              key: password
+        - name: JWT_REFRESH_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt
+              key: refresh-key
+        - name: JWT_ACCESS_TTL_SECONDS
+          value: '900'
+        - name: JWT_REFRESH_TTL_SECONDS
+          value: '604800'
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 1000m
+            memory: 512Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: http
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        livenessProbe:
+          tcpSocket:
+            port: http
+          periodSeconds: 20
+          timeoutSeconds: 5
+        startupProbe:
+          httpGet:
+            path: /health
+            port: http
+          periodSeconds: 5
+          timeoutSeconds: 5
+          failureThreshold: 60
+      volumes:
+      - name: tmp
+        emptyDir:
+          sizeLimit: 256Mi
+      terminationGracePeriodSeconds: 60
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: legacy-api
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: legacy-api
+      app.kubernetes.io/part-of: climateguard
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: legacy-api
+        app.kubernetes.io/part-of: climateguard
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1654
+        runAsGroup: 1654
+        fsGroup: 1654
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: legacy-api
+        image: climateguard/legacy-api:candidate
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 8080
+        env:
+        - name: Jwt__Key
+          valueFrom:
+            secretKeyRef:
+              name: jwt
+              key: access-key
+        - name: Jwt__Issuer
+          valueFrom:
+            configMapKeyRef:
+              name: runtime
+              key: JWT_ISSUER
+        - name: Jwt__Audience
+          valueFrom:
+            configMapKeyRef:
+              name: runtime
+              key: JWT_AUDIENCE
+        - name: ASPNETCORE_ENVIRONMENT
+          value: Production
+        - name: ASPNETCORE_HTTP_PORTS
+          value: '8080'
+        - name: ConnectionStrings__ClimateGuard
+          valueFrom:
+            secretKeyRef:
+              name: sql-app
+              key: connection-string
+        - name: Alerts__GatewayUrl
+          valueFrom:
+            configMapKeyRef:
+              name: runtime
+              key: ALERT_GATEWAY_URL
+        - name: Hosting__HttpsRedirectionEnabled
+          value: 'false'
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 1000m
+            memory: 768Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: settings
+          mountPath: /app/appsettings.json
+          subPath: appsettings.json
+          readOnly: true
+        readinessProbe:
+          httpGet:
+            path: /health/database
+            port: http
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          periodSeconds: 20
+          timeoutSeconds: 5
+          failureThreshold: 3
+        startupProbe:
+          httpGet:
+            path: /health/database
+            port: http
+          periodSeconds: 5
+          timeoutSeconds: 5
+          failureThreshold: 60
+      volumes:
+      - name: tmp
+        emptyDir:
+          sizeLimit: 256Mi
+      - name: settings
+        configMap:
+          name: dotnet-settings
+      terminationGracePeriodSeconds: 60
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sensor-service
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: sensor-service
+      app.kubernetes.io/part-of: climateguard
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: sensor-service
+        app.kubernetes.io/part-of: climateguard
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1654
+        runAsGroup: 1654
+        fsGroup: 1654
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: sensor-service
+        image: climateguard/sensor-service:candidate
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 8080
+        env:
+        - name: Jwt__Key
+          valueFrom:
+            secretKeyRef:
+              name: jwt
+              key: access-key
+        - name: Jwt__Issuer
+          valueFrom:
+            configMapKeyRef:
+              name: runtime
+              key: JWT_ISSUER
+        - name: Jwt__Audience
+          valueFrom:
+            configMapKeyRef:
+              name: runtime
+              key: JWT_AUDIENCE
+        - name: ASPNETCORE_ENVIRONMENT
+          value: Production
+        - name: ASPNETCORE_HTTP_PORTS
+          value: '8080'
+        - name: ConnectionStrings__ClimateGuard
+          valueFrom:
+            secretKeyRef:
+              name: sql-app
+              key: connection-string
+        - name: Alerts__GatewayUrl
+          valueFrom:
+            configMapKeyRef:
+              name: runtime
+              key: ALERT_GATEWAY_URL
+        - name: Sensor__UseSharedDatabase
+          value: 'true'
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 1000m
+            memory: 768Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: settings
+          mountPath: /app/appsettings.json
+          subPath: appsettings.json
+          readOnly: true
+        readinessProbe:
+          httpGet:
+            path: /health/database
+            port: http
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          periodSeconds: 20
+          timeoutSeconds: 5
+          failureThreshold: 3
+        startupProbe:
+          httpGet:
+            path: /health/database
+            port: http
+          periodSeconds: 5
+          timeoutSeconds: 5
+          failureThreshold: 60
+      volumes:
+      - name: tmp
+        emptyDir:
+          sizeLimit: 256Mi
+      - name: settings
+        configMap:
+          name: dotnet-settings
+      terminationGracePeriodSeconds: 60
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alert-service
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: alert-service
+      app.kubernetes.io/part-of: climateguard
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: alert-service
+        app.kubernetes.io/part-of: climateguard
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: alert-service
+        image: climateguard/alert-service:candidate
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 7301
+        env:
+        - name: JWT_ACCESS_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt
+              key: access-key
+        - name: JWT_ISSUER
+          valueFrom:
+            configMapKeyRef:
+              name: runtime
+              key: JWT_ISSUER
+        - name: JWT_AUDIENCE
+          valueFrom:
+            configMapKeyRef:
+              name: runtime
+              key: JWT_AUDIENCE
+        - name: SERVER_PORT
+          value: '7301'
+        - name: SPRING_DATASOURCE_URL
+          value: jdbc:postgresql://alert-db:5432/climateguard_alert
+        - name: SPRING_DATASOURCE_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: alert-db-app
+              key: username
+        - name: SPRING_DATASOURCE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: alert-db-app
+              key: password
+        - name: ALERT_RULES_URL
+          valueFrom:
+            configMapKeyRef:
+              name: runtime
+              key: ALERT_RULES_URL
+        - name: MANAGEMENT_ENDPOINT_HEALTH_GROUP_READINESS_INCLUDE
+          value: readinessState,db
+        - name: JAVA_TOOL_OPTIONS
+          value: -XX:MaxRAMPercentage=65 -XX:InitialRAMPercentage=20
+        - name: SPRING_FLYWAY_ENABLED
+          value: 'true'
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+          limits:
+            cpu: 1500m
+            memory: 1Gi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: http
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: http
+          periodSeconds: 20
+          timeoutSeconds: 5
+          failureThreshold: 3
+        startupProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: http
+          periodSeconds: 5
+          timeoutSeconds: 5
+          failureThreshold: 60
+      volumes:
+      - name: tmp
+        emptyDir:
+          sizeLimit: 256Mi
+      terminationGracePeriodSeconds: 60
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: report-service
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: report-service
+      app.kubernetes.io/part-of: climateguard
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: report-service
+        app.kubernetes.io/part-of: climateguard
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: report-service
+        image: climateguard/report-service:candidate
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 8000
+        env:
+        - name: JWT_ACCESS_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt
+              key: access-key
+        - name: JWT_ISSUER
+          valueFrom:
+            configMapKeyRef:
+              name: runtime
+              key: JWT_ISSUER
+        - name: JWT_AUDIENCE
+          valueFrom:
+            configMapKeyRef:
+              name: runtime
+              key: JWT_AUDIENCE
+        - name: MONGO_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: runtime
+              key: MONGO_HOST
+        - name: MONGO_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: runtime
+              key: MONGO_PORT
+        - name: MONGO_DATABASE
+          value: ClimateGuardReports
+        - name: MONGO_REPORT_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: report-db
+              key: username
+        - name: MONGO_REPORT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: report-db
+              key: password
+        - name: COMMUNITY_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: runtime
+              key: COMMUNITY_SERVICE_URL
+        - name: SENSOR_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: runtime
+              key: SENSOR_SERVICE_URL
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+          limits:
+            cpu: 1500m
+            memory: 1536Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: pdfs
+          mountPath: /opt/climateguard/services/report-service/app/generated
+        readinessProbe:
+          httpGet:
+            path: /health/database
+            port: http
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          periodSeconds: 20
+          timeoutSeconds: 5
+          failureThreshold: 3
+        startupProbe:
+          httpGet:
+            path: /health/database
+            port: http
+          periodSeconds: 5
+          timeoutSeconds: 5
+          failureThreshold: 60
+        command:
+        - python
+        - -m
+        - uvicorn
+        args:
+        - app.main:app
+        - --host
+        - 0.0.0.0
+        - --port
+        - '8000'
+        - --limit-concurrency
+        - '4'
+        - --no-access-log
+      volumes:
+      - name: tmp
+        emptyDir:
+          sizeLimit: 256Mi
+      - name: pdfs
+        persistentVolumeClaim:
+          claimName: report-pdfs
+      terminationGracePeriodSeconds: 60
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: audit-service
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: audit-service
+      app.kubernetes.io/part-of: climateguard
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: audit-service
+        app.kubernetes.io/part-of: climateguard
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: audit-service
+        image: climateguard/audit-service:candidate
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 8001
+        env:
+        - name: JWT_ACCESS_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: jwt
+              key: access-key
+        - name: JWT_ISSUER
+          valueFrom:
+            configMapKeyRef:
+              name: runtime
+              key: JWT_ISSUER
+        - name: JWT_AUDIENCE
+          valueFrom:
+            configMapKeyRef:
+              name: runtime
+              key: JWT_AUDIENCE
+        - name: MONGO_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: runtime
+              key: MONGO_HOST
+        - name: MONGO_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: runtime
+              key: MONGO_PORT
+        - name: MONGO_DATABASE
+          value: ClimateGuardAudit
+        - name: MONGO_AUDIT_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: audit-db
+              key: username
+        - name: MONGO_AUDIT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: audit-db
+              key: password
+        - name: AUDIT_INGEST_KEY
+          valueFrom:
+            secretKeyRef:
+              name: audit-signing
+              key: key
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 1000m
+            memory: 512Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: http
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        livenessProbe:
+          tcpSocket:
+            port: http
+          periodSeconds: 20
+          timeoutSeconds: 5
+        startupProbe:
+          httpGet:
+            path: /health
+            port: http
+          periodSeconds: 5
+          timeoutSeconds: 5
+          failureThreshold: 60
+      volumes:
+      - name: tmp
+        emptyDir:
+          sizeLimit: 256Mi
+      terminationGracePeriodSeconds: 60

@@ -1,0 +1,23 @@
+<section class="audit-page" aria-labelledby="audit-title" [attr.aria-busy]="loading()">
+  <header class="hero"><div><span>CLIMATEGUARD / TRAZABILIDAD</span><h1 id="audit-title">Historial y auditoría</h1><p>Operaciones reales registradas por el Gateway y persistidas en MongoDB.</p></div><button (click)="load()" [disabled]="loading()">Actualizar</button></header>
+  <div class="summary"><strong>{{ loading() || error() ? '—' : total() }}</strong><span>eventos que coinciden con los filtros · acceso administrativo</span></div>
+  <form class="filters" (ngSubmit)="load(1)">
+    <label>Módulo<select name="module" [(ngModel)]="filters.module"><option value="">Todos</option>@for (module of modules; track module) { <option [value]="module">{{module}}</option> }</select></label>
+    <label>Acción<select name="action" [(ngModel)]="filters.action"><option value="">Todas</option>@for (action of actions; track action) { <option [value]="action">{{action}}</option> }</select></label>
+    <label>Actor (UUID)<input name="actor" [(ngModel)]="filters.actor" placeholder="Identificador del usuario"></label>
+    <label>Desde (hora local)<input name="start" type="datetime-local" [(ngModel)]="filters.start"></label>
+    <label>Hasta (hora local)<input name="end" type="datetime-local" [(ngModel)]="filters.end"></label>
+    <label>Resultado<select name="result" [(ngModel)]="filters.result"><option value="">Todos</option><option value="CONFIRMED">Confirmado</option><option value="FAILED">Fallido</option><option value="UNKNOWN">No confirmado</option></select></label>
+    <div class="filter-actions"><button type="submit" [disabled]="loading()">Aplicar filtros</button><button type="button" (click)="clear()" [disabled]="loading()">Limpiar</button></div>
+  </form>
+  @if (loading()) { <p class="state" role="status">Consultando eventos reales…</p> }
+  @else if (error()) { <div class="state error" role="alert"><p>{{error()}}</p><button (click)="load()">Reintentar</button></div> }
+  @else if (!items().length) { <p class="state" role="status">No hay eventos para estos filtros.</p> }
+  @else {
+    <div class="table-scroll"><table><caption class="sr-only">Eventos de auditoría. Fechas mostradas en hora local.</caption><thead><tr><th>Fecha y hora</th><th>Actor</th><th>Módulo / acción</th><th>Entidad</th><th>Resultado</th><th>Detalle</th></tr></thead>
+    <tbody>@for (event of items(); track event.event_id) { <tr [attr.data-event-id]="event.event_id"><td>{{event.occurred_at | date:'dd/MM/yyyy HH:mm:ss'}}</td><td><strong>{{event.actor_name}}</strong><small>{{event.actor_role || 'Sin sesión identificada'}}</small></td><td>{{event.module}}<small>{{event.action}}</small></td><td class="identifier">{{event.entity_id || 'No disponible'}}</td><td><span class="badge" [class.failed]="event.result === 'FAILED'" [class.unknown]="event.result === 'UNKNOWN'">{{resultLabel(event.result)}}</span></td><td><button (click)="detail.set(detail()?.event_id === event.event_id ? null : event)" [attr.aria-expanded]="detail()?.event_id === event.event_id" aria-controls="event-detail">Ver</button></td></tr> }</tbody></table></div>
+    <nav class="pagination" aria-label="Páginas de auditoría"><button (click)="load(page - 1)" [disabled]="page <= 1 || loading()">Anterior</button><span>Página {{page}} · {{total()}} eventos</span><button (click)="load(page + 1)" [disabled]="page * 25 >= total() || loading()">Siguiente</button></nav>
+  }
+  @if (detail(); as event) { <article id="event-detail" class="detail" aria-label="Detalle del evento"><h2>Detalle del evento</h2><dl><dt>ID del evento</dt><dd>{{event.event_id}}</dd><dt>Fecha UTC</dt><dd>{{event.occurred_at | date:'yyyy-MM-dd HH:mm:ss':'UTC'}} UTC</dd><dt>Actor UUID</dt><dd>{{event.actor_id || 'No identificado'}}</dd><dt>Entidad</dt><dd>{{event.module}} / {{event.entity_id || 'No disponible'}}</dd><dt>Respuesta HTTP</dt><dd>{{event.http_status || 'No confirmada'}}</dd></dl><button (click)="detail.set(null)">Cerrar detalle</button></article> }
+  <p class="note">Un resultado no confirmado no prueba que la operación haya fallado. La auditoría cubre las operaciones que pasan por este Gateway; no reconstruye eventos anteriores ni operaciones directas entre servicios.</p>
+</section>

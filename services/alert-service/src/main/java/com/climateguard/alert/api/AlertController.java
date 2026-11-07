@@ -4,7 +4,6 @@ import com.climateguard.alert.domain.Alert;
 import com.climateguard.alert.service.AlertService;
 import com.climateguard.alert.service.AlertService.AlertResponse;
 import com.climateguard.alert.service.AlertService.CreateAlertRequest;
-import com.climateguard.alert.service.AlertService.EvaluateReadingRequest;
 import com.climateguard.alert.service.AlertService.EvaluationResult;
 import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -20,9 +19,11 @@ import java.util.List;
 public class AlertController {
 
     private final AlertService alertService;
+    private final com.climateguard.alert.service.ReadingEvaluationService evaluations;
 
-    public AlertController(AlertService alertService) {
+    public AlertController(AlertService alertService, com.climateguard.alert.service.ReadingEvaluationService evaluations) {
         this.alertService = alertService;
+        this.evaluations = evaluations;
     }
 
     @GetMapping
@@ -78,9 +79,10 @@ public class AlertController {
 
     @PostMapping("/evaluate")
     public EvaluationResult evaluate(
-        @Valid @RequestBody EvaluateReadingRequest request
+        @Valid @RequestBody com.climateguard.alert.service.ReadingEvaluationService.Measurement request,
+        @org.springframework.security.core.annotation.AuthenticationPrincipal org.springframework.security.oauth2.jwt.Jwt token
     ) {
-        return alertService.evaluate(request);
+        return evaluations.evaluate(request, "Bearer " + token.getTokenValue());
     }
 
     @PatchMapping("/{id}/resolve")

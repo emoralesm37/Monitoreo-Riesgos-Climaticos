@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, timeout } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 export interface Comunidad {
@@ -37,21 +37,24 @@ export class ComunidadesService {
   private readonly apiUrl = `${environment.apiUrl}/communities`;
 
   obtenerTodas(): Observable<Comunidad[]> {
-    return this.http.get<Comunidad[]>(this.apiUrl);
+    return this.http.get<Comunidad[]>(this.apiUrl).pipe(timeout(15000));
   }
 
   obtenerPorId(id: number): Observable<Comunidad> {
-    return this.http.get<Comunidad>(`${this.apiUrl}/${id}`);
+    return this.http.get<Comunidad>(`${this.apiUrl}/${id}`).pipe(timeout(15000));
   }
 
   crear(data: CrearComunidadRequest): Observable<Comunidad> {
-    return this.http.post<Comunidad>(this.apiUrl, data);
+    return this.http.post<Comunidad>(this.apiUrl, data).pipe(timeout(15000));
   }
 
   actualizar(
     id: number,
     data: ActualizarComunidadRequest
   ): Observable<void> {
-    return this.http.put<void>(`${this.apiUrl}/${id}`, data);
+    return this.http.put<void>(`${this.apiUrl}/${id}`, data).pipe(timeout(15000));
+  }
+  cambiarEstado(id: number, isActive: boolean): Observable<void> {
+    return this.http.patch<void>(`${this.apiUrl}/${id}/status`, { isActive }).pipe(timeout(15000));
   }
 }

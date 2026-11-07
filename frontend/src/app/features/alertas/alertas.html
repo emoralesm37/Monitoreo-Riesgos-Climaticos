@@ -2,22 +2,48 @@
 
   <div class="alertas-header">
     <div>
-      <h1>Alertas activas</h1>
+      <h1>Alertas climáticas</h1>
       <p>
         Monitorea las alertas generadas por los sensores de ClimateGuard.
       </p>
     </div>
 
+    <button type="button" class="btn-resolve" (click)="load()" [disabled]="loading || resolving.size > 0">Actualizar</button>
     <span class="contador">
-      {{ alertas.length }} activas
+      {{ alertas.length }} resultados
     </span>
   </div>
 
+  <div class="alert-filters">
+    <label>Estado<select [disabled]="loading || resolving.size > 0" [(ngModel)]="statusFilter" (change)="load()"><option value="ACTIVA">Activas</option><option value="RESUELTA">Resueltas</option><option value="">Todos</option></select></label>
+    <label>Severidad<select [disabled]="loading || resolving.size > 0" [(ngModel)]="severityFilter" (change)="load()"><option value="">Todas</option><option>VERDE</option><option>AMARILLO</option><option>NARANJA</option><option>ROJO</option></select></label>
+    <label>Sensor ID<input [disabled]="loading || resolving.size > 0" type="number" min="1" [(ngModel)]="sensorFilter" (change)="load()"></label>
+    <label>Desde (hora local)<input [disabled]="loading || resolving.size > 0" type="datetime-local" [(ngModel)]="fromFilter" (change)="load()"></label>
+    <label>Hasta (hora local)<input [disabled]="loading || resolving.size > 0" type="datetime-local" [(ngModel)]="toFilter" (change)="load()"></label>
+  </div>
+  @if (selected; as item) {
+    <section class="alert-detail" aria-label="Detalle de alerta">
+      <button class="btn-resolve" (click)="selected = null">Cerrar detalle</button>
+      <h2>Alerta #{{ item.alertId }} · {{ item.status }}</h2><p>{{ item.message }}</p>
+      <p>Valor: {{ item.triggerValue ?? 'Sin valor' }} {{ item.unit || '' }} · Regla: {{ item.ruleId ?? 'Sin referencia' }}</p>
+      <p>Captura UTC: {{ item.capturedAt | date:'dd/MM/yyyy HH:mm:ss':'UTC' }}</p>
+      <p>Medición: {{ item.measurementId || 'Sin referencia' }}</p>
+      @if (item.resolvedAt) { <p>Resuelta UTC: {{ item.resolvedAt | date:'dd/MM/yyyy HH:mm:ss':'UTC' }} · Usuario: {{ item.resolvedByUserId }}</p> }
+    </section>
+  }
   @if (mensaje) {
     <div class="mensaje-exito">
       {{ mensaje }}
     </div>
   }
+
+  @if (actionError) { <p role="alert">{{ actionError }}</p> }
+  @if (loading) {
+    <p role="status">Cargando alertas...</p>
+  } @else if (error) {
+    <p role="alert">{{ error }}</p>
+    <button type="button" class="btn-resolve" (click)="load()">Reintentar</button>
+  } @else {
 
   <div class="alertas-list">
 
@@ -39,12 +65,12 @@
             </span>
 
             <span class="alerta-fecha">
-              {{ alerta.createdAt }}
+              {{ alerta.createdAt | date:'dd/MM/yyyy HH:mm:ss':'UTC' }} UTC · {{ alerta.status }}
             </span>
           </div>
 
           <h3>
-            {{ alerta.phenomenon }}
+            {{ phenomenonLabel(alerta.phenomenon) }}
           </h3>
 
           <p class="alerta-message">
@@ -54,38 +80,43 @@
           <div class="alerta-meta">
             <span>
               <strong>Sensor:</strong>
-              {{ alerta.sensorName }}
+              {{ alerta.sensorName || ('ID ' + (alerta.sensorId ?? 'no disponible')) }}
             </span>
 
             <span>
               <strong>Comunidad:</strong>
-              {{ alerta.community }}
+              {{ alerta.communityName || ('ID ' + (alerta.communityId ?? 'no disponible')) }}
             </span>
           </div>
 
         </div>
 
+        <button class="btn-detail" (click)="detail(alerta)" [disabled]="detailLoading">Ver detalle</button>
+        @if (canResolve && alerta.status === 'ACTIVA') {
         <button
           type="button"
           class="btn-resolve"
           (click)="resolver(alerta)"
+          [disabled]="resolving.has(alerta.alertId)"
         >
-          Resolver alerta
+          {{ resolving.has(alerta.alertId) ? 'Resolviendo...' : 'Resolver alerta' }}
         </button>
+        }
 
       </article>
 
     } @empty {
 
       <div class="no-alertas">
-        <h3>No hay alertas activas</h3>
+        <h3>No hay alertas para estos filtros</h3>
         <p>
-          Todos los eventos registrados han sido atendidos.
+          El servicio no devolvió alertas activas o resueltas que coincidan con la consulta.
         </p>
       </div>
 
     }
 
   </div>
+  }
 
 </section>

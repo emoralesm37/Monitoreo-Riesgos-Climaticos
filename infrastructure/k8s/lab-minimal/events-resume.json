@@ -1,0 +1,1375 @@
+{
+    "apiVersion": "v1",
+    "items": [
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-06T17:56:04Z",
+            "involvedObject": {
+                "kind": "Node",
+                "name": "k3d-cg-isolated-mini-server-0",
+                "uid": "k3d-cg-isolated-mini-server-0"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-06T17:56:04Z",
+            "message": "Node and Certificate Authority certificates managed by k3s are OK",
+            "metadata": {
+                "creationTimestamp": "2026-11-06T17:56:04Z",
+                "name": "k3d-cg-isolated-mini-server-0.18e5865df8045550",
+                "namespace": "default",
+                "resourceVersion": "219",
+                "uid": "7818d11a-2445-4fb4-85fe-86160a621d6e"
+            },
+            "reason": "CertificateExpirationOK",
+            "reportingComponent": "k3s-cert-monitor",
+            "reportingInstance": "k3d-cg-isolated-mini-server-0",
+            "source": {
+                "component": "k3s-cert-monitor",
+                "host": "k3d-cg-isolated-mini-server-0"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-06T17:56:04Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "k3d-cg-isolated-mini-server-0"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-06T17:56:04Z",
+            "message": "Starting kubelet.",
+            "metadata": {
+                "creationTimestamp": "2026-11-06T17:56:04Z",
+                "name": "k3d-cg-isolated-mini-server-0.18e5865dfd6eaa19",
+                "namespace": "default",
+                "resourceVersion": "237",
+                "uid": "457dfa0b-2405-4407-8527-2b6543862bbd"
+            },
+            "reason": "Starting",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "k3d-cg-isolated-mini-server-0",
+            "source": {
+                "component": "kubelet",
+                "host": "k3d-cg-isolated-mini-server-0"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-06T17:56:04Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "k3d-cg-isolated-mini-server-0"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-06T17:56:04Z",
+            "message": "invalid capacity 0 on image filesystem",
+            "metadata": {
+                "creationTimestamp": "2026-11-06T17:56:04Z",
+                "name": "k3d-cg-isolated-mini-server-0.18e5865dfe2db746",
+                "namespace": "default",
+                "resourceVersion": "238",
+                "uid": "e1d7d468-8bd0-4e62-9640-76ef19c4d08c"
+            },
+            "reason": "InvalidDiskCapacity",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "k3d-cg-isolated-mini-server-0",
+            "source": {
+                "component": "kubelet",
+                "host": "k3d-cg-isolated-mini-server-0"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 3,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-06T17:56:04Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "k3d-cg-isolated-mini-server-0"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-06T17:56:04Z",
+            "message": "Node k3d-cg-isolated-mini-server-0 status is now: NodeHasSufficientMemory",
+            "metadata": {
+                "creationTimestamp": "2026-11-06T17:56:04Z",
+                "name": "k3d-cg-isolated-mini-server-0.18e5865e006f2729",
+                "namespace": "default",
+                "resourceVersion": "253",
+                "uid": "260f75bf-8b9a-409b-bfee-fbc584e8a9b4"
+            },
+            "reason": "NodeHasSufficientMemory",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "k3d-cg-isolated-mini-server-0",
+            "source": {
+                "component": "kubelet",
+                "host": "k3d-cg-isolated-mini-server-0"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 3,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-06T17:56:04Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "k3d-cg-isolated-mini-server-0"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-06T17:56:04Z",
+            "message": "Node k3d-cg-isolated-mini-server-0 status is now: NodeHasNoDiskPressure",
+            "metadata": {
+                "creationTimestamp": "2026-11-06T17:56:04Z",
+                "name": "k3d-cg-isolated-mini-server-0.18e5865e007040b1",
+                "namespace": "default",
+                "resourceVersion": "254",
+                "uid": "b55b9006-dbcb-493b-a0a8-8efedb80ebfe"
+            },
+            "reason": "NodeHasNoDiskPressure",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "k3d-cg-isolated-mini-server-0",
+            "source": {
+                "component": "kubelet",
+                "host": "k3d-cg-isolated-mini-server-0"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 3,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-06T17:56:04Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "k3d-cg-isolated-mini-server-0"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-06T17:56:04Z",
+            "message": "Node k3d-cg-isolated-mini-server-0 status is now: NodeHasSufficientPID",
+            "metadata": {
+                "creationTimestamp": "2026-11-06T17:56:04Z",
+                "name": "k3d-cg-isolated-mini-server-0.18e5865e00707067",
+                "namespace": "default",
+                "resourceVersion": "256",
+                "uid": "b901f634-1e5b-4f76-a350-1f7a39b59e07"
+            },
+            "reason": "NodeHasSufficientPID",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "k3d-cg-isolated-mini-server-0",
+            "source": {
+                "component": "kubelet",
+                "host": "k3d-cg-isolated-mini-server-0"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-06T17:56:04Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "k3d-cg-isolated-mini-server-0"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-06T17:56:04Z",
+            "message": "Updated Node Allocatable limit across pods",
+            "metadata": {
+                "creationTimestamp": "2026-11-06T17:56:04Z",
+                "name": "k3d-cg-isolated-mini-server-0.18e5865e0164adce",
+                "namespace": "default",
+                "resourceVersion": "251",
+                "uid": "a0180b77-2ea2-4f47-8af1-fb3e765a7a23"
+            },
+            "reason": "NodeAllocatableEnforced",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "k3d-cg-isolated-mini-server-0",
+            "source": {
+                "component": "kubelet",
+                "host": "k3d-cg-isolated-mini-server-0"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-06T17:56:05Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "k3d-cg-isolated-mini-server-0",
+                "uid": "91c6d669-8f2c-4332-82f0-53612ee901e0"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-06T17:56:05Z",
+            "message": "Node k3d-cg-isolated-mini-server-0 status is now: NodeReady",
+            "metadata": {
+                "creationTimestamp": "2026-11-06T17:56:05Z",
+                "name": "k3d-cg-isolated-mini-server-0.18e5865e144d58a3",
+                "namespace": "default",
+                "resourceVersion": "259",
+                "uid": "ebde2cc5-3bef-4009-b023-afcc393a0dc9"
+            },
+            "reason": "NodeReady",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "k3d-cg-isolated-mini-server-0",
+            "source": {
+                "component": "kubelet",
+                "host": "k3d-cg-isolated-mini-server-0"
+            },
+            "type": "Normal"
+        },
+        {
+            "action": "StartKubeProxy",
+            "apiVersion": "v1",
+            "eventTime": "2026-11-06T17:56:05.933154Z",
+            "firstTimestamp": null,
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "k3d-cg-isolated-mini-server-0"
+            },
+            "kind": "Event",
+            "lastTimestamp": null,
+            "metadata": {
+                "creationTimestamp": "2026-11-06T17:56:05Z",
+                "name": "k3d-cg-isolated-mini-server-0.18e5865e3fd7a80d",
+                "namespace": "default",
+                "resourceVersion": "266",
+                "uid": "217e426e-bfec-4d0a-8e52-5fc05e57361a"
+            },
+            "reason": "Starting",
+            "reportingComponent": "kube-proxy",
+            "reportingInstance": "kube-proxy-k3d-cg-isolated-mini-server-0",
+            "source": {},
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-06T17:56:07Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "k3d-cg-isolated-mini-server-0",
+                "resourceVersion": "276",
+                "uid": "91c6d669-8f2c-4332-82f0-53612ee901e0"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-06T17:56:07Z",
+            "message": "Node synced successfully",
+            "metadata": {
+                "creationTimestamp": "2026-11-06T17:56:07Z",
+                "name": "k3d-cg-isolated-mini-server-0.18e5865e995e3ecd",
+                "namespace": "default",
+                "resourceVersion": "329",
+                "uid": "6f14908b-3ba3-4a90-aa10-2b76dcfa860d"
+            },
+            "reason": "Synced",
+            "reportingComponent": "cloud-node-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "cloud-node-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-06T17:56:10Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Node",
+                "name": "k3d-cg-isolated-mini-server-0",
+                "uid": "91c6d669-8f2c-4332-82f0-53612ee901e0"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-06T17:56:10Z",
+            "message": "Node k3d-cg-isolated-mini-server-0 event: Registered Node k3d-cg-isolated-mini-server-0 in Controller",
+            "metadata": {
+                "creationTimestamp": "2026-11-06T17:56:10Z",
+                "name": "k3d-cg-isolated-mini-server-0.18e5865f3bc06c46",
+                "namespace": "default",
+                "resourceVersion": "357",
+                "uid": "1fcdfc64-9e03-46c4-981a-a6b770498859"
+            },
+            "reason": "RegisteredNode",
+            "reportingComponent": "node-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "node-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-06T17:56:10Z",
+            "involvedObject": {
+                "kind": "Node",
+                "name": "k3d-cg-isolated-mini-server-0",
+                "uid": "k3d-cg-isolated-mini-server-0"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-06T17:56:10Z",
+            "message": "Deferred node password secret validation complete",
+            "metadata": {
+                "creationTimestamp": "2026-11-06T17:56:10Z",
+                "name": "k3d-cg-isolated-mini-server-0.18e5865f3d68501f",
+                "namespace": "default",
+                "resourceVersion": "360",
+                "uid": "1bd9ed42-5afe-44de-bd1d-8bdcfc314ce7"
+            },
+            "reason": "NodePasswordValidationComplete",
+            "reportingComponent": "k3s-supervisor",
+            "reportingInstance": "k3d-cg-isolated-mini-server-0",
+            "source": {
+                "component": "k3s-supervisor",
+                "host": "k3d-cg-isolated-mini-server-0"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-06T17:56:06Z",
+            "involvedObject": {
+                "apiVersion": "k3s.cattle.io/v1",
+                "kind": "Addon",
+                "name": "ccm",
+                "namespace": "kube-system",
+                "resourceVersion": "270",
+                "uid": "e0ab67ed-105a-4f84-aa45-283ffe4ed0bb"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-06T17:56:06Z",
+            "message": "Applying manifest at \"/var/lib/rancher/k3s/server/manifests/ccm.yaml\"",
+            "metadata": {
+                "creationTimestamp": "2026-11-06T17:56:06Z",
+                "name": "ccm.18e5865e60a8566e",
+                "namespace": "kube-system",
+                "resourceVersion": "273",
+                "uid": "25239abb-6a41-4184-9847-b178b1fac24d"
+            },
+            "reason": "ApplyingManifest",
+            "reportingComponent": "deploy",
+            "reportingInstance": "k3d-cg-isolated-mini-server-0",
+            "source": {
+                "component": "deploy",
+                "host": "k3d-cg-isolated-mini-server-0"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-06T17:56:06Z",
+            "involvedObject": {
+                "apiVersion": "k3s.cattle.io/v1",
+                "kind": "Addon",
+                "name": "ccm",
+                "namespace": "kube-system",
+                "resourceVersion": "270",
+                "uid": "e0ab67ed-105a-4f84-aa45-283ffe4ed0bb"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-06T17:56:06Z",
+            "message": "Applied manifest at \"/var/lib/rancher/k3s/server/manifests/ccm.yaml\"",
+            "metadata": {
+                "creationTimestamp": "2026-11-06T17:56:06Z",
+                "name": "ccm.18e5865e6869c55c",
+                "namespace": "kube-system",
+                "resourceVersion": "281",
+                "uid": "e73e7944-1922-4c2c-82d1-13b05fdfd1b4"
+            },
+            "reason": "AppliedManifest",
+            "reportingComponent": "deploy",
+            "reportingInstance": "k3d-cg-isolated-mini-server-0",
+            "source": {
+                "component": "deploy",
+                "host": "k3d-cg-isolated-mini-server-0"
+            },
+            "type": "Normal"
+        },
+        {
+            "action": "Binding",
+            "apiVersion": "v1",
+            "eventTime": "2026-11-06T17:56:11.260883Z",
+            "firstTimestamp": null,
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "coredns-577d995dff-dmrqm",
+                "namespace": "kube-system",
+                "resourceVersion": "399",
+                "uid": "de7a29e9-10f5-405c-91a1-944d1bbcc183"
+            },
+            "kind": "Event",
+            "lastTimestamp": null,
+            "message": "Successfully assigned kube-system/coredns-577d995dff-dmrqm to k3d-cg-isolated-mini-server-0",
+            "metadata": {
+                "creationTimestamp": "2026-11-06T17:56:11Z",
+                "name": "coredns-577d995dff-dmrqm.18e5865f7d6660c3",
+                "namespace": "kube-system",
+                "resourceVersion": "403",
+                "uid": "226c3bed-025a-4f15-a5b8-129c96b384e6"
+            },
+            "reason": "Scheduled",
+            "reportingComponent": "default-scheduler",
+            "reportingInstance": "default-scheduler-k3d-cg-isolated-mini-server-0",
+            "source": {},
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-06T17:56:14Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{coredns}",
+                "kind": "Pod",
+                "name": "coredns-577d995dff-dmrqm",
+                "namespace": "kube-system",
+                "resourceVersion": "402",
+                "uid": "de7a29e9-10f5-405c-91a1-944d1bbcc183"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-06T17:56:14Z",
+            "message": "Pulling image \"rancher/mirrored-coredns-coredns:1.14.7\"",
+            "metadata": {
+                "creationTimestamp": "2026-11-06T17:56:14Z",
+                "name": "coredns-577d995dff-dmrqm.18e586603305b927",
+                "namespace": "kube-system",
+                "resourceVersion": "410",
+                "uid": "2573c6cd-6c65-4810-80a2-33a71a1486d0"
+            },
+            "reason": "Pulling",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "k3d-cg-isolated-mini-server-0",
+            "source": {
+                "component": "kubelet",
+                "host": "k3d-cg-isolated-mini-server-0"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-06T17:56:52Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{coredns}",
+                "kind": "Pod",
+                "name": "coredns-577d995dff-dmrqm",
+                "namespace": "kube-system",
+                "resourceVersion": "402",
+                "uid": "de7a29e9-10f5-405c-91a1-944d1bbcc183"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-06T17:56:52Z",
+            "message": "Successfully pulled image \"rancher/mirrored-coredns-coredns:1.14.7\" in 38.653s (38.653s including waiting). Image size: 24261571 bytes.",
+            "metadata": {
+                "creationTimestamp": "2026-11-06T17:56:52Z",
+                "name": "coredns-577d995dff-dmrqm.18e5866932d7f5a6",
+                "namespace": "kube-system",
+                "resourceVersion": "482",
+                "uid": "97dee8eb-24f1-4e2d-8086-c3699b7cd53c"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "k3d-cg-isolated-mini-server-0",
+            "source": {
+                "component": "kubelet",
+                "host": "k3d-cg-isolated-mini-server-0"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-06T17:56:52Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{coredns}",
+                "kind": "Pod",
+                "name": "coredns-577d995dff-dmrqm",
+                "namespace": "kube-system",
+                "resourceVersion": "402",
+                "uid": "de7a29e9-10f5-405c-91a1-944d1bbcc183"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-06T17:56:52Z",
+            "message": "Container created",
+            "metadata": {
+                "creationTimestamp": "2026-11-06T17:56:52Z",
+                "name": "coredns-577d995dff-dmrqm.18e5866934282fc4",
+                "namespace": "kube-system",
+                "resourceVersion": "483",
+                "uid": "b51e8e20-94b5-4aaa-a32b-c0dbbe47133a"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "k3d-cg-isolated-mini-server-0",
+            "source": {
+                "component": "kubelet",
+                "host": "k3d-cg-isolated-mini-server-0"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-06T17:56:53Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{coredns}",
+                "kind": "Pod",
+                "name": "coredns-577d995dff-dmrqm",
+                "namespace": "kube-system",
+                "resourceVersion": "402",
+                "uid": "de7a29e9-10f5-405c-91a1-944d1bbcc183"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-06T17:56:53Z",
+            "message": "Container started",
+            "metadata": {
+                "creationTimestamp": "2026-11-06T17:56:53Z",
+                "name": "coredns-577d995dff-dmrqm.18e586693813a8d0",
+                "namespace": "kube-system",
+                "resourceVersion": "486",
+                "uid": "96558ea0-bcb7-460e-a231-cced9d376db8"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "k3d-cg-isolated-mini-server-0",
+            "source": {
+                "component": "kubelet",
+                "host": "k3d-cg-isolated-mini-server-0"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-06T17:56:53Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{coredns}",
+                "kind": "Pod",
+                "name": "coredns-577d995dff-dmrqm",
+                "namespace": "kube-system",
+                "resourceVersion": "402",
+                "uid": "de7a29e9-10f5-405c-91a1-944d1bbcc183"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-06T17:56:53Z",
+            "message": "Readiness probe failed: Get \"http://10.42.0.2:8181/ready\": dial tcp 10.42.0.2:8181: connect: connection refused",
+            "metadata": {
+                "creationTimestamp": "2026-11-06T17:56:53Z",
+                "name": "coredns-577d995dff-dmrqm.18e5866938467a2f",
+                "namespace": "kube-system",
+                "resourceVersion": "487",
+                "uid": "9308a297-c53c-46b1-a588-1ba5317da424"
+            },
+            "reason": "Unhealthy",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "k3d-cg-isolated-mini-server-0",
+            "source": {
+                "component": "kubelet",
+                "host": "k3d-cg-isolated-mini-server-0"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-06T17:56:11Z",
+            "involvedObject": {
+                "apiVersion": "apps/v1",
+                "kind": "ReplicaSet",
+                "name": "coredns-577d995dff",
+                "namespace": "kube-system",
+                "resourceVersion": "390",
+                "uid": "b58898ac-538f-4cda-bfc5-403d2d004848"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-06T17:56:11Z",
+            "message": "Created pod: coredns-577d995dff-dmrqm",
+            "metadata": {
+                "creationTimestamp": "2026-11-06T17:56:11Z",
+                "name": "coredns-577d995dff.18e5865f7d224862",
+                "namespace": "kube-system",
+                "resourceVersion": "400",
+                "uid": "2147c993-485c-4c51-9ced-45b4c253dd17"
+            },
+            "reason": "SuccessfulCreate",
+            "reportingComponent": "replicaset-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "replicaset-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-06T17:56:06Z",
+            "involvedObject": {
+                "apiVersion": "k3s.cattle.io/v1",
+                "kind": "Addon",
+                "name": "coredns",
+                "namespace": "kube-system",
+                "resourceVersion": "283",
+                "uid": "cb3b7fb1-44d7-4ab1-bf43-4b43dc52ce44"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-06T17:56:06Z",
+            "message": "Applying manifest at \"/var/lib/rancher/k3s/server/manifests/coredns.yaml\"",
+            "metadata": {
+                "creationTimestamp": "2026-11-06T17:56:06Z",
+                "name": "coredns.18e5865e695b2e37",
+                "namespace": "kube-system",
+                "resourceVersion": "284",
+                "uid": "0df89c58-4bae-4675-af81-8062171b6112"
+            },
+            "reason": "ApplyingManifest",
+            "reportingComponent": "deploy",
+            "reportingInstance": "k3d-cg-isolated-mini-server-0",
+            "source": {
+                "component": "deploy",
+                "host": "k3d-cg-isolated-mini-server-0"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-06T17:56:06Z",
+            "involvedObject": {
+                "apiVersion": "k3s.cattle.io/v1",
+                "kind": "Addon",
+                "name": "coredns",
+                "namespace": "kube-system",
+                "resourceVersion": "283",
+                "uid": "cb3b7fb1-44d7-4ab1-bf43-4b43dc52ce44"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-06T17:56:06Z",
+            "message": "Applied manifest at \"/var/lib/rancher/k3s/server/manifests/coredns.yaml\"",
+            "metadata": {
+                "creationTimestamp": "2026-11-06T17:56:06Z",
+                "name": "coredns.18e5865e6f6a288f",
+                "namespace": "kube-system",
+                "resourceVersion": "293",
+                "uid": "0dbabf60-0bc9-415e-a8ac-b86d8be5747e"
+            },
+            "reason": "AppliedManifest",
+            "reportingComponent": "deploy",
+            "reportingInstance": "k3d-cg-isolated-mini-server-0",
+            "source": {
+                "component": "deploy",
+                "host": "k3d-cg-isolated-mini-server-0"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-06T17:56:11Z",
+            "involvedObject": {
+                "apiVersion": "apps/v1",
+                "kind": "Deployment",
+                "name": "coredns",
+                "namespace": "kube-system",
+                "resourceVersion": "289",
+                "uid": "130894ea-28de-4e6e-a2d6-1846e2004f59"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-06T17:56:11Z",
+            "message": "Scaled up replica set coredns-577d995dff from 0 to 1",
+            "metadata": {
+                "creationTimestamp": "2026-11-06T17:56:11Z",
+                "name": "coredns.18e5865f743bf281",
+                "namespace": "kube-system",
+                "resourceVersion": "391",
+                "uid": "f0f36762-8e6e-4289-ad05-5baff93b5850"
+            },
+            "reason": "ScalingReplicaSet",
+            "reportingComponent": "deployment-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "deployment-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-06T17:56:06Z",
+            "involvedObject": {
+                "apiVersion": "k3s.cattle.io/v1",
+                "kind": "Addon",
+                "name": "gateway-api-crd",
+                "namespace": "kube-system",
+                "resourceVersion": "294",
+                "uid": "91538f21-b558-41f0-95b7-161e77466a69"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-06T17:56:06Z",
+            "message": "Applying manifest at \"/var/lib/rancher/k3s/server/manifests/gateway-api-crd.yaml\"",
+            "metadata": {
+                "creationTimestamp": "2026-11-06T17:56:06Z",
+                "name": "gateway-api-crd.18e5865e6ff9c9d0",
+                "namespace": "kube-system",
+                "resourceVersion": "295",
+                "uid": "8848a362-92a4-42ed-97bb-1002428c607a"
+            },
+            "reason": "ApplyingManifest",
+            "reportingComponent": "deploy",
+            "reportingInstance": "k3d-cg-isolated-mini-server-0",
+            "source": {
+                "component": "deploy",
+                "host": "k3d-cg-isolated-mini-server-0"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-06T17:56:06Z",
+            "involvedObject": {
+                "apiVersion": "k3s.cattle.io/v1",
+                "kind": "Addon",
+                "name": "gateway-api-crd",
+                "namespace": "kube-system",
+                "resourceVersion": "294",
+                "uid": "91538f21-b558-41f0-95b7-161e77466a69"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-06T17:56:06Z",
+            "message": "Applied manifest at \"/var/lib/rancher/k3s/server/manifests/gateway-api-crd.yaml\"",
+            "metadata": {
+                "creationTimestamp": "2026-11-06T17:56:06Z",
+                "name": "gateway-api-crd.18e5865e70a44e22",
+                "namespace": "kube-system",
+                "resourceVersion": "298",
+                "uid": "73222b74-db74-4a29-a1b0-851279e20590"
+            },
+            "reason": "AppliedManifest",
+            "reportingComponent": "deploy",
+            "reportingInstance": "k3d-cg-isolated-mini-server-0",
+            "source": {
+                "component": "deploy",
+                "host": "k3d-cg-isolated-mini-server-0"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-06T17:56:07Z",
+            "involvedObject": {
+                "apiVersion": "helm.cattle.io/v1",
+                "kind": "HelmChart",
+                "name": "gateway-api-crd",
+                "namespace": "kube-system",
+                "resourceVersion": "331",
+                "uid": "b206895c-9e40-4d53-aef9-245bb7b06299"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-06T17:56:07Z",
+            "message": "Applying HelmChart from https://%{KUBERNETES_API}%/static/charts/gateway-api-crd-1.6.301.tgz using Job kube-system/helm-install-gateway-api-crd ",
+            "metadata": {
+                "annotations": {
+                    "helmcharts.helm.cattle.io/configHash": "SHA256=F4B39A88AFCC8A5B9E8993C572A7680AA9344AD13493300C50E8BEDECAF26FB2"
+                },
+                "creationTimestamp": "2026-11-06T17:56:07Z",
+                "name": "gateway-api-crd.18e5865ea45c4110",
+                "namespace": "kube-system",
+                "resourceVersion": "332",
+                "uid": "ddf52172-0f62-4950-8ea7-3ffe55e4b26e"
+            },
+            "reason": "ApplyJob",
+            "reportingComponent": "helm-controller",
+            "reportingInstance": "k3d-cg-isolated-mini-server-0",
+            "source": {
+                "component": "helm-controller",
+                "host": "k3d-cg-isolated-mini-server-0"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-06T17:56:10Z",
+            "involvedObject": {
+                "apiVersion": "helm.cattle.io/v1",
+                "kind": "HelmChart",
+                "name": "gateway-api-crd",
+                "namespace": "kube-system",
+                "resourceVersion": "340",
+                "uid": "b206895c-9e40-4d53-aef9-245bb7b06299"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-06T17:56:10Z",
+            "message": "Resumed synced Job kube-system/helm-install-gateway-api-crd",
+            "metadata": {
+                "creationTimestamp": "2026-11-06T17:56:10Z",
+                "name": "gateway-api-crd.18e5865f5d763414",
+                "namespace": "kube-system",
+                "resourceVersion": "366",
+                "uid": "e25ff5c7-a8b6-4858-b960-b10746f46775"
+            },
+            "reason": "ResumeJob",
+            "reportingComponent": "helm-controller",
+            "reportingInstance": "k3d-cg-isolated-mini-server-0",
+            "source": {
+                "component": "helm-controller",
+                "host": "k3d-cg-isolated-mini-server-0"
+            },
+            "type": "Normal"
+        },
+        {
+            "action": "Binding",
+            "apiVersion": "v1",
+            "eventTime": "2026-11-06T17:56:10.735118Z",
+            "firstTimestamp": null,
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "helm-install-gateway-api-crd-7vs57",
+                "namespace": "kube-system",
+                "resourceVersion": "367",
+                "uid": "76688947-cd31-4e60-ba28-fa25ea1a8ea3"
+            },
+            "kind": "Event",
+            "lastTimestamp": null,
+            "message": "Successfully assigned kube-system/helm-install-gateway-api-crd-7vs57 to k3d-cg-isolated-mini-server-0",
+            "metadata": {
+                "creationTimestamp": "2026-11-06T17:56:10Z",
+                "name": "helm-install-gateway-api-crd-7vs57.18e5865f5e10477d",
+                "namespace": "kube-system",
+                "resourceVersion": "372",
+                "uid": "f09a6fc5-f41f-4042-b1ff-f574bc4cedba"
+            },
+            "reason": "Scheduled",
+            "reportingComponent": "default-scheduler",
+            "reportingInstance": "default-scheduler-k3d-cg-isolated-mini-server-0",
+            "source": {},
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-06T17:56:10Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "kind": "Pod",
+                "name": "helm-install-gateway-api-crd-7vs57",
+                "namespace": "kube-system",
+                "resourceVersion": "370",
+                "uid": "76688947-cd31-4e60-ba28-fa25ea1a8ea3"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-06T17:56:10Z",
+            "message": "MountVolume.SetUp failed for volume \"kube-api-access-ms97x\" : configmap \"kube-root-ca.crt\" not found",
+            "metadata": {
+                "creationTimestamp": "2026-11-06T17:56:10Z",
+                "name": "helm-install-gateway-api-crd-7vs57.18e5865f661175e9",
+                "namespace": "kube-system",
+                "resourceVersion": "378",
+                "uid": "4359187d-7c97-4771-8e7d-554ceaa6481c"
+            },
+            "reason": "FailedMount",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "k3d-cg-isolated-mini-server-0",
+            "source": {
+                "component": "kubelet",
+                "host": "k3d-cg-isolated-mini-server-0"
+            },
+            "type": "Warning"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-06T17:56:14Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{helm}",
+                "kind": "Pod",
+                "name": "helm-install-gateway-api-crd-7vs57",
+                "namespace": "kube-system",
+                "resourceVersion": "370",
+                "uid": "76688947-cd31-4e60-ba28-fa25ea1a8ea3"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-06T17:56:14Z",
+            "message": "Pulling image \"rancher/klipper-helm:v0.13.3-build20261021\"",
+            "metadata": {
+                "creationTimestamp": "2026-11-06T17:56:14Z",
+                "name": "helm-install-gateway-api-crd-7vs57.18e5866033310b0b",
+                "namespace": "kube-system",
+                "resourceVersion": "411",
+                "uid": "657ce427-fca2-4fc6-a664-c36f2f70f85f"
+            },
+            "reason": "Pulling",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "k3d-cg-isolated-mini-server-0",
+            "source": {
+                "component": "kubelet",
+                "host": "k3d-cg-isolated-mini-server-0"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-06T17:56:50Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{helm}",
+                "kind": "Pod",
+                "name": "helm-install-gateway-api-crd-7vs57",
+                "namespace": "kube-system",
+                "resourceVersion": "370",
+                "uid": "76688947-cd31-4e60-ba28-fa25ea1a8ea3"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-06T17:56:50Z",
+            "message": "Successfully pulled image \"rancher/klipper-helm:v0.13.3-build20261021\" in 36.309s (36.31s including waiting). Image size: 77490339 bytes.",
+            "metadata": {
+                "creationTimestamp": "2026-11-06T17:56:50Z",
+                "name": "helm-install-gateway-api-crd-7vs57.18e58668a752b0dd",
+                "namespace": "kube-system",
+                "resourceVersion": "429",
+                "uid": "85db4878-9bd4-4a7d-8d79-893e2cd8e2b2"
+            },
+            "reason": "Pulled",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "k3d-cg-isolated-mini-server-0",
+            "source": {
+                "component": "kubelet",
+                "host": "k3d-cg-isolated-mini-server-0"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-06T17:56:50Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{helm}",
+                "kind": "Pod",
+                "name": "helm-install-gateway-api-crd-7vs57",
+                "namespace": "kube-system",
+                "resourceVersion": "370",
+                "uid": "76688947-cd31-4e60-ba28-fa25ea1a8ea3"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-06T17:56:50Z",
+            "message": "Container created",
+            "metadata": {
+                "creationTimestamp": "2026-11-06T17:56:50Z",
+                "name": "helm-install-gateway-api-crd-7vs57.18e58668a9b220ca",
+                "namespace": "kube-system",
+                "resourceVersion": "430",
+                "uid": "68fc9ab0-4ffe-494d-9218-21e5854e2dc0"
+            },
+            "reason": "Created",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "k3d-cg-isolated-mini-server-0",
+            "source": {
+                "component": "kubelet",
+                "host": "k3d-cg-isolated-mini-server-0"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-06T17:56:50Z",
+            "involvedObject": {
+                "apiVersion": "v1",
+                "fieldPath": "spec.containers{helm}",
+                "kind": "Pod",
+                "name": "helm-install-gateway-api-crd-7vs57",
+                "namespace": "kube-system",
+                "resourceVersion": "370",
+                "uid": "76688947-cd31-4e60-ba28-fa25ea1a8ea3"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-06T17:56:50Z",
+            "message": "Container started",
+            "metadata": {
+                "creationTimestamp": "2026-11-06T17:56:50Z",
+                "name": "helm-install-gateway-api-crd-7vs57.18e58668b11bf97a",
+                "namespace": "kube-system",
+                "resourceVersion": "431",
+                "uid": "e086ebe7-8cf9-4513-bb68-aabbc6acfc94"
+            },
+            "reason": "Started",
+            "reportingComponent": "kubelet",
+            "reportingInstance": "k3d-cg-isolated-mini-server-0",
+            "source": {
+                "component": "kubelet",
+                "host": "k3d-cg-isolated-mini-server-0"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-06T17:56:10Z",
+            "involvedObject": {
+                "apiVersion": "batch/v1",
+                "kind": "Job",
+                "name": "helm-install-gateway-api-crd",
+                "namespace": "kube-system",
+                "resourceVersion": "337",
+                "uid": "762d83f3-b519-425d-b798-34e8bb753814"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-06T17:56:10Z",
+            "message": "Job suspended",
+            "metadata": {
+                "creationTimestamp": "2026-11-06T17:56:10Z",
+                "name": "helm-install-gateway-api-crd.18e5865f3ba4e4bf",
+                "namespace": "kube-system",
+                "resourceVersion": "363",
+                "uid": "23303e40-851e-4ba0-bbec-e419ad3cd8ce"
+            },
+            "reason": "Suspended",
+            "reportingComponent": "job-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "job-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-06T17:56:10Z",
+            "involvedObject": {
+                "apiVersion": "batch/v1",
+                "kind": "Job",
+                "name": "helm-install-gateway-api-crd",
+                "namespace": "kube-system",
+                "resourceVersion": "365",
+                "uid": "762d83f3-b519-425d-b798-34e8bb753814"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-06T17:56:10Z",
+            "message": "Created pod: helm-install-gateway-api-crd-7vs57",
+            "metadata": {
+                "creationTimestamp": "2026-11-06T17:56:10Z",
+                "name": "helm-install-gateway-api-crd.18e5865f5dc691ff",
+                "namespace": "kube-system",
+                "resourceVersion": "368",
+                "uid": "45ae1e55-c155-4b1f-8c69-d201949743bb"
+            },
+            "reason": "SuccessfulCreate",
+            "reportingComponent": "job-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "job-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-06T17:56:10Z",
+            "involvedObject": {
+                "apiVersion": "batch/v1",
+                "kind": "Job",
+                "name": "helm-install-gateway-api-crd",
+                "namespace": "kube-system",
+                "resourceVersion": "365",
+                "uid": "762d83f3-b519-425d-b798-34e8bb753814"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-06T17:56:10Z",
+            "message": "Job resumed",
+            "metadata": {
+                "creationTimestamp": "2026-11-06T17:56:10Z",
+                "name": "helm-install-gateway-api-crd.18e5865f5dc6cdcd",
+                "namespace": "kube-system",
+                "resourceVersion": "371",
+                "uid": "3fb1a19e-01a0-4e75-ae79-7becd0e862ce"
+            },
+            "reason": "Resumed",
+            "reportingComponent": "job-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "job-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-06T17:56:55Z",
+            "involvedObject": {
+                "apiVersion": "batch/v1",
+                "kind": "Job",
+                "name": "helm-install-gateway-api-crd",
+                "namespace": "kube-system",
+                "resourceVersion": "500",
+                "uid": "762d83f3-b519-425d-b798-34e8bb753814"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-06T17:56:55Z",
+            "message": "Job completed",
+            "metadata": {
+                "creationTimestamp": "2026-11-06T17:56:55Z",
+                "name": "helm-install-gateway-api-crd.18e58669ad1047a7",
+                "namespace": "kube-system",
+                "resourceVersion": "504",
+                "uid": "0ca793ce-a03d-4d8d-85b8-034b89d72b83"
+            },
+            "reason": "Completed",
+            "reportingComponent": "job-controller",
+            "reportingInstance": "",
+            "source": {
+                "component": "job-controller"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-06T17:56:06Z",
+            "involvedObject": {
+                "apiVersion": "k3s.cattle.io/v1",
+                "kind": "Addon",
+                "name": "local-storage",
+                "namespace": "kube-system"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-06T17:56:06Z",
+            "message": "Deleting manifest at \"/var/lib/rancher/k3s/server/manifests/local-storage.yaml\"",
+            "metadata": {
+                "creationTimestamp": "2026-11-06T17:56:06Z",
+                "name": "local-storage.18e5865e7499f0e3",
+                "namespace": "kube-system",
+                "resourceVersion": "300",
+                "uid": "0a1a3bc9-e7d7-4816-99ca-4d71f222b092"
+            },
+            "reason": "DeletingManifest",
+            "reportingComponent": "deploy",
+            "reportingInstance": "k3d-cg-isolated-mini-server-0",
+            "source": {
+                "component": "deploy",
+                "host": "k3d-cg-isolated-mini-server-0"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-06T17:56:06Z",
+            "involvedObject": {
+                "apiVersion": "k3s.cattle.io/v1",
+                "kind": "Addon",
+                "name": "rolebindings",
+                "namespace": "kube-system",
+                "resourceVersion": "301",
+                "uid": "2294b5bb-0c7d-48ba-9212-858b5d5af4da"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-06T17:56:06Z",
+            "message": "Applying manifest at \"/var/lib/rancher/k3s/server/manifests/rolebindings.yaml\"",
+            "metadata": {
+                "creationTimestamp": "2026-11-06T17:56:06Z",
+                "name": "rolebindings.18e5865e74f808d4",
+                "namespace": "kube-system",
+                "resourceVersion": "302",
+                "uid": "fbdfdfd9-2078-494d-be71-f5d5a7291004"
+            },
+            "reason": "ApplyingManifest",
+            "reportingComponent": "deploy",
+            "reportingInstance": "k3d-cg-isolated-mini-server-0",
+            "source": {
+                "component": "deploy",
+                "host": "k3d-cg-isolated-mini-server-0"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-06T17:56:06Z",
+            "involvedObject": {
+                "apiVersion": "k3s.cattle.io/v1",
+                "kind": "Addon",
+                "name": "rolebindings",
+                "namespace": "kube-system",
+                "resourceVersion": "301",
+                "uid": "2294b5bb-0c7d-48ba-9212-858b5d5af4da"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-06T17:56:06Z",
+            "message": "Applied manifest at \"/var/lib/rancher/k3s/server/manifests/rolebindings.yaml\"",
+            "metadata": {
+                "creationTimestamp": "2026-11-06T17:56:06Z",
+                "name": "rolebindings.18e5865e7c04460f",
+                "namespace": "kube-system",
+                "resourceVersion": "308",
+                "uid": "457ae45e-24ce-41c8-8522-dfe448c20f7d"
+            },
+            "reason": "AppliedManifest",
+            "reportingComponent": "deploy",
+            "reportingInstance": "k3d-cg-isolated-mini-server-0",
+            "source": {
+                "component": "deploy",
+                "host": "k3d-cg-isolated-mini-server-0"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-06T17:56:06Z",
+            "involvedObject": {
+                "apiVersion": "k3s.cattle.io/v1",
+                "kind": "Addon",
+                "name": "runtimes",
+                "namespace": "kube-system",
+                "resourceVersion": "310",
+                "uid": "6beeca90-b6f8-4053-88bd-2b9cfa57c098"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-06T17:56:06Z",
+            "message": "Applying manifest at \"/var/lib/rancher/k3s/server/manifests/runtimes.yaml\"",
+            "metadata": {
+                "creationTimestamp": "2026-11-06T17:56:06Z",
+                "name": "runtimes.18e5865e7c9cd946",
+                "namespace": "kube-system",
+                "resourceVersion": "312",
+                "uid": "dbb0bd1e-b3fd-45d0-96ab-c7293527e358"
+            },
+            "reason": "ApplyingManifest",
+            "reportingComponent": "deploy",
+            "reportingInstance": "k3d-cg-isolated-mini-server-0",
+            "source": {
+                "component": "deploy",
+                "host": "k3d-cg-isolated-mini-server-0"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-06T17:56:06Z",
+            "involvedObject": {
+                "apiVersion": "k3s.cattle.io/v1",
+                "kind": "Addon",
+                "name": "runtimes",
+                "namespace": "kube-system",
+                "resourceVersion": "310",
+                "uid": "6beeca90-b6f8-4053-88bd-2b9cfa57c098"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-06T17:56:06Z",
+            "message": "Applied manifest at \"/var/lib/rancher/k3s/server/manifests/runtimes.yaml\"",
+            "metadata": {
+                "creationTimestamp": "2026-11-06T17:56:07Z",
+                "name": "runtimes.18e5865e7f66c702",
+                "namespace": "kube-system",
+                "resourceVersion": "323",
+                "uid": "e45e9f4c-13b1-4019-8b22-f0c3832ab34a"
+            },
+            "reason": "AppliedManifest",
+            "reportingComponent": "deploy",
+            "reportingInstance": "k3d-cg-isolated-mini-server-0",
+            "source": {
+                "component": "deploy",
+                "host": "k3d-cg-isolated-mini-server-0"
+            },
+            "type": "Normal"
+        },
+        {
+            "apiVersion": "v1",
+            "count": 1,
+            "eventTime": null,
+            "firstTimestamp": "2026-11-06T17:56:07Z",
+            "involvedObject": {
+                "apiVersion": "k3s.cattle.io/v1",
+                "kind": "Addon",
+                "name": "traefik",
+                "namespace": "kube-system"
+            },
+            "kind": "Event",
+            "lastTimestamp": "2026-11-06T17:56:07Z",
+            "message": "Deleting manifest at \"/var/lib/rancher/k3s/server/manifests/traefik.yaml\"",
+            "metadata": {
+                "creationTimestamp": "2026-11-06T17:56:07Z",
+                "name": "traefik.18e5865e7fd15a8f",
+                "namespace": "kube-system",
+                "resourceVersion": "325",
+                "uid": "188fa3a6-05d7-4827-8da8-d7cad8c64d3a"
+            },
+            "reason": "DeletingManifest",
+            "reportingComponent": "deploy",
+            "reportingInstance": "k3d-cg-isolated-mini-server-0",
+            "source": {
+                "component": "deploy",
+                "host": "k3d-cg-isolated-mini-server-0"
+            },
+            "type": "Normal"
+        }
+    ],
+    "kind": "List",
+    "metadata": {
+        "resourceVersion": ""
+    }
+}

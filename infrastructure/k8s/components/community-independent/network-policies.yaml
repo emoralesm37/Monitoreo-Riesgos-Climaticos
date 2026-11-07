@@ -1,0 +1,143 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: gateway-to-community-service
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: gateway
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: community-service
+    ports:
+    - protocol: TCP
+      port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: community-service-from-gateway
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: community-service
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: gateway
+    ports:
+    - protocol: TCP
+      port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: community-service-to-community-db
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: community-service
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: community-db
+    ports:
+    - protocol: TCP
+      port: 5432
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: community-db-from-community-service
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: community-db
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: community-service
+    ports:
+    - protocol: TCP
+      port: 5432
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: bootstrap-to-community-db
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: bootstrap
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: community-db
+    ports:
+    - protocol: TCP
+      port: 5432
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: community-db-from-bootstrap
+  labels:
+    app.kubernetes.io/part-of: climateguard
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: community-db
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: bootstrap
+    ports:
+    - protocol: TCP
+      port: 5432

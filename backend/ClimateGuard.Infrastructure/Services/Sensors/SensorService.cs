@@ -4,18 +4,19 @@ using ClimateGuard.Domain.Entities;
 using ClimateGuard.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using ClimateGuard.Application.Abstractions.Alerts;
+using ClimateGuard.Infrastructure.Services.Alerts;
 
 namespace ClimateGuard.Infrastructure.Services.Sensors;
 
 public sealed class SensorService(
     AppDbContext dbContext,
-    IAlertEvaluationService alertEvaluationService,
-    IAlertGenerationService alertGenerationService) : ISensorService
+    ReadingAlertDispatcher alertDispatcher,
+    ClimateGuard.Infrastructure.Services.Communities.CommunityDirectory? directory = null) : ISensorService
 {
     public async Task<IReadOnlyList<SensorDto>> GetAllAsync(
         CancellationToken cancellationToken = default)
     {
-        return await dbContext.Sensors
+        var rows = await dbContext.Sensors
             .AsNoTracking()
             .OrderBy(sensor => sensor.Name)
             .Select(sensor => new SensorDto(
@@ -30,13 +31,16 @@ public sealed class SensorService(
                 sensor.LastValue,
                 sensor.LastUpdatedAt))
             .ToListAsync(cancellationToken);
+        if (directory?.Enabled != true) return rows;
+        var names = await directory.NamesAsync(cancellationToken);
+        return rows.Select(s => s with { Community = names.GetValueOrDefault(s.CommunityId, "Comunidad no disponible") }).ToList();
     }
 
     public async Task<SensorDto?> GetByIdAsync(
         int sensorId,
         CancellationToken cancellationToken = default)
     {
-        return await dbContext.Sensors
+        var row = await dbContext.Sensors
             .AsNoTracking()
             .Where(sensor => sensor.SensorId == sensorId)
             .Select(sensor => new SensorDto(
@@ -51,6 +55,9 @@ public sealed class SensorService(
                 sensor.LastValue,
                 sensor.LastUpdatedAt))
             .FirstOrDefaultAsync(cancellationToken);
+        if (row is null || directory?.Enabled != true) return row;
+        var community = await directory.GetAsync(row.CommunityId,cancellationToken);
+        return row with { Community = community.GetProperty("name").GetString()! };
     }
 
     public async Task<SensorDto> CreateAsync(
@@ -150,7 +157,8 @@ public sealed class SensorService(
                 reading.SensorReadingId,
                 reading.SensorId,
                 reading.Value,
-                reading.Timestamp))
+                reading.Timestamp,
+                dbContext.ReadingAlertDeliveries.Any(delivery => delivery.SensorReadingId == reading.SensorReadingId && delivery.DeliveredAt == null)))
             .ToListAsync(cancellationToken);
     }
 
@@ -187,32 +195,10 @@ public sealed class SensorService(
 
 
 
-        // RF-ADM-32: evaluar la lectura contra las reglas activas.
-        var violatedRuleIds = await alertEvaluationService.EvaluateAsync(
-            sensor.SensorTypeId,
-            reading.Value,
-            cancellationToken);
-
-            // RF-ADM-33: preparar las alertas correspondientes
-            // a las reglas incumplidas.
-            await alertGenerationService.GenerateAsync(
-                sensor.SensorId,
-                reading.Value,
-                violatedRuleIds,
-                cancellationToken);
-
-            // Guardar la lectura, los cambios del sensor y las
-            // alertas en una misma operación de EF Core.
-            await dbContext.SaveChangesAsync(cancellationToken);
-            
-        // Por ahora solo se detectan las reglas incumplidas.
-        // RF-ADM-33 implementará la generación de alertas.
-
-            return new SensorReadingDto(
-            reading.SensorReadingId,
-            reading.SensorId,
-            reading.Value,
-            reading.Timestamp);
+        // One evaluator: Java Alert Service. Persist SQL measurement + delivery first.
+        var delivered = await alertDispatcher.SaveAndDispatchAsync(reading, cancellationToken);
+        return new SensorReadingDto(reading.SensorReadingId, reading.SensorId,
+            reading.Value, reading.Timestamp, !delivered);
     }
 
     public async Task<bool> ResetAsync(
@@ -270,6 +256,9 @@ public sealed class SensorService(
             throw new ArgumentException(
                 "El tipo de sensor indicado no existe.");
         }
+
+        if (directory?.Enabled == true)
+            await directory.SynchronizeAsync(dbContext, communityId, cancellationToken);
 
         var communityExists = await dbContext.Communities
             .AnyAsync(

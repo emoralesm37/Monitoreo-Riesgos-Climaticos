@@ -1,0 +1,35 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: 'true'
+    cert-manager.io/issuer: letsencrypt
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: public
+  namespace: climateguard
+spec:
+  ingressClassName: traefik
+  rules:
+  - host: climateguard.garher.lat
+    http:
+      paths:
+      - backend:
+          service:
+            name: gateway
+            port:
+              number: 8080
+        path: /api
+        pathType: Prefix
+      - backend:
+          service:
+            name: frontend
+            port:
+              number: 8080
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - climateguard.garher.lat
+    secretName: climateguard-tls

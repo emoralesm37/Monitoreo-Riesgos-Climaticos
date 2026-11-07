@@ -62,6 +62,7 @@
     <div class="subtitle">
         Reporte de Sensores
         <p>Fecha de generación: {{ generated_at }}</p>
+        <p>Filtros: {% for key, value in parameters.items() %}{{ key }}={{ value }} {% else %}Todos{% endfor %}</p>
         <p>Total de sensores: {{ sensors | length }}</p>
     </div>
 

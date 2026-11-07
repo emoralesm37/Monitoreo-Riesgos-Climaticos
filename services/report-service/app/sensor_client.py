@@ -1,196 +1,75 @@
-
 import httpx
-
 from app.config import settings
-
+import math
 
 class SensorServiceError(Exception):
-    """Error al consultar el servicio de sensores."""
+    pass
 
+class ReportLimitError(Exception):
+    pass
 
-def get_sensors(access_token: str) -> list[dict]:
-    url = (
-        f"{settings.sensor_service_url.rstrip('/')}"
-        "/api/sensors"
-    )
-
+def fetch_json(access_token: str, path: str, params=None):
+    # Only the configured internal Gateway is contacted; no client-supplied URLs.
     try:
-        with httpx.Client(timeout=10.0) as client:
-            response = client.get(
-                url,
-                headers={
-                    "Authorization": f"Bearer {access_token}"
-                },
-            )
-
+        with httpx.Client(timeout=20, follow_redirects=False) as client:
+            response = client.get(settings.sensor_service_url.rstrip('/') + path,
+                headers={'Authorization': 'Bearer ' + access_token}, params=params)
             response.raise_for_status()
+            return response.json()
+    except (httpx.HTTPError, ValueError) as exc:
+        raise SensorServiceError('No se pudo consultar la fuente oficial.') from exc
 
-            sensors = response.json()
+def fetch_list(token: str, path: str):
+    result = fetch_json(token, path)
+    if not isinstance(result, list) or any(not isinstance(x, dict) for x in result):
+        raise SensorServiceError('Contrato de lista no válido.')
+    return result
 
-            if not isinstance(sensors, list):
-                raise SensorServiceError(
-                    "La respuesta de sensores no tiene el formato esperado"
-                )
+def get_sensors(token):
+    return fetch_list(token, '/api/sensors')
 
-            return sensors
+def get_sensor_types(token):
+    return fetch_list(token, '/api/catalogs/sensor-types')
 
-    except httpx.HTTPStatusError as exc:
-        raise SensorServiceError(
-            f"El servicio de sensores respondió HTTP "
-            f"{exc.response.status_code}"
-        ) from exc
+def get_communities_raw(token):
+    return fetch_list(token, '/api/communities')
 
-    except httpx.RequestError as exc:
-        raise SensorServiceError(
-            "No fue posible conectar con el servicio de sensores"
-        ) from exc
-
-    except ValueError as exc:
-        raise SensorServiceError(
-            "El servicio de sensores devolvió un JSON inválido"
-        ) from exc
-
-
-def get_sensor_types(access_token: str) -> list[dict]:
-    url = (
-        f"{settings.sensor_service_url.rstrip('/')}"
-        "/api/sensor-types"
-    )
-
-    try:
-        with httpx.Client(timeout=10.0) as client:
-            response = client.get(
-                url,
-                headers={
-                    "Authorization": f"Bearer {access_token}"
-                },
-            )
-
-            response.raise_for_status()
-
-            sensor_types = response.json()
-
-            if not isinstance(sensor_types, list):
-                raise SensorServiceError(
-                    "La respuesta de tipos de sensores "
-                    "no tiene el formato esperado"
-                )
-
-            return sensor_types
-
-    except httpx.HTTPStatusError as exc:
-        raise SensorServiceError(
-            f"El servicio de tipos de sensores respondió HTTP "
-            f"{exc.response.status_code}"
-        ) from exc
-
-    except httpx.RequestError as exc:
-        raise SensorServiceError(
-            "No fue posible conectar con el servicio "
-            "de tipos de sensores"
-        ) from exc
-
-    except ValueError as exc:
-        raise SensorServiceError(
-            "El servicio de tipos de sensores "
-            "devolvió un JSON inválido"
-        ) from exc
-
-def get_sensor_readings(
-    access_token: str,
-    sensor_id: int,
-    page: int = 1,
-    page_size: int = 100,
-) -> dict:
-    """Consulta una página de lecturas de un sensor."""
-
-    if sensor_id <= 0:
-        raise ValueError("El identificador del sensor debe ser positivo")
-
-    if page < 1 or not 1 <= page_size <= 100:
-        raise ValueError("Parámetros de paginación inválidos")
-
-    url = (
-        f"{settings.sensor_service_url.rstrip('/')}"
-        f"/api/sensors/{sensor_id}/readings"
-    )
-
-    try:
-        with httpx.Client(timeout=10.0) as client:
-            response = client.get(
-                url,
-                headers={
-                    "Authorization": f"Bearer {access_token}"
-                },
-                params={
-                    "page": page,
-                    "pageSize": page_size,
-                },
-            )
-
-            response.raise_for_status()
-            result = response.json()
-
-            if (
-                not isinstance(result, dict)
-                or not isinstance(result.get("readings"), list)
-                or not isinstance(result.get("totalPages"), int)
-            ):
-                raise SensorServiceError(
-                    "La respuesta de lecturas no tiene "
-                    "el formato esperado"
-                )
-
+def get_all_sensor_readings(token, sensor_id, filters, max_rows=20000):
+    result, after, snapshot = [], 0, None
+    while True:
+        params = {'pageSize': 500, 'afterId': after}
+        if snapshot is not None:
+            params['snapshotId'] = snapshot
+        for key in ('startDate', 'endDate'):
+            if filters.get(key):
+                params[key] = filters[key]
+        page = fetch_json(token, f'/api/sensors/{sensor_id}/readings/report', params)
+        if (not isinstance(page, dict) or not isinstance(page.get('readings'), list)
+                or type(page.get('snapshotId')) is not int
+                or type(page.get('hasMore')) is not bool
+                or type(page.get('nextAfterId')) is not int):
+            raise SensorServiceError('Contrato de exportación no válido.')
+        if snapshot is not None and page['snapshotId'] != snapshot:
+            raise SensorServiceError('La instantánea de exportación cambió.')
+        snapshot = page['snapshotId']
+        rows = page['readings']
+        previous = after
+        for row in rows:
+            if (not isinstance(row, dict) or type(row.get('sensorReadingId')) is not int
+                    or row.get('sensorId') != sensor_id
+                    or not after < row['sensorReadingId'] <= snapshot
+                    or 'value' not in row or not isinstance(row.get('timestamp'), str)
+                    or isinstance(row.get('value'), bool)
+                    or not isinstance(row.get('value'), (int, float))
+                    or not math.isfinite(row['value'])
+                    or type(row.get('evaluationRecorded')) is not bool
+                    or type(row.get('evaluationDelivered')) is not bool):
+                raise SensorServiceError('Lectura oficial no válida.')
+            after = row['sensorReadingId']
+        if page['nextAfterId'] != after or (page['hasMore'] and after <= previous):
+            raise SensorServiceError('La paginación no avanza.')
+        result.extend(rows)
+        if len(result) > max_rows:
+            raise ReportLimitError('El reporte supera 20000 lecturas; reduce los filtros.')
+        if not page['hasMore']:
             return result
-
-    except httpx.HTTPStatusError as exc:
-        raise SensorServiceError(
-            "El servicio de lecturas respondió HTTP "
-            f"{exc.response.status_code}"
-        ) from exc
-
-    except httpx.RequestError as exc:
-        raise SensorServiceError(
-            "No fue posible conectar con el servicio de lecturas"
-        ) from exc
-
-    except ValueError as exc:
-        raise SensorServiceError(
-            "El servicio de lecturas devolvió un JSON inválido"
-        ) from exc
-
-def get_all_sensor_readings(
-    access_token: str,
-    sensor_id: int,
-    max_pages: int = 10,
-) -> list[dict]:
-    """Recupera lecturas paginadas de un sensor."""
-
-    if max_pages < 1:
-        raise ValueError("max_pages debe ser mayor que cero")
-
-    all_readings = []
-    page = 1
-
-    while page <= max_pages:
-        result = get_sensor_readings(
-            access_token=access_token,
-            sensor_id=sensor_id,
-            page=page,
-            page_size=100,
-        )
-
-        readings = result["readings"]
-        total_pages = result["totalPages"]
-
-        all_readings.extend(readings)
-
-        if page >= total_pages or not readings:
-            return all_readings
-
-        page += 1
-
-    raise SensorServiceError(
-        "Se alcanzó el límite de páginas de lecturas. "
-        "No es posible garantizar un reporte completo."
-    )

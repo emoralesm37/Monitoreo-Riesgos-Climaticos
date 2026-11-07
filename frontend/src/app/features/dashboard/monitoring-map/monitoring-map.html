@@ -1,0 +1,25 @@
+<section class="map-card" aria-labelledby="monitoring-map-title">
+  <header>
+    <div><span class="eyebrow">CLIMATEGUARD · TERRITORIO</span><h2 id="monitoring-map-title">Mapa de monitoreo</h2>
+      <p>Comunidades registradas · Guatemala</p></div>
+    <div class="map-actions"><button type="button" (click)="showLocations()" [disabled]="!located.length || loading || error">Ver ubicaciones</button> <button type="button" (click)="resetView()" aria-label="Centrar mapa en Guatemala">Ver Guatemala ↗</button></div>
+  </header>
+  <div class="map-summary" aria-live="polite">
+    @if (loading) { <span role="status">Consultando comunidades…</span> }
+    @else if (error) { <span role="alert">No se pudieron consultar las comunidades mediante Gateway.</span><button (click)="retry.emit()">Reintentar</button> }
+    @else { <span><strong>{{ located.length }}</strong> comunidades representadas</span><span>{{ unlocated }} sin ubicación</span> }
+    <span class="legend"><i aria-hidden="true"></i> Cian: ubicación registrada sin riesgo confirmado. Colores de riesgo: solo alertas activas.</span>
+  </div>
+  <div class="map-shell">
+    <div #canvas class="map-canvas" role="region" aria-label="Mapa interactivo de Guatemala; comunidades con ubicación registrada"></div>
+    @if (mapError()) { <div class="map-message" role="alert">No se pudo iniciar el mapa. Vuelve a abrir el Dashboard.</div> }
+  </div>
+  <footer>
+    @if (!loading && !error && outsideGuatemala) { <p>{{ outsideGuatemala }} ubicaciones fuera del área aproximada de Guatemala. Revisa las coordenadas guardadas; no se corrigen automáticamente.</p> }
+    @if (!loading && !error && unlocated) {
+      <p>Comunidades sin ubicación geográfica registrada: <strong>{{ unlocated }}</strong>.</p>
+    } @else if (!loading && !error && !communities.length) { <p>No hay comunidades registradas.</p> }
+    @if (tilesError()) { <p role="alert">No se pudo cargar parte del mapa base. Comprueba la conexión a internet.</p> }
+    <p>Los marcadores no indican conexión física de sensores. Sin alertas activas no se confirma normalidad. Desplaza el mapa o utiliza los controles para explorar.</p>
+  </footer>
+</section>

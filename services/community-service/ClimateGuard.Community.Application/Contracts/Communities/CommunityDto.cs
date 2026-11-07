@@ -11,5 +11,6 @@ public sealed record CommunityDto(
     string? Description,
     bool IsActive,
     DateTimeOffset CreatedAt,
-    DateTimeOffset? UpdatedAt
+    DateTimeOffset? UpdatedAt,
+    int? SensorCount = null
 );

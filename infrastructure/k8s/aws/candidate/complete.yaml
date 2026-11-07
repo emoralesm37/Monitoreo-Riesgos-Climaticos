@@ -1,0 +1,2965 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: climateguard
+---
+apiVersion: v1
+data:
+  appsettings.json: "{\r\n  \"Logging\": {\r\n    \"LogLevel\": {\r\n      \"Default\"\
+    : \"Information\",\r\n      \"Microsoft.AspNetCore\": \"Warning\"\r\n    }\r\n\
+    \  }\r\n}\r\n"
+kind: ConfigMap
+metadata:
+  name: dotnet-settings-kf65bh8d9f
+  namespace: climateguard
+---
+apiVersion: v1
+data:
+  nginx.conf: "worker_processes auto;\npid /tmp/nginx.pid;\nevents { worker_connections\
+    \ 1024; }\nhttp {\n  include /etc/nginx/mime.types;\n  default_type application/octet-stream;\n\
+    \  access_log off;\n  error_log /dev/stderr warn;\n  server_tokens off;\n  sendfile\
+    \ on;\n  client_body_temp_path /tmp/client_temp;\n  proxy_temp_path /tmp/proxy_temp;\n\
+    \  fastcgi_temp_path /tmp/fastcgi_temp;\n  uwsgi_temp_path /tmp/uwsgi_temp;\n\
+    \  scgi_temp_path /tmp/scgi_temp;\n  server {\n    listen 8080;\n    root /usr/share/nginx/html;\n\
+    \    index index.html;\n    location = /healthz { default_type text/plain; return\
+    \ 200 'ok'; }\n    location = /index.html { add_header Cache-Control 'no-store';\
+    \ }\n    location /api/ { return 404; }\n    location / { try_files $uri $uri/\
+    \ /index.html; }\n  }\n}\n"
+kind: ConfigMap
+metadata:
+  name: frontend-settings-29gh7h769f
+  namespace: climateguard
+---
+apiVersion: v1
+data:
+  appsettings.json: "{\n  \"Logging\": {\n    \"LogLevel\": {\n      \"Default\":\
+    \ \"Information\",\n      \"Microsoft.AspNetCore\": \"Warning\",\n      \"Yarp.ReverseProxy\"\
+    : \"Warning\"\n    }\n  },\n  \"Cors\": {\n    \"AllowedOrigins\": [\n      \"\
+    https://climateguard.garher.lat\"\n    ]\n  },\n  \"Audit\": {\n    \"Enabled\"\
+    : true,\n    \"IngestUrl\": \"http://audit-service:8001/internal/events\",\n \
+    \   \"OutboxDirectory\": \"/var/lib/climateguard/audit-outbox\"\n  },\n  \"ReverseProxy\"\
+    : {\n    \"Routes\": {\n      \"auth\": {\n        \"ClusterId\": \"auth-service\"\
+    ,\n        \"Match\": {\n          \"Path\": \"/api/auth/{**remainder}\"\n   \
+    \     },\n        \"AuthorizationPolicy\": \"anonymous\",\n        \"Transforms\"\
+    : [\n          {\n            \"PathRemovePrefix\": \"/api\"\n          }\n  \
+    \      ]\n      },\n      \"users\": {\n        \"ClusterId\": \"auth-service\"\
+    ,\n        \"Match\": {\n          \"Path\": \"/api/users/{**remainder}\"\n  \
+    \      },\n        \"AuthorizationPolicy\": \"Administrators\",\n        \"Transforms\"\
+    : [\n          {\n            \"PathRemovePrefix\": \"/api\"\n          }\n  \
+    \      ]\n      },\n      \"roles\": {\n        \"ClusterId\": \"auth-service\"\
+    ,\n        \"Match\": {\n          \"Path\": \"/api/roles/{**remainder}\"\n  \
+    \      },\n        \"AuthorizationPolicy\": \"Administrators\",\n        \"Transforms\"\
+    : [\n          {\n            \"PathRemovePrefix\": \"/api\"\n          }\n  \
+    \      ]\n      },\n      \"communities\": {\n        \"ClusterId\": \"legacy-api\"\
+    ,\n        \"Match\": {\n          \"Path\": \"/api/communities/{**remainder}\"\
+    \n        }\n      },\n      \"sensors\": {\n        \"ClusterId\": \"sensor-service\"\
+    ,\n        \"Match\": {\n          \"Path\": \"/api/sensors/{**remainder}\"\n\
+    \        }\n      },\n      \"catalogs\": {\n        \"ClusterId\": \"legacy-api\"\
+    ,\n        \"Match\": {\n          \"Path\": \"/api/catalogs/{**remainder}\"\n\
+    \        }\n      },\n      \"rules\": {\n        \"ClusterId\": \"legacy-api\"\
+    ,\n        \"Match\": {\n          \"Path\": \"/api/alert-rules/{**remainder}\"\
+    \n        }\n      },\n      \"alerts\": {\n        \"ClusterId\": \"alert-service\"\
+    ,\n        \"Match\": {\n          \"Path\": \"/api/alerts/{**remainder}\"\n \
+    \       }\n      },\n      \"reports\": {\n        \"ClusterId\": \"report-service\"\
+    ,\n        \"Match\": {\n          \"Path\": \"/api/reports/{**remainder}\"\n\
+    \        },\n        \"AuthorizationPolicy\": \"Administrators\"\n      },\n \
+    \     \"audit\": {\n        \"ClusterId\": \"audit-service\",\n        \"Match\"\
+    : {\n          \"Path\": \"/api/audit/events\",\n          \"Methods\": [\n  \
+    \          \"GET\"\n          ]\n        },\n        \"AuthorizationPolicy\":\
+    \ \"Administrators\"\n      }\n    },\n    \"Clusters\": {\n      \"auth-service\"\
+    : {\n        \"Destinations\": {\n          \"primary\": {\n            \"Address\"\
+    : \"http://auth-service:7101/\"\n          }\n        }\n      },\n      \"legacy-api\"\
+    : {\n        \"Destinations\": {\n          \"primary\": {\n            \"Address\"\
+    : \"http://legacy-api:8080/\"\n          }\n        }\n      },\n      \"sensor-service\"\
+    : {\n        \"Destinations\": {\n          \"primary\": {\n            \"Address\"\
+    : \"http://sensor-service:8080/\"\n          }\n        }\n      },\n      \"\
+    alert-service\": {\n        \"Destinations\": {\n          \"primary\": {\n  \
+    \          \"Address\": \"http://alert-service:7301/\"\n          }\n        }\n\
+    \      },\n      \"report-service\": {\n        \"Destinations\": {\n        \
+    \  \"primary\": {\n            \"Address\": \"http://report-service:8000/\"\n\
+    \          }\n        }\n      },\n      \"audit-service\": {\n        \"Destinations\"\
+    : {\n          \"primary\": {\n            \"Address\": \"http://audit-service:8001/\"\
+    \n          }\n        }\n      }\n    }\n  }\n}"
+kind: ConfigMap
+metadata:
+  name: gateway-settings-9km6t8fd2d
+  namespace: climateguard
+---
+apiVersion: v1
+data:
+  GITHUB_CALLBACK_URL: https://climateguard.garher.lat/api/auth/callback/github
+  GOOGLE_CALLBACK_URL: https://climateguard.garher.lat/api/auth/callback/google
+  OAUTH_FRONTEND_URL: https://climateguard.garher.lat
+kind: ConfigMap
+metadata:
+  name: oauth-settings
+  namespace: climateguard
+---
+apiVersion: v1
+data:
+  ALERT_DB_NAME: climateguard_alert
+  ALERT_GATEWAY_URL: http://gateway:8080
+  ALERT_RULES_URL: http://legacy-api:8080/api/alert-rules/evaluation
+  AUTH_DB_HOST: auth-db
+  AUTH_DB_NAME: climateguard_auth
+  COMMUNITY_SERVICE_URL: http://gateway:8080
+  JWT_AUDIENCE: ClimateGuard.Services
+  JWT_ISSUER: ClimateGuard.Auth
+  MONGO_HOST: mongodb
+  MONGO_PORT: '27017'
+  SENSOR_SERVICE_URL: http://gateway:8080
+kind: ConfigMap
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: runtime
+  namespace: climateguard
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: alert-db
+  namespace: climateguard
+spec:
+  clusterIP: None
+  ports:
+  - name: db
+    port: 5432
+    targetPort: db
+  selector:
+    app.kubernetes.io/name: alert-db
+    app.kubernetes.io/part-of: climateguard
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: alert-service
+  namespace: climateguard
+spec:
+  ports:
+  - name: http
+    port: 7301
+    targetPort: http
+  selector:
+    app.kubernetes.io/name: alert-service
+    app.kubernetes.io/part-of: climateguard
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: audit-service
+  namespace: climateguard
+spec:
+  ports:
+  - name: http
+    port: 8001
+    targetPort: http
+  selector:
+    app.kubernetes.io/name: audit-service
+    app.kubernetes.io/part-of: climateguard
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: auth-db
+  namespace: climateguard
+spec:
+  clusterIP: None
+  ports:
+  - name: db
+    port: 5432
+    targetPort: db
+  selector:
+    app.kubernetes.io/name: auth-db
+    app.kubernetes.io/part-of: climateguard
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: auth-service
+  namespace: climateguard
+spec:
+  ports:
+  - name: http
+    port: 7101
+    targetPort: http
+  selector:
+    app.kubernetes.io/name: auth-service
+    app.kubernetes.io/part-of: climateguard
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: frontend
+  namespace: climateguard
+spec:
+  ports:
+  - name: http
+    port: 8080
+    targetPort: http
+  selector:
+    app.kubernetes.io/name: frontend
+    app.kubernetes.io/part-of: climateguard
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: gateway
+  namespace: climateguard
+spec:
+  ports:
+  - name: http
+    port: 8080
+    targetPort: http
+  selector:
+    app.kubernetes.io/name: gateway
+    app.kubernetes.io/part-of: climateguard
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: legacy-api
+  namespace: climateguard
+spec:
+  ports:
+  - name: http
+    port: 8080
+    targetPort: http
+  selector:
+    app.kubernetes.io/name: legacy-api
+    app.kubernetes.io/part-of: climateguard
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: mongodb
+  namespace: climateguard
+spec:
+  clusterIP: None
+  ports:
+  - name: db
+    port: 27017
+    targetPort: db
+  selector:
+    app.kubernetes.io/name: mongodb
+    app.kubernetes.io/part-of: climateguard
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: report-service
+  namespace: climateguard
+spec:
+  ports:
+  - name: http
+    port: 8000
+    targetPort: http
+  selector:
+    app.kubernetes.io/name: report-service
+    app.kubernetes.io/part-of: climateguard
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: sensor-service
+  namespace: climateguard
+spec:
+  ports:
+  - name: http
+    port: 8080
+    targetPort: http
+  selector:
+    app.kubernetes.io/name: sensor-service
+    app.kubernetes.io/part-of: climateguard
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: sqlserver
+  namespace: climateguard
+spec:
+  clusterIP: None
+  ports:
+  - name: db
+    port: 1433
+    targetPort: db
+  selector:
+    app.kubernetes.io/name: sqlserver
+    app.kubernetes.io/part-of: climateguard
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: gateway-outbox
+  namespace: climateguard
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+  storageClassName: cg-retain
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: report-pdfs
+  namespace: climateguard
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: cg-retain
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: alert-service
+  namespace: climateguard
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: alert-service
+      app.kubernetes.io/part-of: climateguard
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: alert-service
+        app.kubernetes.io/part-of: climateguard
+      annotations:
+        climateguard.io/config-checksum: cc52c5ef10f3dc24bb8135a7419e0c51c1644bd46760573fd6e0697bd348944d
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - env:
+        - name: JWT_ACCESS_SECRET
+          valueFrom:
+            secretKeyRef:
+              key: access-key
+              name: jwt
+        - name: JWT_ISSUER
+          valueFrom:
+            configMapKeyRef:
+              key: JWT_ISSUER
+              name: runtime
+        - name: JWT_AUDIENCE
+          valueFrom:
+            configMapKeyRef:
+              key: JWT_AUDIENCE
+              name: runtime
+        - name: SERVER_PORT
+          value: '7301'
+        - name: SPRING_DATASOURCE_URL
+          value: jdbc:postgresql://alert-db:5432/climateguard_alert
+        - name: SPRING_DATASOURCE_USERNAME
+          valueFrom:
+            secretKeyRef:
+              key: username
+              name: alert-db-app
+        - name: SPRING_DATASOURCE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: alert-db-app
+        - name: ALERT_RULES_URL
+          valueFrom:
+            configMapKeyRef:
+              key: ALERT_RULES_URL
+              name: runtime
+        - name: MANAGEMENT_ENDPOINT_HEALTH_GROUP_READINESS_INCLUDE
+          value: readinessState,db
+        - name: JAVA_TOOL_OPTIONS
+          value: -XX:MaxRAMPercentage=65 -XX:InitialRAMPercentage=20
+        - name: SPRING_FLYWAY_ENABLED
+          value: 'true'
+        image: climateguard/alert-service:release-20261106-f0048fcb2ff2
+        imagePullPolicy: Never
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /actuator/health/liveness
+            port: http
+          periodSeconds: 20
+          timeoutSeconds: 5
+        name: alert-service
+        ports:
+        - containerPort: 7301
+          name: http
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /actuator/health/readiness
+            port: http
+          periodSeconds: 10
+          timeoutSeconds: 5
+        resources:
+          limits:
+            cpu: 1500m
+            memory: 1Gi
+          requests:
+            cpu: 250m
+            memory: 512Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+        startupProbe:
+          failureThreshold: 60
+          httpGet:
+            path: /actuator/health/readiness
+            port: http
+          periodSeconds: 5
+          timeoutSeconds: 5
+        volumeMounts:
+        - mountPath: /tmp
+          name: tmp
+      securityContext:
+        fsGroup: 10001
+        fsGroupChangePolicy: OnRootMismatch
+        runAsGroup: 10001
+        runAsNonRoot: true
+        runAsUser: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      terminationGracePeriodSeconds: 60
+      volumes:
+      - emptyDir:
+          sizeLimit: 256Mi
+        name: tmp
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: audit-service
+  namespace: climateguard
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: audit-service
+      app.kubernetes.io/part-of: climateguard
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: audit-service
+        app.kubernetes.io/part-of: climateguard
+      annotations:
+        climateguard.io/config-checksum: cc52c5ef10f3dc24bb8135a7419e0c51c1644bd46760573fd6e0697bd348944d
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - env:
+        - name: JWT_ACCESS_SECRET
+          valueFrom:
+            secretKeyRef:
+              key: access-key
+              name: jwt
+        - name: JWT_ISSUER
+          valueFrom:
+            configMapKeyRef:
+              key: JWT_ISSUER
+              name: runtime
+        - name: JWT_AUDIENCE
+          valueFrom:
+            configMapKeyRef:
+              key: JWT_AUDIENCE
+              name: runtime
+        - name: MONGO_HOST
+          valueFrom:
+            configMapKeyRef:
+              key: MONGO_HOST
+              name: runtime
+        - name: MONGO_PORT
+          valueFrom:
+            configMapKeyRef:
+              key: MONGO_PORT
+              name: runtime
+        - name: MONGO_DATABASE
+          value: ClimateGuardAudit
+        - name: MONGO_AUDIT_USERNAME
+          valueFrom:
+            secretKeyRef:
+              key: username
+              name: audit-db
+        - name: MONGO_AUDIT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: audit-db
+        - name: AUDIT_INGEST_KEY
+          valueFrom:
+            secretKeyRef:
+              key: key
+              name: audit-signing
+        image: climateguard/audit-service:release-20261106-f0048fcb2ff2
+        imagePullPolicy: Never
+        livenessProbe:
+          periodSeconds: 20
+          tcpSocket:
+            port: http
+          timeoutSeconds: 5
+        name: audit-service
+        ports:
+        - containerPort: 8001
+          name: http
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /health
+            port: http
+          periodSeconds: 10
+          timeoutSeconds: 5
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+        startupProbe:
+          failureThreshold: 60
+          httpGet:
+            path: /health
+            port: http
+          periodSeconds: 5
+          timeoutSeconds: 5
+        volumeMounts:
+        - mountPath: /tmp
+          name: tmp
+      securityContext:
+        fsGroup: 10001
+        fsGroupChangePolicy: OnRootMismatch
+        runAsGroup: 10001
+        runAsNonRoot: true
+        runAsUser: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      terminationGracePeriodSeconds: 60
+      volumes:
+      - emptyDir:
+          sizeLimit: 256Mi
+        name: tmp
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: auth-service
+  namespace: climateguard
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: auth-service
+      app.kubernetes.io/part-of: climateguard
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: auth-service
+        app.kubernetes.io/part-of: climateguard
+      annotations:
+        climateguard.io/config-checksum: cc52c5ef10f3dc24bb8135a7419e0c51c1644bd46760573fd6e0697bd348944d
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - env:
+        - name: OAUTH_FRONTEND_URL
+          valueFrom:
+            configMapKeyRef:
+              key: OAUTH_FRONTEND_URL
+              name: oauth-settings
+        - name: GOOGLE_CALLBACK_URL
+          valueFrom:
+            configMapKeyRef:
+              key: GOOGLE_CALLBACK_URL
+              name: oauth-settings
+        - name: GITHUB_CALLBACK_URL
+          valueFrom:
+            configMapKeyRef:
+              key: GITHUB_CALLBACK_URL
+              name: oauth-settings
+        - name: OAUTH_SESSION_KEY
+          valueFrom:
+            secretKeyRef:
+              key: session-key
+              name: oauth-clients
+        - name: GOOGLE_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              key: google-client-id
+              name: oauth-clients
+        - name: GOOGLE_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              key: google-client-secret
+              name: oauth-clients
+        - name: GITHUB_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              key: github-client-id
+              name: oauth-clients
+        - name: GITHUB_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              key: github-client-secret
+              name: oauth-clients
+        - name: JWT_ACCESS_SECRET
+          valueFrom:
+            secretKeyRef:
+              key: access-key
+              name: jwt
+        - name: JWT_ISSUER
+          valueFrom:
+            configMapKeyRef:
+              key: JWT_ISSUER
+              name: runtime
+        - name: JWT_AUDIENCE
+          valueFrom:
+            configMapKeyRef:
+              key: JWT_AUDIENCE
+              name: runtime
+        - name: NODE_ENV
+          value: production
+        - name: PORT
+          value: '7101'
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              key: AUTH_DB_HOST
+              name: runtime
+        - name: DB_PORT
+          value: '5432'
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              key: AUTH_DB_NAME
+              name: runtime
+        - name: DB_SSL
+          value: 'false'
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              key: username
+              name: auth-db-app
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: auth-db-app
+        - name: JWT_REFRESH_SECRET
+          valueFrom:
+            secretKeyRef:
+              key: refresh-key
+              name: jwt
+        - name: JWT_ACCESS_TTL_SECONDS
+          value: '900'
+        - name: JWT_REFRESH_TTL_SECONDS
+          value: '604800'
+        image: climateguard/auth-service:release-20261106-f0048fcb2ff2
+        imagePullPolicy: Never
+        livenessProbe:
+          periodSeconds: 20
+          tcpSocket:
+            port: http
+          timeoutSeconds: 5
+        name: auth-service
+        ports:
+        - containerPort: 7101
+          name: http
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /health
+            port: http
+          periodSeconds: 10
+          timeoutSeconds: 5
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+        startupProbe:
+          failureThreshold: 60
+          httpGet:
+            path: /health
+            port: http
+          periodSeconds: 5
+          timeoutSeconds: 5
+        volumeMounts:
+        - mountPath: /tmp
+          name: tmp
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      terminationGracePeriodSeconds: 60
+      volumes:
+      - emptyDir:
+          sizeLimit: 256Mi
+        name: tmp
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: frontend
+  namespace: climateguard
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: frontend
+      app.kubernetes.io/part-of: climateguard
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: frontend
+        app.kubernetes.io/part-of: climateguard
+      annotations:
+        climateguard.io/config-checksum: cc52c5ef10f3dc24bb8135a7419e0c51c1644bd46760573fd6e0697bd348944d
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - env: []
+        image: climateguard/frontend:release-20261106-f0048fcb2ff2
+        imagePullPolicy: Never
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /healthz
+            port: http
+          periodSeconds: 20
+          timeoutSeconds: 5
+        name: frontend
+        ports:
+        - containerPort: 8080
+          name: http
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /index.html
+            port: http
+          periodSeconds: 10
+          timeoutSeconds: 5
+        resources:
+          limits:
+            cpu: 250m
+            memory: 128Mi
+          requests:
+            cpu: 25m
+            memory: 32Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+        startupProbe:
+          failureThreshold: 60
+          httpGet:
+            path: /healthz
+            port: http
+          periodSeconds: 5
+          timeoutSeconds: 5
+        volumeMounts:
+        - mountPath: /tmp
+          name: tmp
+        - mountPath: /etc/nginx/nginx.conf
+          name: nginx
+          readOnly: true
+          subPath: nginx.conf
+      securityContext:
+        fsGroup: 101
+        fsGroupChangePolicy: OnRootMismatch
+        runAsGroup: 101
+        runAsNonRoot: true
+        runAsUser: 101
+        seccompProfile:
+          type: RuntimeDefault
+      terminationGracePeriodSeconds: 60
+      volumes:
+      - emptyDir:
+          sizeLimit: 256Mi
+        name: tmp
+      - configMap:
+          name: frontend-settings-29gh7h769f
+        name: nginx
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: gateway
+  namespace: climateguard
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: gateway
+      app.kubernetes.io/part-of: climateguard
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: gateway
+        app.kubernetes.io/part-of: climateguard
+      annotations:
+        climateguard.io/config-checksum: cc52c5ef10f3dc24bb8135a7419e0c51c1644bd46760573fd6e0697bd348944d
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - env:
+        - name: Jwt__Key
+          valueFrom:
+            secretKeyRef:
+              key: access-key
+              name: jwt
+        - name: Jwt__Issuer
+          valueFrom:
+            configMapKeyRef:
+              key: JWT_ISSUER
+              name: runtime
+        - name: Jwt__Audience
+          valueFrom:
+            configMapKeyRef:
+              key: JWT_AUDIENCE
+              name: runtime
+        - name: ASPNETCORE_ENVIRONMENT
+          value: Production
+        - name: ASPNETCORE_HTTP_PORTS
+          value: '8080'
+        - name: Audit__SigningKey
+          valueFrom:
+            secretKeyRef:
+              key: key
+              name: audit-signing
+        image: climateguard/gateway:release-20261106-f0048fcb2ff2
+        imagePullPolicy: Never
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /health
+            port: http
+          periodSeconds: 20
+          timeoutSeconds: 5
+        name: gateway
+        ports:
+        - containerPort: 8080
+          name: http
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /health/ready
+            port: http
+          periodSeconds: 10
+          timeoutSeconds: 5
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+        startupProbe:
+          failureThreshold: 60
+          httpGet:
+            path: /health/ready
+            port: http
+          periodSeconds: 5
+          timeoutSeconds: 5
+        volumeMounts:
+        - mountPath: /tmp
+          name: tmp
+        - mountPath: /app/appsettings.json
+          name: settings
+          readOnly: true
+          subPath: appsettings.json
+        - mountPath: /var/lib/climateguard/audit-outbox
+          name: outbox
+      securityContext:
+        fsGroup: 1654
+        fsGroupChangePolicy: OnRootMismatch
+        runAsGroup: 1654
+        runAsNonRoot: true
+        runAsUser: 1654
+        seccompProfile:
+          type: RuntimeDefault
+      terminationGracePeriodSeconds: 60
+      volumes:
+      - emptyDir:
+          sizeLimit: 256Mi
+        name: tmp
+      - configMap:
+          name: gateway-settings-9km6t8fd2d
+        name: settings
+      - name: outbox
+        persistentVolumeClaim:
+          claimName: gateway-outbox
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: legacy-api
+  namespace: climateguard
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: legacy-api
+      app.kubernetes.io/part-of: climateguard
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: legacy-api
+        app.kubernetes.io/part-of: climateguard
+      annotations:
+        climateguard.io/config-checksum: cc52c5ef10f3dc24bb8135a7419e0c51c1644bd46760573fd6e0697bd348944d
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - env:
+        - name: Jwt__Key
+          valueFrom:
+            secretKeyRef:
+              key: access-key
+              name: jwt
+        - name: Jwt__Issuer
+          valueFrom:
+            configMapKeyRef:
+              key: JWT_ISSUER
+              name: runtime
+        - name: Jwt__Audience
+          valueFrom:
+            configMapKeyRef:
+              key: JWT_AUDIENCE
+              name: runtime
+        - name: ASPNETCORE_ENVIRONMENT
+          value: Production
+        - name: ASPNETCORE_HTTP_PORTS
+          value: '8080'
+        - name: ConnectionStrings__ClimateGuard
+          valueFrom:
+            secretKeyRef:
+              key: connection-string
+              name: sql-app
+        - name: Alerts__GatewayUrl
+          valueFrom:
+            configMapKeyRef:
+              key: ALERT_GATEWAY_URL
+              name: runtime
+        - name: Hosting__HttpsRedirectionEnabled
+          value: 'false'
+        image: climateguard/legacy-api:release-20261106-f0048fcb2ff2
+        imagePullPolicy: Never
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /health
+            port: http
+          periodSeconds: 20
+          timeoutSeconds: 5
+        name: legacy-api
+        ports:
+        - containerPort: 8080
+          name: http
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /health/database
+            port: http
+          periodSeconds: 10
+          timeoutSeconds: 5
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 768Mi
+          requests:
+            cpu: 100m
+            memory: 256Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+        startupProbe:
+          failureThreshold: 60
+          httpGet:
+            path: /health/database
+            port: http
+          periodSeconds: 5
+          timeoutSeconds: 5
+        volumeMounts:
+        - mountPath: /tmp
+          name: tmp
+        - mountPath: /app/appsettings.json
+          name: settings
+          readOnly: true
+          subPath: appsettings.json
+      securityContext:
+        fsGroup: 1654
+        fsGroupChangePolicy: OnRootMismatch
+        runAsGroup: 1654
+        runAsNonRoot: true
+        runAsUser: 1654
+        seccompProfile:
+          type: RuntimeDefault
+      terminationGracePeriodSeconds: 60
+      volumes:
+      - emptyDir:
+          sizeLimit: 256Mi
+        name: tmp
+      - configMap:
+          name: dotnet-settings-kf65bh8d9f
+        name: settings
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: report-service
+  namespace: climateguard
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: report-service
+      app.kubernetes.io/part-of: climateguard
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: report-service
+        app.kubernetes.io/part-of: climateguard
+      annotations:
+        climateguard.io/config-checksum: cc52c5ef10f3dc24bb8135a7419e0c51c1644bd46760573fd6e0697bd348944d
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - args:
+        - app.main:app
+        - --host
+        - 0.0.0.0
+        - --port
+        - '8000'
+        - --limit-concurrency
+        - '4'
+        - --no-access-log
+        command:
+        - python
+        - -m
+        - uvicorn
+        env:
+        - name: JWT_ACCESS_SECRET
+          valueFrom:
+            secretKeyRef:
+              key: access-key
+              name: jwt
+        - name: JWT_ISSUER
+          valueFrom:
+            configMapKeyRef:
+              key: JWT_ISSUER
+              name: runtime
+        - name: JWT_AUDIENCE
+          valueFrom:
+            configMapKeyRef:
+              key: JWT_AUDIENCE
+              name: runtime
+        - name: MONGO_HOST
+          valueFrom:
+            configMapKeyRef:
+              key: MONGO_HOST
+              name: runtime
+        - name: MONGO_PORT
+          valueFrom:
+            configMapKeyRef:
+              key: MONGO_PORT
+              name: runtime
+        - name: MONGO_DATABASE
+          value: ClimateGuardReports
+        - name: MONGO_REPORT_USERNAME
+          valueFrom:
+            secretKeyRef:
+              key: username
+              name: report-db
+        - name: MONGO_REPORT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: report-db
+        - name: COMMUNITY_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              key: COMMUNITY_SERVICE_URL
+              name: runtime
+        - name: SENSOR_SERVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              key: SENSOR_SERVICE_URL
+              name: runtime
+        image: climateguard/report-service:release-20261106-f0048fcb2ff2
+        imagePullPolicy: Never
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /health
+            port: http
+          periodSeconds: 20
+          timeoutSeconds: 5
+        name: report-service
+        ports:
+        - containerPort: 8000
+          name: http
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /health/database
+            port: http
+          periodSeconds: 10
+          timeoutSeconds: 5
+        resources:
+          limits:
+            cpu: 1500m
+            memory: 1536Mi
+          requests:
+            cpu: 250m
+            memory: 512Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+        startupProbe:
+          failureThreshold: 60
+          httpGet:
+            path: /health/database
+            port: http
+          periodSeconds: 5
+          timeoutSeconds: 5
+        volumeMounts:
+        - mountPath: /tmp
+          name: tmp
+        - mountPath: /opt/climateguard/services/report-service/app/generated
+          name: pdfs
+      securityContext:
+        fsGroup: 10001
+        fsGroupChangePolicy: OnRootMismatch
+        runAsGroup: 10001
+        runAsNonRoot: true
+        runAsUser: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      terminationGracePeriodSeconds: 60
+      volumes:
+      - emptyDir:
+          sizeLimit: 256Mi
+        name: tmp
+      - name: pdfs
+        persistentVolumeClaim:
+          claimName: report-pdfs
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: sensor-service
+  namespace: climateguard
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: sensor-service
+      app.kubernetes.io/part-of: climateguard
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: sensor-service
+        app.kubernetes.io/part-of: climateguard
+      annotations:
+        climateguard.io/config-checksum: cc52c5ef10f3dc24bb8135a7419e0c51c1644bd46760573fd6e0697bd348944d
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - env:
+        - name: Jwt__Key
+          valueFrom:
+            secretKeyRef:
+              key: access-key
+              name: jwt
+        - name: Jwt__Issuer
+          valueFrom:
+            configMapKeyRef:
+              key: JWT_ISSUER
+              name: runtime
+        - name: Jwt__Audience
+          valueFrom:
+            configMapKeyRef:
+              key: JWT_AUDIENCE
+              name: runtime
+        - name: ASPNETCORE_ENVIRONMENT
+          value: Production
+        - name: ASPNETCORE_HTTP_PORTS
+          value: '8080'
+        - name: ConnectionStrings__ClimateGuard
+          valueFrom:
+            secretKeyRef:
+              key: connection-string
+              name: sql-app
+        - name: Alerts__GatewayUrl
+          valueFrom:
+            configMapKeyRef:
+              key: ALERT_GATEWAY_URL
+              name: runtime
+        - name: Sensor__UseSharedDatabase
+          value: 'true'
+        image: climateguard/sensor-service:release-20261106-f0048fcb2ff2
+        imagePullPolicy: Never
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /health
+            port: http
+          periodSeconds: 20
+          timeoutSeconds: 5
+        name: sensor-service
+        ports:
+        - containerPort: 8080
+          name: http
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /health/database
+            port: http
+          periodSeconds: 10
+          timeoutSeconds: 5
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 768Mi
+          requests:
+            cpu: 100m
+            memory: 256Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+        startupProbe:
+          failureThreshold: 60
+          httpGet:
+            path: /health/database
+            port: http
+          periodSeconds: 5
+          timeoutSeconds: 5
+        volumeMounts:
+        - mountPath: /tmp
+          name: tmp
+        - mountPath: /app/appsettings.json
+          name: settings
+          readOnly: true
+          subPath: appsettings.json
+      securityContext:
+        fsGroup: 1654
+        fsGroupChangePolicy: OnRootMismatch
+        runAsGroup: 1654
+        runAsNonRoot: true
+        runAsUser: 1654
+        seccompProfile:
+          type: RuntimeDefault
+      terminationGracePeriodSeconds: 60
+      volumes:
+      - emptyDir:
+          sizeLimit: 256Mi
+        name: tmp
+      - configMap:
+          name: dotnet-settings-kf65bh8d9f
+        name: settings
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: alert-db
+  namespace: climateguard
+spec:
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: alert-db
+      app.kubernetes.io/part-of: climateguard
+  serviceName: alert-db
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: alert-db
+        app.kubernetes.io/part-of: climateguard
+      annotations:
+        climateguard.io/config-checksum: cc52c5ef10f3dc24bb8135a7419e0c51c1644bd46760573fd6e0697bd348944d
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - env:
+        - name: POSTGRES_USER
+          value: postgres
+        - name: POSTGRES_DB
+          value: postgres
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: alert-db-admin
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+        image: postgres@sha256:665dc7b37ac52a17e298511414c21d23ffa4e6a6ef6225b3e5d59c7afb35e994
+        livenessProbe:
+          periodSeconds: 20
+          tcpSocket:
+            port: db
+          timeoutSeconds: 5
+        name: alert-db
+        ports:
+        - containerPort: 5432
+          name: db
+        readinessProbe:
+          exec:
+            command:
+            - sh
+            - -ec
+            - PGPASSWORD="$POSTGRES_PASSWORD" psql -h 127.0.0.1 -U postgres -d postgres
+              -tAc "SELECT 1" >/dev/null
+          failureThreshold: 3
+          periodSeconds: 10
+          timeoutSeconds: 5
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 768Mi
+          requests:
+            cpu: 100m
+            memory: 256Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+        startupProbe:
+          failureThreshold: 60
+          periodSeconds: 5
+          tcpSocket:
+            port: db
+        volumeMounts:
+        - mountPath: /var/lib/postgresql/data
+          name: data
+        - mountPath: /tmp
+          name: tmp
+      securityContext:
+        fsGroup: 999
+        fsGroupChangePolicy: OnRootMismatch
+        runAsNonRoot: true
+        runAsUser: 999
+        seccompProfile:
+          type: RuntimeDefault
+      terminationGracePeriodSeconds: 120
+      volumes:
+      - emptyDir:
+          sizeLimit: 256Mi
+        name: tmp
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 20Gi
+      storageClassName: cg-retain
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: auth-db
+  namespace: climateguard
+spec:
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: auth-db
+      app.kubernetes.io/part-of: climateguard
+  serviceName: auth-db
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: auth-db
+        app.kubernetes.io/part-of: climateguard
+      annotations:
+        climateguard.io/config-checksum: cc52c5ef10f3dc24bb8135a7419e0c51c1644bd46760573fd6e0697bd348944d
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - env:
+        - name: POSTGRES_USER
+          value: postgres
+        - name: POSTGRES_DB
+          value: postgres
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: auth-db-admin
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+        image: postgres@sha256:665dc7b37ac52a17e298511414c21d23ffa4e6a6ef6225b3e5d59c7afb35e994
+        livenessProbe:
+          periodSeconds: 20
+          tcpSocket:
+            port: db
+          timeoutSeconds: 5
+        name: auth-db
+        ports:
+        - containerPort: 5432
+          name: db
+        readinessProbe:
+          exec:
+            command:
+            - sh
+            - -ec
+            - PGPASSWORD="$POSTGRES_PASSWORD" psql -h 127.0.0.1 -U postgres -d postgres
+              -tAc "SELECT 1" >/dev/null
+          failureThreshold: 3
+          periodSeconds: 10
+          timeoutSeconds: 5
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 768Mi
+          requests:
+            cpu: 100m
+            memory: 256Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+        startupProbe:
+          failureThreshold: 60
+          periodSeconds: 5
+          tcpSocket:
+            port: db
+        volumeMounts:
+        - mountPath: /var/lib/postgresql/data
+          name: data
+        - mountPath: /tmp
+          name: tmp
+      securityContext:
+        fsGroup: 999
+        fsGroupChangePolicy: OnRootMismatch
+        runAsNonRoot: true
+        runAsUser: 999
+        seccompProfile:
+          type: RuntimeDefault
+      terminationGracePeriodSeconds: 120
+      volumes:
+      - emptyDir:
+          sizeLimit: 256Mi
+        name: tmp
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 20Gi
+      storageClassName: cg-retain
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: mongodb
+  namespace: climateguard
+spec:
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mongodb
+      app.kubernetes.io/part-of: climateguard
+  serviceName: mongodb
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mongodb
+        app.kubernetes.io/part-of: climateguard
+      annotations:
+        climateguard.io/config-checksum: cc52c5ef10f3dc24bb8135a7419e0c51c1644bd46760573fd6e0697bd348944d
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - env:
+        - name: MONGO_INITDB_ROOT_USERNAME
+          valueFrom:
+            secretKeyRef:
+              key: username
+              name: mongo-admin
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: mongo-admin
+        - name: HOME
+          value: /tmp
+        image: mongo@sha256:8bb4442761a63a8dda452744082cdac9644b429807eb977b42324a63cef59ca4
+        livenessProbe:
+          periodSeconds: 20
+          tcpSocket:
+            port: db
+          timeoutSeconds: 5
+        name: mongodb
+        ports:
+        - containerPort: 27017
+          name: db
+        readinessProbe:
+          exec:
+            command:
+            - mongosh
+            - --quiet
+            - --nodb
+            - --eval
+            - try {const c=new Mongo('mongodb://127.0.0.1:27017'); if(!c.getDB('admin').auth(process.env.MONGO_INITDB_ROOT_USERNAME,process.env.MONGO_INITDB_ROOT_PASSWORD))quit(1);if(c.getDB('admin').runCommand({ping:1}).ok!==1)quit(1)}catch(e){quit(1)}
+          failureThreshold: 3
+          periodSeconds: 10
+          timeoutSeconds: 5
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 1536Mi
+          requests:
+            cpu: 200m
+            memory: 512Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+        startupProbe:
+          failureThreshold: 60
+          periodSeconds: 5
+          tcpSocket:
+            port: db
+        volumeMounts:
+        - mountPath: /data/db
+          name: data
+        - mountPath: /tmp
+          name: tmp
+      securityContext:
+        fsGroup: 999
+        fsGroupChangePolicy: OnRootMismatch
+        runAsNonRoot: true
+        runAsUser: 999
+        seccompProfile:
+          type: RuntimeDefault
+      terminationGracePeriodSeconds: 120
+      volumes:
+      - emptyDir:
+          sizeLimit: 256Mi
+        name: tmp
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 20Gi
+      storageClassName: cg-retain
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: sqlserver
+  namespace: climateguard
+spec:
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: Retain
+    whenScaled: Retain
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: sqlserver
+      app.kubernetes.io/part-of: climateguard
+  serviceName: sqlserver
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: sqlserver
+        app.kubernetes.io/part-of: climateguard
+      annotations:
+        climateguard.io/config-checksum: cc52c5ef10f3dc24bb8135a7419e0c51c1644bd46760573fd6e0697bd348944d
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - env:
+        - name: ACCEPT_EULA
+          value: 'Y'
+        - name: MSSQL_PID
+          value: Developer
+        - name: MSSQL_MEMORY_LIMIT_MB
+          value: '2048'
+        - name: MSSQL_SA_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: sql-admin
+        image: mcr.microsoft.com/mssql/server@sha256:cf8f0ab2ebe61feec2eed2629061a07d247f791c2a8ddda74a4ac9f06a291718
+        livenessProbe:
+          periodSeconds: 20
+          tcpSocket:
+            port: db
+          timeoutSeconds: 5
+        name: sqlserver
+        ports:
+        - containerPort: 1433
+          name: db
+        readinessProbe:
+          exec:
+            command:
+            - sh
+            - -ec
+            - SQLCMDPASSWORD="$MSSQL_SA_PASSWORD" /opt/mssql-tools18/bin/sqlcmd -S
+              127.0.0.1 -U sa -C -l 3 -b -Q "SET NOCOUNT ON; SELECT 1" -o /dev/null
+          failureThreshold: 3
+          periodSeconds: 10
+          timeoutSeconds: 5
+        resources:
+          limits:
+            cpu: 2000m
+            memory: 3Gi
+          requests:
+            cpu: 1000m
+            memory: 2Gi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+            add:
+            - NET_BIND_SERVICE
+        startupProbe:
+          failureThreshold: 60
+          periodSeconds: 5
+          tcpSocket:
+            port: db
+        volumeMounts:
+        - mountPath: /var/opt/mssql
+          name: data
+        - mountPath: /tmp
+          name: tmp
+      nodeSelector:
+        kubernetes.io/arch: amd64
+        kubernetes.io/os: linux
+      securityContext:
+        fsGroup: 10001
+        fsGroupChangePolicy: OnRootMismatch
+        runAsNonRoot: true
+        runAsUser: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      terminationGracePeriodSeconds: 120
+      volumes:
+      - emptyDir:
+          sizeLimit: 256Mi
+        name: tmp
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 40Gi
+      storageClassName: cg-retain
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: 'true'
+    cert-manager.io/issuer: letsencrypt
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: public
+  namespace: climateguard
+spec:
+  ingressClassName: traefik
+  rules:
+  - host: climateguard.garher.lat
+    http:
+      paths:
+      - backend:
+          service:
+            name: gateway
+            port:
+              number: 8080
+        path: /api
+        pathType: Prefix
+      - backend:
+          service:
+            name: frontend
+            port:
+              number: 8080
+        path: /
+        pathType: Prefix
+  tls:
+  - hosts:
+    - climateguard.garher.lat
+    secretName: climateguard-tls
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: alert-db-from-alert-service
+  namespace: climateguard
+spec:
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: alert-service
+    ports:
+    - port: 5432
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: alert-db
+  policyTypes:
+  - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: alert-db-from-bootstrap
+  namespace: climateguard
+spec:
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: bootstrap
+    ports:
+    - port: 5432
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: alert-db
+  policyTypes:
+  - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: alert-service-from-gateway
+  namespace: climateguard
+spec:
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: gateway
+    ports:
+    - port: 7301
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: alert-service
+  policyTypes:
+  - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: alert-service-to-alert-db
+  namespace: climateguard
+spec:
+  egress:
+  - ports:
+    - port: 5432
+      protocol: TCP
+    to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: alert-db
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: alert-service
+  policyTypes:
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: alert-service-to-legacy-api
+  namespace: climateguard
+spec:
+  egress:
+  - ports:
+    - port: 8080
+      protocol: TCP
+    to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: legacy-api
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: alert-service
+  policyTypes:
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: audit-service-from-gateway
+  namespace: climateguard
+spec:
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: gateway
+    ports:
+    - port: 8001
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: audit-service
+  policyTypes:
+  - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: audit-service-to-mongodb
+  namespace: climateguard
+spec:
+  egress:
+  - ports:
+    - port: 27017
+      protocol: TCP
+    to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: mongodb
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: audit-service
+  policyTypes:
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: auth-db-from-auth-service
+  namespace: climateguard
+spec:
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: auth-service
+    ports:
+    - port: 5432
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: auth-db
+  policyTypes:
+  - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: auth-db-from-bootstrap
+  namespace: climateguard
+spec:
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: bootstrap
+    ports:
+    - port: 5432
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: auth-db
+  policyTypes:
+  - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: auth-oauth-https
+  namespace: climateguard
+spec:
+  egress:
+  - ports:
+    - port: 443
+      protocol: TCP
+    to:
+    - ipBlock:
+        cidr: 0.0.0.0/0
+        except:
+        - 10.0.0.0/8
+        - 172.16.0.0/12
+        - 192.168.0.0/16
+        - 127.0.0.0/8
+        - 169.254.0.0/16
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: auth-service
+  policyTypes:
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: auth-service-from-gateway
+  namespace: climateguard
+spec:
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: gateway
+    ports:
+    - port: 7101
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: auth-service
+  policyTypes:
+  - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: auth-service-to-auth-db
+  namespace: climateguard
+spec:
+  egress:
+  - ports:
+    - port: 5432
+      protocol: TCP
+    to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: auth-db
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: auth-service
+  policyTypes:
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: bootstrap-to-alert-db
+  namespace: climateguard
+spec:
+  egress:
+  - ports:
+    - port: 5432
+      protocol: TCP
+    to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: alert-db
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: bootstrap
+  policyTypes:
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: bootstrap-to-auth-db
+  namespace: climateguard
+spec:
+  egress:
+  - ports:
+    - port: 5432
+      protocol: TCP
+    to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: auth-db
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: bootstrap
+  policyTypes:
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: bootstrap-to-mongodb
+  namespace: climateguard
+spec:
+  egress:
+  - ports:
+    - port: 27017
+      protocol: TCP
+    to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: mongodb
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: bootstrap
+  policyTypes:
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: bootstrap-to-sqlserver
+  namespace: climateguard
+spec:
+  egress:
+  - ports:
+    - port: 1433
+      protocol: TCP
+    to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: sqlserver
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: bootstrap
+  policyTypes:
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: default-deny
+  namespace: climateguard
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: dns
+  namespace: climateguard
+spec:
+  egress:
+  - ports:
+    - port: 53
+      protocol: UDP
+    - port: 53
+      protocol: TCP
+    to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: kube-system
+      podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+  podSelector: {}
+  policyTypes:
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: frontend-from-ingress
+  namespace: climateguard
+spec:
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: kube-system
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: traefik
+    ports:
+    - port: 8080
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: frontend
+  policyTypes:
+  - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: gateway-from-ingress
+  namespace: climateguard
+spec:
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: kube-system
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: traefik
+    ports:
+    - port: 8080
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: gateway
+  policyTypes:
+  - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: gateway-from-legacy-api
+  namespace: climateguard
+spec:
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: legacy-api
+    ports:
+    - port: 8080
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: gateway
+  policyTypes:
+  - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: gateway-from-report-service
+  namespace: climateguard
+spec:
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: report-service
+    ports:
+    - port: 8080
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: gateway
+  policyTypes:
+  - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: gateway-from-sensor-service
+  namespace: climateguard
+spec:
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: sensor-service
+    ports:
+    - port: 8080
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: gateway
+  policyTypes:
+  - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: gateway-to-alert-service
+  namespace: climateguard
+spec:
+  egress:
+  - ports:
+    - port: 7301
+      protocol: TCP
+    to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: alert-service
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: gateway
+  policyTypes:
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: gateway-to-audit-service
+  namespace: climateguard
+spec:
+  egress:
+  - ports:
+    - port: 8001
+      protocol: TCP
+    to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: audit-service
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: gateway
+  policyTypes:
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: gateway-to-auth-service
+  namespace: climateguard
+spec:
+  egress:
+  - ports:
+    - port: 7101
+      protocol: TCP
+    to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: auth-service
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: gateway
+  policyTypes:
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: gateway-to-legacy-api
+  namespace: climateguard
+spec:
+  egress:
+  - ports:
+    - port: 8080
+      protocol: TCP
+    to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: legacy-api
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: gateway
+  policyTypes:
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: gateway-to-report-service
+  namespace: climateguard
+spec:
+  egress:
+  - ports:
+    - port: 8000
+      protocol: TCP
+    to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: report-service
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: gateway
+  policyTypes:
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: gateway-to-sensor-service
+  namespace: climateguard
+spec:
+  egress:
+  - ports:
+    - port: 8080
+      protocol: TCP
+    to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: sensor-service
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: gateway
+  policyTypes:
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: legacy-api-from-alert-service
+  namespace: climateguard
+spec:
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: alert-service
+    ports:
+    - port: 8080
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: legacy-api
+  policyTypes:
+  - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: legacy-api-from-gateway
+  namespace: climateguard
+spec:
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: gateway
+    ports:
+    - port: 8080
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: legacy-api
+  policyTypes:
+  - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: legacy-api-to-gateway
+  namespace: climateguard
+spec:
+  egress:
+  - ports:
+    - port: 8080
+      protocol: TCP
+    to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: gateway
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: legacy-api
+  policyTypes:
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: legacy-api-to-sqlserver
+  namespace: climateguard
+spec:
+  egress:
+  - ports:
+    - port: 1433
+      protocol: TCP
+    to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: sqlserver
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: legacy-api
+  policyTypes:
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: mongodb-from-audit-service
+  namespace: climateguard
+spec:
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: audit-service
+    ports:
+    - port: 27017
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: mongodb
+  policyTypes:
+  - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: mongodb-from-bootstrap
+  namespace: climateguard
+spec:
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: bootstrap
+    ports:
+    - port: 27017
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: mongodb
+  policyTypes:
+  - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: mongodb-from-report-service
+  namespace: climateguard
+spec:
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: report-service
+    ports:
+    - port: 27017
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: mongodb
+  policyTypes:
+  - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: report-service-from-gateway
+  namespace: climateguard
+spec:
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: gateway
+    ports:
+    - port: 8000
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: report-service
+  policyTypes:
+  - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: report-service-to-gateway
+  namespace: climateguard
+spec:
+  egress:
+  - ports:
+    - port: 8080
+      protocol: TCP
+    to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: gateway
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: report-service
+  policyTypes:
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: report-service-to-mongodb
+  namespace: climateguard
+spec:
+  egress:
+  - ports:
+    - port: 27017
+      protocol: TCP
+    to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: mongodb
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: report-service
+  policyTypes:
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: sensor-service-from-gateway
+  namespace: climateguard
+spec:
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: gateway
+    ports:
+    - port: 8080
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: sensor-service
+  policyTypes:
+  - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: sensor-service-to-gateway
+  namespace: climateguard
+spec:
+  egress:
+  - ports:
+    - port: 8080
+      protocol: TCP
+    to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: gateway
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: sensor-service
+  policyTypes:
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: sensor-service-to-sqlserver
+  namespace: climateguard
+spec:
+  egress:
+  - ports:
+    - port: 1433
+      protocol: TCP
+    to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: sqlserver
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: sensor-service
+  policyTypes:
+  - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: sqlserver-from-bootstrap
+  namespace: climateguard
+spec:
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: bootstrap
+    ports:
+    - port: 1433
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: sqlserver
+  policyTypes:
+  - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: sqlserver-from-legacy-api
+  namespace: climateguard
+spec:
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: legacy-api
+    ports:
+    - port: 1433
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: sqlserver
+  policyTypes:
+  - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: sqlserver-from-sensor-service
+  namespace: climateguard
+spec:
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: climateguard
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: sensor-service
+    ports:
+    - port: 1433
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: sqlserver
+  policyTypes:
+  - Ingress

@@ -1,6 +1,6 @@
 import jwt
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.config import settings
@@ -51,6 +51,7 @@ def get_current_user(
         )
 
 def require_administrator(
+    request: Request,
     user: dict = Depends(get_current_user),
 ) -> dict:
     if user.get("role") != "Administrador":
@@ -58,5 +59,9 @@ def require_administrator(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="No tiene permisos para realizar esta operación",
         )
+
+    permission = 'reports:generate' if request.method == 'POST' else 'reports:read'
+    if not isinstance(user.get('permissions'), list) or permission not in user['permissions']:
+        raise HTTPException(status_code=403, detail='Permiso de reportería requerido.')
 
     return user

@@ -1,16 +1,9 @@
-import {
-  MigrationInterface,
-  QueryRunner,
-} from 'typeorm';
+import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddExternalAuthentication1793937600000
-  implements MigrationInterface
-{
+export class AddExternalAuthentication1793937600000 implements MigrationInterface {
   name = 'AddExternalAuthentication1793937600000';
 
-  public async up(
-    queryRunner: QueryRunner,
-  ): Promise<void> {
+  public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
       ALTER TABLE "users"
       ALTER COLUMN "password_hash" DROP NOT NULL
@@ -22,7 +15,7 @@ export class AddExternalAuthentication1793937600000
       VALUES (
         '00000000-0000-4000-8000-000000000003',
         'Viewer',
-        'Consulta de dashboard, alertas y reportes'
+        'Consulta de monitoreo sin permisos administrativos'
       )
       ON CONFLICT ("name") DO NOTHING
     `);
@@ -56,28 +49,9 @@ export class AddExternalAuthentication1793937600000
     `);
   }
 
-  public async down(
-    queryRunner: QueryRunner,
-  ): Promise<void> {
-    await queryRunner.query(`
-      DROP TABLE "external_accounts"
-    `);
-
-    await queryRunner.query(`
-      UPDATE "users"
-      SET "password_hash" = ''
-      WHERE "password_hash" IS NULL
-    `);
-
-    await queryRunner.query(`
-      ALTER TABLE "users"
-      ALTER COLUMN "password_hash" SET NOT NULL
-    `);
-
-    await queryRunner.query(`
-      DELETE FROM "roles"
-      WHERE "id" =
-        '00000000-0000-4000-8000-000000000003'
-    `);
+  public async down(_queryRunner: QueryRunner): Promise<void> {
+    throw new Error(
+      'Rollback destructivo bloqueado: preservar cuentas externas y usuarios existentes.',
+    );
   }
 }

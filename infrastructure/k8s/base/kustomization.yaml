@@ -1,0 +1,21 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: climateguard
+resources:
+- namespace.yaml
+- runtime.yaml
+- deployments.yaml
+- services.yaml
+- storage.yaml
+- ingress.yaml
+- network-policies.yaml
+configMapGenerator:
+- name: gateway-settings
+  files:
+  - appsettings.json=config/gateway.json
+- name: dotnet-settings
+  files:
+  - appsettings.json=config/dotnet.json
+- name: frontend-settings
+  files:
+  - nginx.conf=config/nginx.conf

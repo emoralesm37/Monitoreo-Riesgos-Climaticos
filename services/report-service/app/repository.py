@@ -46,6 +46,7 @@ def update_report_metadata(
         "file_name",
         "file_path",
         "downloaded_at"
+        , "row_count"
     }
 
     safe_updates = {
@@ -64,7 +65,7 @@ def update_report_metadata(
 
     return result.matched_count == 1
 
-def list_report_metadata(limit: int = 50) -> list[dict]:
+def list_report_metadata(limit: int = 50, skip: int = 0, report_type: str | None = None) -> list[dict]:
     """
     Obtiene el historial de reportes,
     ordenado del más reciente al más antiguo.
@@ -79,8 +80,9 @@ def list_report_metadata(limit: int = 50) -> list[dict]:
 
     cursor = (
         database["reports"]
-        .find({}, {"file_path": 0})
-        .sort("created_at", -1)
+        .find({"report_type": report_type} if report_type else {}, {"file_path": 0})
+        .sort([("created_at", -1), ("_id", -1)])
+        .skip(skip)
         .limit(limit)
     )
 
@@ -91,3 +93,7 @@ def list_report_metadata(limit: int = 50) -> list[dict]:
         reports.append(document)
 
     return reports
+
+
+def count_reports(report_type: str | None = None) -> int:
+    return get_database()['reports'].count_documents({'report_type': report_type} if report_type else {})

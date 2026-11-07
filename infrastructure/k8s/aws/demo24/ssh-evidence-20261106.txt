@@ -1,0 +1,102 @@
+1d287d52050bbde8a257c438f1e4da15cfd00097c590da7dbe03e2a7e29692c9  /tmp/cg-demo24-preflight.FNYIxZT5/ssh-readonly.sh
+
+UTC
+Fri Nov  6 19:10:26 UTC 2026
+
+Architecture / CPUs
+x86_64
+2
+
+Memory
+               total        used        free      shared  buff/cache   available
+Mem:            7776        1652        4309          48        2119        6123
+Swap:              0           0           0
+MemTotal:        7962860 kB
+MemFree:         4412664 kB
+MemAvailable:    6270360 kB
+SwapTotal:             0 kB
+SwapFree:              0 kB
+
+Disks / mounts
+Filesystem      Type      Size  Used Avail Use% Mounted on
+/dev/root       ext4       61G   15G   47G  24% /
+tmpfs           tmpfs     3.8G  8.0K  3.8G   1% /dev/shm
+tmpfs           tmpfs     1.6G  1.3M  1.6G   1% /run
+tmpfs           tmpfs     5.0M     0  5.0M   0% /run/lock
+efivarfs        efivarfs  128K  3.3K  120K   3% /sys/firmware/efi/efivars
+/dev/nvme0n1p16 ext4      881M  183M  637M  23% /boot
+/dev/nvme0n1p15 vfat      105M  6.2M   99M   6% /boot/efi
+tmpfs           tmpfs     778M   12K  778M   1% /run/user/1000
+NAME          SIZE FSTYPE   MOUNTPOINTS
+loop0        28.2M squashfs /snap/amazon-ssm-agent/13009
+loop1        28.4M squashfs /snap/amazon-ssm-agent/13349
+loop2          74M squashfs /snap/core22/2411
+loop3          74M squashfs /snap/core22/2955
+loop4        44.7M squashfs /snap/snapd/28254
+loop5        49.3M squashfs /snap/snapd/26865
+nvme0n1        64G          
+├─nvme0n1p1    63G ext4     /
+├─nvme0n1p14    4M          
+├─nvme0n1p15  106M vfat     /boot/efi
+└─nvme0n1p16  913M ext4     /boot
+SOURCE         TARGET FSTYPE OPTIONS
+/dev/nvme0n1p1 /      ext4   rw,relatime,discard,errors=remount-ro,commit=30
+
+Listening TCP ports
+State  Recv-Q Send-Q Local Address:Port Peer Address:PortProcess
+LISTEN 0      511          0.0.0.0:443       0.0.0.0:*          
+LISTEN 0      4096         0.0.0.0:22        0.0.0.0:*          
+LISTEN 0      511          0.0.0.0:80        0.0.0.0:*          
+LISTEN 0      512        127.0.0.1:5147      0.0.0.0:*          
+LISTEN 0      4096       127.0.0.1:5433      0.0.0.0:*          
+LISTEN 0      4096         0.0.0.0:1433      0.0.0.0:*          
+LISTEN 0      4096      127.0.0.54:53        0.0.0.0:*          
+LISTEN 0      511          0.0.0.0:7101      0.0.0.0:*          
+LISTEN 0      512        127.0.0.1:7102      0.0.0.0:*          
+LISTEN 0      512        127.0.0.1:7000      0.0.0.0:*          
+LISTEN 0      4096   127.0.0.53%lo:53        0.0.0.0:*          
+LISTEN 0      511             [::]:443          [::]:*          
+LISTEN 0      4096            [::]:22           [::]:*          
+LISTEN 0      511             [::]:80           [::]:*          
+LISTEN 0      4096            [::]:1433         [::]:*          
+
+Service states (not changed)
+docker: active
+enabled
+containerd: active
+enabled
+nginx: active
+enabled
+apache2: inactive
+not-found
+k3s: inactive
+not-found
+
+Installed tools
+/usr/bin/docker
+/usr/bin/python3
+/usr/bin/curl
+/usr/bin/sha256sum
+/usr/bin/systemd-analyze
+
+Existing Docker inventory, NO environment values
+b46a2de3a3e5|climateguard-auth-postgres|postgres:16|Up 37 minutes
+350c056cc857|climateguard-db-init|mcr.microsoft.com/mssql/server:2022-latest|Exited (0) 4 weeks ago
+bef15688c21f|climateguard-sqlserver|mcr.microsoft.com/mssql/server:2022-latest|Up 37 minutes (healthy)
+climateguard-auth-postgres-data|local
+climateguard-sqlserver-data|local
+TYPE            TOTAL     ACTIVE    SIZE      RECLAIMABLE
+Images          2         2         2.986GB   0B (0%)
+Containers      3         2         32.77kB   8.192kB (25%)
+Local Volumes   2         2         317.4MB   0B (0%)
+Build Cache     0         0         0B        0B
+climateguard-auth-postgres|49.42MiB / 7.594GiB|0.00%
+climateguard-sqlserver|932MiB / 7.594GiB|0.87%
+
+Known candidate paths: existence only, no contents
+ABSENT_OR_NOT_ACCESSIBLE /srv/climateguard-demo
+ABSENT_OR_NOT_ACCESSIBLE /srv/climateguard-v2
+ABSENT_OR_NOT_ACCESSIBLE /etc/rancher/k3s
+ABSENT_OR_NOT_ACCESSIBLE /var/lib/rancher/k3s
+
+Read-only diagnostic completed; no databases queried or services changed.

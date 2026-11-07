@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service
+spec:
+  template:
+    spec:
+      containers:
+      - name: auth-service
+        env:
+        - name: OAUTH_FRONTEND_URL
+          valueFrom:
+            configMapKeyRef:
+              name: oauth-settings
+              key: OAUTH_FRONTEND_URL
+        - name: GOOGLE_CALLBACK_URL
+          valueFrom:
+            configMapKeyRef:
+              name: oauth-settings
+              key: GOOGLE_CALLBACK_URL
+        - name: GITHUB_CALLBACK_URL
+          valueFrom:
+            configMapKeyRef:
+              name: oauth-settings
+              key: GITHUB_CALLBACK_URL
+        - name: OAUTH_SESSION_KEY
+          valueFrom:
+            secretKeyRef:
+              name: oauth-clients
+              key: session-key
+        - name: GOOGLE_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: oauth-clients
+              key: google-client-id
+        - name: GOOGLE_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: oauth-clients
+              key: google-client-secret
+        - name: GITHUB_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: oauth-clients
+              key: github-client-id
+        - name: GITHUB_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: oauth-clients
+              key: github-client-secret

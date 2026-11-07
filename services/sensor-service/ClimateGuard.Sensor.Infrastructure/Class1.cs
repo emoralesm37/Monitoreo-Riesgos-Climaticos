@@ -1,4 +1,4 @@
-﻿namespace ClimateGuard.Sensor.Infrastructure;
+namespace ClimateGuard.Sensor.Infrastructure;
 
 public class Class1
 {

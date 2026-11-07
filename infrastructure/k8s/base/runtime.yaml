@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: runtime
+  labels:
+    app.kubernetes.io/part-of: climateguard
+data:
+  JWT_ISSUER: ClimateGuard.Auth
+  JWT_AUDIENCE: ClimateGuard.Services
+  AUTH_DB_HOST: auth-db
+  AUTH_DB_NAME: climateguard_auth
+  ALERT_DB_NAME: climateguard_alert
+  MONGO_HOST: mongodb
+  MONGO_PORT: '27017'
+  COMMUNITY_SERVICE_URL: http://gateway:8080
+  SENSOR_SERVICE_URL: http://gateway:8080
+  ALERT_RULES_URL: http://legacy-api:8080/api/alert-rules/evaluation
+  ALERT_GATEWAY_URL: http://gateway:8080

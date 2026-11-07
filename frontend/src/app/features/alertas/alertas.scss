@@ -91,3 +91,11 @@
   border-left-color: #ef4444;
   .alerta-severity { background-color: #ef4444; }
 }
+.alertas-header { display:flex; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom:24px; color:#123b56; }
+.alertas-header h1 { margin:0 0 8px; }
+.alert-filters { display:flex; flex-wrap:wrap; gap:14px; padding:20px; background:#10374d; border-radius:16px; margin-bottom:22px; }
+.alert-filters label { display:flex; flex-direction:column; gap:8px; color:#c8eaf5; font-size:12px; flex:1; min-width:130px; }
+.alert-filters input, .alert-filters select { font:inherit; padding:10px; border:1px solid #6591a7; border-radius:8px; background:#f6fbff; color:#133c56; min-width:0; }
+.alert-detail { border:1px solid #9ccbdc; background:#edf8fc; padding:22px; border-radius:16px; margin-bottom:20px; overflow-wrap:anywhere; }
+.btn-detail { border:1px solid #b1d7e5; border-radius:8px; color:#176780; background:#f0faff; padding:10px; margin:8px; cursor:pointer; }
+@media(max-width:700px) { .alerta-card { align-items:flex-start; flex-wrap:wrap; } }

@@ -65,7 +65,7 @@
       <table class="sensores-table">
         <thead><tr>
           <th>Nombre</th><th>Tipo</th><th>Comunidad</th><th>Último valor</th><th>Estado</th>
-          @if (canManage) { <th>Acciones</th> }
+          <th>Acciones</th>
         </tr></thead>
         <tbody>
           @for (sensor of sensores; track sensor.sensorId) {
@@ -73,15 +73,53 @@
               <td>{{ sensor.name }}</td><td>{{ sensor.sensorType }}</td><td>{{ sensor.community }}</td>
               <td>{{ sensor.lastValue === null ? 'Sin lecturas' : sensor.lastValue + ' ' + sensor.unit }}</td>
               <td><span class="status" [class.active]="sensor.isActive">{{ sensor.isActive ? 'Activo' : 'Inactivo' }}</span></td>
-              @if (canManage) {
-                <td><button type="button" class="btn-link" (click)="toggleStatus(sensor)" [disabled]="updating.has(sensor.sensorId)">
+              <td><div class="sensor-actions">
+                <button type="button" class="btn-link" (click)="viewReadings(sensor)">Ver lecturas</button>
+                @if (canManage) {
+                <button type="button" class="btn-link" (click)="toggleStatus(sensor)" [disabled]="updating.has(sensor.sensorId)">
                   {{ updating.has(sensor.sensorId) ? 'Guardando...' : sensor.isActive ? 'Desactivar' : 'Activar' }}
-                </button></td>
-              }
+                </button>
+                }
+              </div></td>
             </tr>
           }
         </tbody>
       </table>
     </div>
+  }
+  @if (selectedSensor; as sensor) {
+    <section class="readings-panel" aria-labelledby="readings-title" [attr.aria-busy]="readingsLoading">
+      <div class="sensores-header">
+        <h2 id="readings-title">Lecturas de {{ sensor.name }}</h2>
+        <button type="button" class="btn-primary" (click)="refreshReadings()" [disabled]="readingsLoading">Actualizar</button>
+      </div>
+      <p>Últimas 100 lecturas como máximo, de más reciente a más antigua. No es el historial completo.</p>
+      <p>Unidad: {{ sensor.unit || 'No disponible' }}. Fecha y hora local del navegador.</p>
+      @if (readingsLoading) {
+        <p role="status">Cargando lecturas...</p>
+      } @else if (readingsError) {
+        <p class="error-msg" role="alert">{{ readingsError }}</p>
+        <button type="button" class="btn-link" (click)="refreshReadings()">Reintentar lecturas</button>
+      } @else if (!readings.length) {
+        <p class="empty-state" role="status">No hay lecturas registradas para este sensor.</p>
+      } @else {
+        <div class="table-scroll">
+          <table class="sensores-table readings-table">
+            <caption class="readings-caption">Últimas lecturas de {{ sensor.name }}</caption>
+            <thead><tr><th scope="col">Fecha y hora</th><th scope="col">Valor {{ sensor.unit ? '(' + sensor.unit + ')' : '' }}</th></tr></thead>
+            <tbody>
+              @for (reading of readings; track reading.sensorReadingId) {
+                <tr><td>{{ reading.timestamp | date:'dd/MM/yyyy HH:mm:ss':'UTC' }} UTC</td><td>{{ reading.value }}
+                  @if (reading.alertEvaluationPending) { <small role="status">Evaluación de alertas pendiente de entrega</small> }
+                  @if (reading.alertEvaluationPending && canManage) {
+                    <button class="btn-link" (click)="retryReadingEvaluation(reading)" [disabled]="retryingReadings.has(reading.sensorReadingId)">Reintentar evaluación</button>
+                  }
+                </td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
   }
 </div>

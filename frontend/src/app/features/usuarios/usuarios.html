@@ -1,229 +1,80 @@
-<section class="usuarios">
-
-  <div class="usuarios-header">
-    <div>
-      <h1>Administración de usuarios</h1>
-      <p>Gestiona los usuarios y permisos de ClimateGuard.</p>
-    </div>
-
-    <button
-      type="button"
-      class="btn-primary"
-      (click)="nuevoUsuario()"
-    >
-      + Nuevo usuario
-    </button>
+<section class="users-page" aria-labelledby="users-title">
+  <header class="users-heading">
+    <div><span class="eyebrow">CLIMATEGUARD / ADMINISTRACIÓN</span><h1 id="users-title">Usuarios y roles</h1>
+      <p>Gestiona las cuentas y el acceso a la plataforma.</p></div>
+    @if (canManage) { <button class="primary" (click)="newUser()" [disabled]="loading() || saving() || changingStatus() || !!loadError()">+ Nuevo usuario</button> }
+  </header>
+  <div class="summary-grid" aria-label="Resumen de usuarios">
+    <article><span>Cuentas registradas</span><strong>{{ loading() || loadError() ? '?' : usuarios().length }}</strong><small>Datos de Auth Service</small></article>
+    <article><span>Activas</span><strong>{{ loading() || loadError() ? '?' : activeCount }}</strong><small>Acceso habilitado</small></article>
+    <article><span>Inactivas</span><strong>{{ loading() || loadError() ? '?' : usuarios().length - activeCount }}</strong><small>Acceso deshabilitado</small></article>
+    <article><span>Roles disponibles</span><strong>{{ loading() || loadError() ? '?' : roles().length }}</strong><small>Catálogo del servidor</small></article>
   </div>
+  @if (message()) { <p class="notice success" role="status">{{ message() }}</p> }
 
-  @if (mensaje) {
-    <div class="mensaje success">
-      {{ mensaje }}
-    </div>
-  }
-
-  @if (mostrarFormulario) {
-    <div class="usuario-form-card">
-
-      <h2>
-        {{ editandoId !== null ? 'Editar usuario' : 'Nuevo usuario' }}
-      </h2>
-
-      <form (ngSubmit)="guardar()">
-
+  @if (showForm()) {
+    <section class="form-card" aria-labelledby="user-form-title" [attr.aria-busy]="saving()">
+      <header><div><span class="eyebrow">CUENTA DE USUARIO</span><h2 #formHeading tabindex="-1" id="user-form-title">{{ editingId ? 'Editar usuario' : 'Nuevo usuario' }}</h2></div>
+        <button class="secondary" (click)="cancelForm()" [disabled]="saving()">Cancelar</button></header>
+      <form #userForm="ngForm" (ngSubmit)="save(userForm)" novalidate>
         <div class="form-grid">
-
-          <div class="form-group">
-            <label for="nombre">Nombre</label>
-
-            <input
-              id="nombre"
-              name="nombre"
-              type="text"
-              [(ngModel)]="nombre"
-              placeholder="Nombre completo"
-              required
-            />
-          </div>
-
-          <div class="form-group">
-            <label for="email">Correo electrónico</label>
-
-            <input
-              id="email"
-              name="email"
-              type="email"
-              [(ngModel)]="email"
-              placeholder="usuario@climateguard.com"
-              required
-            />
-          </div>
-
-          <div class="form-group">
-            <label for="rol">Rol</label>
-
-            <select
-              id="rol"
-              name="rol"
-              [(ngModel)]="rol"
-            >
-              <option value="Administrador">
-                Administrador
-              </option>
-
-              <option value="Operador">
-                Operador
-              </option>
-            </select>
-          </div>
-
+          <label for="user-name">Nombre<input id="user-name" name="name" [(ngModel)]="form.name" required [minlength]="editingId ? 2 : 1" maxlength="100" autocomplete="name" [readOnly]="saving()"></label>
+          <label for="user-email">Correo<input id="user-email" name="email" type="email" [(ngModel)]="form.email" required email maxlength="150" autocomplete="email" [readOnly]="saving()"></label>
+          <label for="user-role">Rol<select id="user-role" name="roleId" [(ngModel)]="form.roleId" required [disabled]="saving() || editingId === currentUserId">
+            <option value="" disabled>Selecciona un rol</option>@for (role of roles(); track role.id) { <option [value]="role.id">{{ role.name }}</option> }
+          </select></label>
+          @if (!editingId) { <label for="user-password">Contraseña inicial<input id="user-password" name="password" type="password" [(ngModel)]="form.password" required minlength="8" maxlength="100" autocomplete="new-password" [readOnly]="saving()"><small>Entre 8 y 100 caracteres. No se muestra al consultar usuarios.</small></label> }
         </div>
-
-        @if (error) {
-          <div class="mensaje error">
-            {{ error }}
-          </div>
-        }
-
-        <div class="form-actions">
-
-          <button
-            type="submit"
-            class="btn-primary"
-          >
-            {{ editandoId !== null ? 'Guardar cambios' : 'Crear usuario' }}
-          </button>
-
-          <button
-            type="button"
-            class="btn-secondary"
-            (click)="cancelar()"
-          >
-            Cancelar
-          </button>
-
-        </div>
-
+        @if (editingId) { <p class="form-note">La edición permite nombre, correo y rol. No modifica la contraseña.</p> }
+        @if (editingId === currentUserId) { <p class="form-note">Conservamos el rol de tu cuenta actual para evitar que pierdas acceso.</p> }
+        @if (formError()) { <p class="notice error" role="alert">{{ formError() }}</p> }
+        <button class="primary" type="submit" [disabled]="saving() || changingStatus()">{{ saving() ? 'Guardando...' : editingId ? 'Guardar cambios' : 'Crear usuario' }}</button>
       </form>
-
-    </div>
+    </section>
   }
 
-  <div class="usuarios-card">
-
-    <div class="card-header">
-      <h2>Usuarios registrados</h2>
-      <span>{{ usuarios.length }} usuarios</span>
+  <section class="list-card" aria-labelledby="list-title" [attr.aria-busy]="loading()">
+    <header><div><h2 id="list-title">Directorio de usuarios</h2><p>{{ filtered.length }} resultados de {{ usuarios().length }} cuentas cargadas</p></div>
+      <button class="secondary" (click)="load()" [disabled]="loading() || saving() || changingStatus()">Actualizar</button></header>
+    <div class="filters">
+      <label for="user-search">Buscar<input id="user-search" type="search" [(ngModel)]="search" placeholder="Nombre, correo o rol"></label>
+      <label for="role-filter">Rol<select id="role-filter" [(ngModel)]="roleFilter"><option value="">Todos los roles</option>@for (role of roles(); track role.id) { <option [value]="role.id">{{ role.name }}</option> }</select></label>
+      <label for="status-filter">Estado<select id="status-filter" [(ngModel)]="statusFilter"><option value="">Todos</option><option value="active">Activos</option><option value="inactive">Inactivos</option></select></label>
+      <button class="secondary" (click)="clearFilters()">Limpiar filtros</button>
     </div>
-
-    <div class="table-responsive">
-
-      <table class="usuarios-table">
-
-        <thead>
-          <tr>
-            <th>Nombre</th>
-            <th>Email</th>
-            <th>Rol</th>
-            <th>Estado</th>
-            <th>Acciones</th>
+    @if (loading()) { <div class="state" role="status">Consultando usuarios y roles...</div> }
+    @else if (loadError()) { <div class="state error" role="alert"><p>{{ loadError() }}</p><button class="secondary" (click)="load()">Reintentar</button></div> }
+    @else if (!filtered.length) { <div class="state"><h3>{{ usuarios().length ? 'Sin coincidencias' : 'No hay usuarios registrados' }}</h3><p>{{ usuarios().length ? 'Prueba con otros filtros.' : 'Crea una cuenta para comenzar.' }}</p></div> }
+    @else {
+      <div class="table-scroll"><table><caption class="sr-only">Usuarios persistidos en Auth Service</caption>
+        <thead><tr><th scope="col">Usuario</th><th scope="col">Rol</th><th scope="col">Estado</th><th scope="col">Acciones</th></tr></thead>
+        <tbody>@for (user of filtered; track user.id) {
+          <tr [attr.data-user-id]="user.id"><td><strong>{{ user.name }}</strong><span class="email">{{ user.email }}</span>@if (user.id === currentUserId) { <span class="own-tag">Tu cuenta</span> }</td>
+            <td>{{ user.role }}</td><td><span class="status" [class.active]="user.isActive">{{ user.isActive ? 'Activo' : 'Inactivo' }}</span></td>
+            <td><div class="actions">@if (canManage) {
+              <button class="text-button edit-user" (click)="edit(user)" [disabled]="loading() || saving() || changingStatus()" [attr.aria-label]="'Editar a ' + user.name">Editar</button>
+              <button class="text-button status-user" (click)="requestStatus(user)" [disabled]="loading() || saving() || changingStatus() || user.id === currentUserId"
+                [attr.aria-label]="(user.isActive ? 'Desactivar a ' : 'Activar a ') + user.name" [attr.title]="user.id === currentUserId ? 'No puedes desactivar tu cuenta actual desde esta pantalla' : null">{{ user.isActive ? 'Desactivar' : 'Activar' }}</button>
+            }</div></td>
           </tr>
-        </thead>
+        }</tbody>
+      </table></div>
+    }
+  </section>
+  <p class="audit-note">Las operaciones mediante Gateway se registran en Auditoría. Esta pantalla no genera una bitácora local ni presenta eventos simulados.</p>
+  @if (!loading() && !loadError()) { <app-roles-catalog [roles]="roles()" [users]="usuarios()" /> }
+  <dialog id="role-change-dialog" #roleConfirmation aria-labelledby="role-confirm-title" (cancel)="cancelRoleConfirmation()">
+    <h2 id="role-confirm-title">Confirmar cambio de rol</h2><p>Se modificará el rol de <strong>{{form.name}}</strong>. El servidor verificará los permisos y conservará al menos un administrador activo.</p><p>Las sesiones de Auth con permisos anteriores requerirán iniciar sesión nuevamente.</p>
+    <div class="dialog-actions"><button class="secondary" autofocus (click)="cancelRoleConfirmation()">Volver al formulario</button><button class="primary confirm-role" (click)="save(undefined, true)">Confirmar rol</button></div>
+  </dialog>
 
-        <tbody>
-
-          @for (usuario of usuarios; track usuario.id) {
-
-            <tr>
-
-              <td>
-                {{ usuario.nombre }}
-              </td>
-
-              <td>
-                {{ usuario.email }}
-              </td>
-
-              <td>
-                <span
-                  class="rol-tag"
-                  [class.admin]="usuario.rol === 'Administrador'"
-                >
-                  {{ usuario.rol }}
-                </span>
-              </td>
-
-              <td>
-                <span
-                  class="estado"
-                  [class.activo]="usuario.activo"
-                  [class.inactivo]="!usuario.activo"
-                >
-                  {{ usuario.activo ? 'Activo' : 'Inactivo' }}
-                </span>
-              </td>
-
-              <td class="acciones">
-
-                <button
-                  type="button"
-                  class="btn-link"
-                  (click)="editar(usuario)"
-                >
-                  Editar
-                </button>
-
-                <button
-                  type="button"
-                  class="btn-link danger"
-                  (click)="cambiarEstado(usuario)"
-                >
-                  {{ usuario.activo ? 'Desactivar' : 'Activar' }}
-                </button>
-
-              </td>
-
-            </tr>
-
-          }
-
-        </tbody>
-
-      </table>
-
-    </div>
-
-  </div>
-
-  <div class="bitacora-section">
-
-    <div class="card-header">
-      <div>
-        <h2>Bitácora reciente</h2>
-        <p>Últimas acciones realizadas en el sistema.</p>
-      </div>
-    </div>
-
-    <ul class="bitacora-list">
-
-      @for (log of bitacora; track log.id) {
-
-        <li>
-
-          <div class="bitacora-info">
-            <strong>{{ log.usuario }}</strong>
-            <span>{{ log.accion }}</span>
-          </div>
-
-          <span class="bitacora-fecha">
-            {{ log.fecha }}
-          </span>
-
-        </li>
-
-      }
-
-    </ul>
-
-  </div>
-
+  <dialog id="user-status-dialog" #confirmation aria-labelledby="status-title" aria-describedby="status-description" (cancel)="cancelConfirmation($event)" [attr.aria-busy]="changingStatus()">
+    @if (confirmationTarget(); as user) {
+      <span class="eyebrow">CONFIRMAR CAMBIO</span><h2 id="status-title">{{ user.isActive ? 'Desactivar usuario' : 'Activar usuario' }}</h2>
+      <p id="status-description">{{ user.isActive ? 'Se deshabilitará el acceso de' : 'Se habilitará el acceso de' }} <strong>{{ user.name }}</strong> ({{ user.email }}). Se conservarán sus datos y su rol.</p>
+      @if (statusError()) { <p class="notice error" role="alert">{{ statusError() }}</p> }
+      <div class="dialog-actions"><button class="secondary" autofocus (click)="cancelConfirmation()" [disabled]="changingStatus()">Cancelar</button>
+        <button class="primary confirm-status" (click)="confirmStatus()" [disabled]="changingStatus()">{{ changingStatus() ? 'Actualizando...' : 'Confirmar cambio' }}</button></div>
+    }
+  </dialog>
 </section>

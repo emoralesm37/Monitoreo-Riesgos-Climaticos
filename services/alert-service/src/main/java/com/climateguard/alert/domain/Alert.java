@@ -70,6 +70,23 @@ public class Alert {
     @Column(name = "resolved_by_user_id", length = 100)
     private String resolvedByUserId;
 
+    @Column(name = "measurement_id", length = 120)
+    private String measurementId;
+    @Column(name = "rule_id")
+    private Integer ruleId;
+    @Column(length = 30)
+    private String unit;
+    @Column(name = "captured_at")
+    private Instant capturedAt;
+    public String getMeasurementId() { return measurementId; }
+    public void setMeasurementId(String value) { measurementId = value; }
+    public Integer getRuleId() { return ruleId; }
+    public void setRuleId(Integer value) { ruleId = value; }
+    public String getUnit() { return unit; }
+    public void setUnit(String value) { unit = value; }
+    public Instant getCapturedAt() { return capturedAt; }
+    public void setCapturedAt(Instant value) { capturedAt = value; }
+
     public Alert() {
     }
 

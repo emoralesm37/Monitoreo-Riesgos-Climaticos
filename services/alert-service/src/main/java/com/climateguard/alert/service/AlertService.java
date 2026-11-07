@@ -1,12 +1,10 @@
 package com.climateguard.alert.service;
 
 import com.climateguard.alert.domain.Alert;
-import com.climateguard.alert.domain.SensorReadingType;
 import com.climateguard.alert.repository.AlertRepository;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
@@ -23,43 +21,7 @@ import java.util.List;
 public class AlertService {
 
     private final AlertRepository alertRepository;
-    private final BigDecimal riverLevelThreshold;
-    private final BigDecimal rainfallThreshold;
-    private final BigDecimal highTemperatureThreshold;
-    private final BigDecimal lowTemperatureThreshold;
-    private final BigDecimal lowHumidityThreshold;
-    private final BigDecimal lowSoilHumidityThreshold;
-    private final BigDecimal windSpeedThreshold;
-
-    public AlertService(
-        AlertRepository alertRepository,
-        @Value("${alert.thresholds.river-level:8.0}")
-        BigDecimal riverLevelThreshold,
-        @Value("${alert.thresholds.rainfall:100.0}")
-        BigDecimal rainfallThreshold,
-        @Value("${alert.thresholds.high-temperature:40.0}")
-        BigDecimal highTemperatureThreshold,
-        @Value("${alert.thresholds.low-temperature:2.0}")
-        BigDecimal lowTemperatureThreshold,
-        @Value("${alert.thresholds.low-humidity:20.0}")
-        BigDecimal lowHumidityThreshold,
-        @Value("${alert.thresholds.low-soil-humidity:20.0}")
-        BigDecimal lowSoilHumidityThreshold,
-        @Value("${alert.thresholds.wind-speed:80.0}")
-        BigDecimal windSpeedThreshold
-    ) {
-        this.alertRepository = alertRepository;
-        this.riverLevelThreshold = riverLevelThreshold;
-        this.rainfallThreshold = rainfallThreshold;
-        this.highTemperatureThreshold =
-            highTemperatureThreshold;
-        this.lowTemperatureThreshold =
-            lowTemperatureThreshold;
-        this.lowHumidityThreshold = lowHumidityThreshold;
-        this.lowSoilHumidityThreshold =
-            lowSoilHumidityThreshold;
-        this.windSpeedThreshold = windSpeedThreshold;
-    }
+    public AlertService(AlertRepository alertRepository) { this.alertRepository = alertRepository; }
 
     @Transactional(readOnly = true)
     public List<AlertResponse> getAll(
@@ -183,68 +145,6 @@ public class AlertService {
     }
 
     @Transactional
-    public EvaluationResult evaluate(
-        EvaluateReadingRequest request
-    ) {
-        RuleMatch rule = evaluateRule(
-            request.readingType(),
-            request.value()
-        );
-
-        if (rule == null) {
-            return new EvaluationResult(
-                false,
-                false,
-                "La lectura no supera ningún umbral.",
-                null
-            );
-        }
-
-        var existingAlert =
-            alertRepository
-                .findFirstBySensorIdAndPhenomenonAndStatusOrderByCreatedAtDesc(
-                    request.sensorId(),
-                    rule.phenomenon(),
-                    Alert.Status.ACTIVA
-                );
-
-        if (existingAlert.isPresent()) {
-            return new EvaluationResult(
-                false,
-                true,
-                "Ya existe una alerta activa equivalente.",
-                AlertResponse.from(existingAlert.get())
-            );
-        }
-
-        String message = String.format(
-            "Umbral superado para %s: %s",
-            request.readingType(),
-            request.value()
-        );
-
-        Alert alert = buildAlert(
-            request.sensorId(),
-            request.communityId(),
-            request.sensorName(),
-            request.communityName(),
-            rule.severity(),
-            rule.phenomenon(),
-            request.value(),
-            message
-        );
-
-        Alert savedAlert = alertRepository.save(alert);
-
-        return new EvaluationResult(
-            true,
-            false,
-            "Alerta generada correctamente.",
-            AlertResponse.from(savedAlert)
-        );
-    }
-
-    @Transactional
     public AlertResponse resolve(Long id, String userId) {
         Alert alert = findAlert(id);
         alert.resolve(userId);
@@ -252,81 +152,6 @@ public class AlertService {
         return AlertResponse.from(
             alertRepository.save(alert)
         );
-    }
-
-    private RuleMatch evaluateRule(
-        SensorReadingType readingType,
-        BigDecimal value
-    ) {
-        return switch (readingType) {
-            case NIVEL_RIO ->
-                value.compareTo(riverLevelThreshold) >= 0
-                    ? new RuleMatch(
-                        Alert.Severity.ROJO,
-                        Alert.Phenomenon.INUNDACION
-                    )
-                    : null;
-
-            case NIVEL_LLUVIA ->
-                value.compareTo(rainfallThreshold) >= 0
-                    ? new RuleMatch(
-                        Alert.Severity.NARANJA,
-                        Alert.Phenomenon.INUNDACION
-                    )
-                    : null;
-
-            case TEMPERATURA -> {
-                if (
-                    value.compareTo(
-                        highTemperatureThreshold
-                    ) >= 0
-                ) {
-                    yield new RuleMatch(
-                        Alert.Severity.ROJO,
-                        Alert.Phenomenon.INCENDIO_FORESTAL
-                    );
-                }
-
-                if (
-                    value.compareTo(
-                        lowTemperatureThreshold
-                    ) <= 0
-                ) {
-                    yield new RuleMatch(
-                        Alert.Severity.NARANJA,
-                        Alert.Phenomenon.HELADA
-                    );
-                }
-
-                yield null;
-            }
-
-            case HUMEDAD ->
-                value.compareTo(lowHumidityThreshold) <= 0
-                    ? new RuleMatch(
-                        Alert.Severity.AMARILLO,
-                        Alert.Phenomenon.SEQUIA
-                    )
-                    : null;
-
-            case HUMEDAD_SUELO ->
-                value.compareTo(
-                    lowSoilHumidityThreshold
-                ) <= 0
-                    ? new RuleMatch(
-                        Alert.Severity.NARANJA,
-                        Alert.Phenomenon.SEQUIA
-                    )
-                    : null;
-
-            case VELOCIDAD_VIENTO ->
-                value.compareTo(windSpeedThreshold) >= 0
-                    ? new RuleMatch(
-                        Alert.Severity.NARANJA,
-                        Alert.Phenomenon.TORMENTA
-                    )
-                    : null;
-        };
     }
 
     private Alert buildAlert(
@@ -357,34 +182,8 @@ public class AlertService {
         return alertRepository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(
                 HttpStatus.NOT_FOUND,
-                "No se encontró la alerta con id " + id
+                "No se encontrÃ³ la alerta con id " + id
             ));
-    }
-
-    private record RuleMatch(
-        Alert.Severity severity,
-        Alert.Phenomenon phenomenon
-    ) {
-    }
-
-    public record EvaluateReadingRequest(
-        @NotNull
-        Integer sensorId,
-
-        Integer communityId,
-
-        @Size(max = 100)
-        String sensorName,
-
-        @Size(max = 120)
-        String communityName,
-
-        @NotNull
-        SensorReadingType readingType,
-
-        @NotNull
-        BigDecimal value
-    ) {
     }
 
     public record EvaluationResult(
@@ -431,7 +230,8 @@ public class AlertService {
         Alert.Status status,
         Instant createdAt,
         Instant resolvedAt,
-        String resolvedByUserId
+        String resolvedByUserId,
+        String measurementId, Integer ruleId, String unit, Instant capturedAt
     ) {
         static AlertResponse from(Alert alert) {
             return new AlertResponse(
@@ -447,7 +247,7 @@ public class AlertService {
                 alert.getStatus(),
                 alert.getCreatedAt(),
                 alert.getResolvedAt(),
-                alert.getResolvedByUserId()
+                alert.getResolvedByUserId(), alert.getMeasurementId(), alert.getRuleId(), alert.getUnit(), alert.getCapturedAt()
             );
         }
     }

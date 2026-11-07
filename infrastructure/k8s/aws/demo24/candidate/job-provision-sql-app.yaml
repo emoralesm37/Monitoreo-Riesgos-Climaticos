@@ -1,0 +1,72 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+    app.kubernetes.io/part-of: climateguard
+  name: provision-sql-app
+  namespace: climateguard
+spec:
+  activeDeadlineSeconds: 600
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: bootstrap
+        app.kubernetes.io/part-of: climateguard
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - command:
+        - bash
+        - /bootstrap/provision-sql-app.sh
+        env:
+        - name: MSSQL_SA_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: password
+              name: sql-admin
+        - name: CG_SQL_APP_USER
+          valueFrom:
+            secretKeyRef:
+              name: sql-app-bootstrap
+              key: username
+        - name: CG_SQL_APP_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: sql-app-bootstrap
+              key: password
+        image: mcr.microsoft.com/mssql/server@sha256:cf8f0ab2ebe61feec2eed2629061a07d247f791c2a8ddda74a4ac9f06a291718
+        name: provision-sql-app
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          readOnlyRootFilesystem: true
+        volumeMounts:
+        - mountPath: /bootstrap
+          name: scripts
+          readOnly: true
+        - mountPath: /tmp
+          name: tmp
+      restartPolicy: Never
+      securityContext:
+        fsGroup: 10001
+        runAsGroup: 10001
+        runAsNonRoot: true
+        runAsUser: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      volumes:
+      - configMap:
+          name: sql-app-bootstrap-scripts
+        name: scripts
+      - emptyDir: {}
+        name: tmp

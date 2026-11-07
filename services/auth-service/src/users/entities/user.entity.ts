@@ -29,6 +29,7 @@ export class User {
     length: 255,
     nullable: true,
     select: false,
+    
   })
   passwordHash!: string | null;
 

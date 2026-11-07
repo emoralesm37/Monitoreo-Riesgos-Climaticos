@@ -1,0 +1,201 @@
+{
+  "applied": false,
+  "profile": "24-hour university demo on existing m7i-flex.large",
+  "instanceId": "i-REPLACE_INSTANCE_ID",
+  "instanceType": "m7i-flex.large",
+  "vcpu": 2,
+  "memoryGiB": 8,
+  "persistentGiB": 19,
+  "newEbsGiBIfRequired": 40,
+  "preferExistingFilesystemIfFreeGiBAtLeast": 40,
+  "storageDecision": "WAIT_FOR_SSH_DISK_MEASUREMENT; no additional EBS approved",
+  "frontendReplicas": 2,
+  "otherApplicationReplicas": 1,
+  "requestedMemoryMiB": 3808.0,
+  "limitsMemoryMiB": 5728.0,
+  "defaultBasePvcGiB": 112,
+  "capacityStatus": "PROPOSED_NOT_PROVEN; native runtime checks mandatory before full application rollout",
+  "domain": "climateguard.garher.lat",
+  "tag": "release-20261106-f0048fcb2ff2",
+  "sourceFingerprint": "f0048fcb2ff219e0903c30027a05e467ed5a95e7c79cf963997be74acb4f45f2",
+  "files": [
+    "00-platform.yaml",
+    "01-databases.yaml",
+    "02-job-config.yaml",
+    "03-applications.yaml",
+    "04-issuer.yaml",
+    "05-ingress.yaml",
+    "06-internal-probe.yaml",
+    "07-http-redirect.yaml",
+    "complete.yaml",
+    "job-auth-bootstrap-admin.yaml",
+    "job-auth-migrate.yaml",
+    "job-provision-alert-db.yaml",
+    "job-provision-auth-db.yaml",
+    "job-provision-mongo.yaml",
+    "job-provision-sql-app.yaml",
+    "job-sql-empty-schema.yaml",
+    "jobs.yaml"
+  ],
+  "resourceBudgets": {
+    "alert-service": {
+      "replicas": 1,
+      "resources": {
+        "requests": {
+          "cpu": "100m",
+          "memory": "384Mi"
+        },
+        "limits": {
+          "cpu": "750m",
+          "memory": "512Mi"
+        }
+      }
+    },
+    "audit-service": {
+      "replicas": 1,
+      "resources": {
+        "requests": {
+          "cpu": "40m",
+          "memory": "96Mi"
+        },
+        "limits": {
+          "cpu": "500m",
+          "memory": "192Mi"
+        }
+      }
+    },
+    "auth-service": {
+      "replicas": 1,
+      "resources": {
+        "requests": {
+          "cpu": "40m",
+          "memory": "128Mi"
+        },
+        "limits": {
+          "cpu": "500m",
+          "memory": "256Mi"
+        }
+      }
+    },
+    "frontend": {
+      "replicas": 2,
+      "resources": {
+        "requests": {
+          "cpu": "10m",
+          "memory": "16Mi"
+        },
+        "limits": {
+          "cpu": "100m",
+          "memory": "48Mi"
+        }
+      }
+    },
+    "gateway": {
+      "replicas": 1,
+      "resources": {
+        "requests": {
+          "cpu": "40m",
+          "memory": "96Mi"
+        },
+        "limits": {
+          "cpu": "500m",
+          "memory": "192Mi"
+        }
+      }
+    },
+    "legacy-api": {
+      "replicas": 1,
+      "resources": {
+        "requests": {
+          "cpu": "50m",
+          "memory": "128Mi"
+        },
+        "limits": {
+          "cpu": "500m",
+          "memory": "256Mi"
+        }
+      }
+    },
+    "report-service": {
+      "replicas": 1,
+      "resources": {
+        "requests": {
+          "cpu": "75m",
+          "memory": "256Mi"
+        },
+        "limits": {
+          "cpu": "750m",
+          "memory": "512Mi"
+        }
+      }
+    },
+    "sensor-service": {
+      "replicas": 1,
+      "resources": {
+        "requests": {
+          "cpu": "50m",
+          "memory": "128Mi"
+        },
+        "limits": {
+          "cpu": "500m",
+          "memory": "256Mi"
+        }
+      }
+    },
+    "alert-db": {
+      "replicas": 1,
+      "resources": {
+        "requests": {
+          "cpu": "50m",
+          "memory": "128Mi"
+        },
+        "limits": {
+          "cpu": "500m",
+          "memory": "320Mi"
+        }
+      }
+    },
+    "auth-db": {
+      "replicas": 1,
+      "resources": {
+        "requests": {
+          "cpu": "50m",
+          "memory": "128Mi"
+        },
+        "limits": {
+          "cpu": "500m",
+          "memory": "320Mi"
+        }
+      }
+    },
+    "mongodb": {
+      "replicas": 1,
+      "resources": {
+        "requests": {
+          "cpu": "75m",
+          "memory": "256Mi"
+        },
+        "limits": {
+          "cpu": "500m",
+          "memory": "512Mi"
+        }
+      }
+    },
+    "sqlserver": {
+      "replicas": 1,
+      "resources": {
+        "requests": {
+          "cpu": "400m",
+          "memory": "2048Mi"
+        },
+        "limits": {
+          "cpu": "1000m",
+          "memory": "2304Mi"
+        }
+      }
+    }
+  },
+  "requestedCpuMillicores": 990.0,
+  "systemAndKubeReservedMiB": 1152,
+  "reservedCpuMillicores": 400
+}

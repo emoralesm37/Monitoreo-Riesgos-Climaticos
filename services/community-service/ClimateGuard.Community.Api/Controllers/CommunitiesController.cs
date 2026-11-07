@@ -9,7 +9,7 @@ namespace ClimateGuard.Community.Api.Controllers;
 [Route("api/communities")]
 [Authorize]
 public sealed class CommunitiesController(
-    ICommunityService communityService)
+    ICommunityService communityService, IHttpClientFactory clients, IConfiguration configuration)
     : ControllerBase
 {
     [HttpGet]
@@ -26,7 +26,12 @@ public sealed class CommunitiesController(
                 filters,
                 cancellationToken);
 
-        return Ok(communities);
+        try
+        {
+            var counts = await SensorCounts(cancellationToken);
+            return Ok(communities.Select(c => c with { SensorCount = counts.GetValueOrDefault(c.CommunityId) }));
+        }
+        catch (HttpRequestException) { return StatusCode(503, new { message = "No se pudo consultar la asociación de sensores." }); }
     }
 
     [HttpGet("{communityId:int}")]
@@ -52,7 +57,12 @@ public sealed class CommunitiesController(
             });
         }
 
-        return Ok(community);
+        try
+        {
+            var counts = await SensorCounts(cancellationToken);
+            return Ok(community with { SensorCount = counts.GetValueOrDefault(communityId) });
+        }
+        catch (HttpRequestException) { return StatusCode(503, new { message = "No se pudo consultar la asociación de sensores." }); }
     }
 
     [HttpPost]
@@ -82,7 +92,7 @@ public sealed class CommunitiesController(
                     communityId =
                         community.CommunityId
                 },
-                community);
+                community with { SensorCount = 0 });
         }
         catch (ArgumentException exception)
         {
@@ -162,5 +172,17 @@ public sealed class CommunitiesController(
         }
 
         return NoContent();
+    }
+
+    private async Task<Dictionary<int,int>> SensorCounts(CancellationToken ct)
+    {
+        var url = configuration["Sensor:ServiceUrl"];
+        if (string.IsNullOrWhiteSpace(url)) throw new HttpRequestException("Sensor API no configurada");
+        using var request = new HttpRequestMessage(HttpMethod.Get, url.TrimEnd('/') + "/api/sensors/community-counts");
+        request.Headers.TryAddWithoutValidation("Authorization", Request.Headers.Authorization.ToString());
+        using var response = await clients.CreateClient("SensorDirectory").SendAsync(request, ct);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<Dictionary<int,int>>(cancellationToken:ct)
+            ?? throw new HttpRequestException("Contrato de sensores inválido");
     }
 }

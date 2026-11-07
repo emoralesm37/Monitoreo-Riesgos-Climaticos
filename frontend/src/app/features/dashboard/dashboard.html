@@ -1,235 +1,49 @@
-<section class="dashboard">
-
-  <div class="dashboard-header">
-    <div>
-      <h1>Panel general</h1>
-      <p>
-        Resumen del sistema de monitoreo y alerta temprana.
-      </p>
-    </div>
+<section class="dashboard" aria-labelledby="dashboard-title" [attr.aria-busy]="busy">
+  <header class="control-header"><div><span class="eyebrow">CLIMATEGUARD / CENTRO DE MONITOREO</span><h1 id="dashboard-title">Panorama climático</h1><p>Comunidades, mediciones y alertas desde las APIs del Gateway.</p></div><div class="update"><button (click)="refresh()" [disabled]="busy">{{busy ? 'Actualizando...' : 'Actualizar datos'}}</button><small>{{synchronized() ? 'Respuesta recibida ' + (synchronized() | date:'HH:mm:ss') : 'Esperando datos reales'}} · hora local</small></div></header>
+  <div class="view-filter"><label for="dashboard-community">Comunidad<select id="dashboard-community" [(ngModel)]="communityId" (ngModelChange)="selectCommunity()" [disabled]="communityLoading() || !!communityError()"><option value="">Todas las comunidades</option>@for (c of communities(); track c.communityId) { <option [value]="c.communityId">{{c.name}}</option> }</select></label><p>La selección filtra sensores, alertas y mapa. Los registros inactivos siguen incluidos.</p></div>
+  @if (sensorError() || communityError() || alertError()) { <div class="warning" role="alert">Información parcial. Las fuentes que fallaron se muestran como no disponibles, no como cero. <button (click)="refresh()" [disabled]="busy">Reintentar</button></div> }
+  <div class="metrics">
+    <article><span>Comunidades registradas</span><strong data-metric="communities">{{communityLoading() ? '...' : communityError() ? '—' : visibleCommunities.length}}</strong><small>{{communityError() || 'Registros en la vista seleccionada'}}</small></article>
+    <article><span>Sensores registrados</span><strong data-metric="sensors">{{sensorLoading() ? '...' : sensorError() ? '—' : visibleSensors.length}}</strong><small>{{sensorError() || 'Incluye activos e inactivos'}}</small></article>
+    <article><span>Sensores activos</span><strong data-metric="active-sensors">{{sensorLoading() ? '...' : sensorError() ? '—' : activeSensors}}</strong><small>Estado administrativo, no conexión física</small></article>
+    <article><span>Alertas activas</span><strong data-metric="active-alerts">{{alertLoading() ? '...' : alertError() ? '—' : activeAlerts.length}}</strong><small>{{alertError() || 'Estado ACTIVA confirmado por la API'}}</small></article>
+    <article><span>Alertas resueltas</span><strong data-metric="resolved-alerts">{{alertLoading() ? '...' : alertError() ? '—' : resolvedAlerts.length}}</strong><small>Resoluciones persistidas</small></article>
+    <article><span>Última actividad registrada</span><strong class="date-value">{{lastActivity !== null ? (lastActivity | date:'dd/MM HH:mm:ss':'UTC') : sensorError() || alertError() ? 'No disponible' : busy ? '...' : 'Sin registros'}}</strong><small>Lectura o alerta · UTC. No indica conectividad.</small></article>
   </div>
-
-  <div class="summary-grid">
-
-    <div class="summary-card">
-      <div class="summary-icon sensores">
-        S
-      </div>
-
-      <div class="summary-content">
-        <span class="summary-label">
-          Sensores registrados
-        </span>
-
-        @if (cargandoSensores) {
-          <span class="summary-value">
-            ...
-          </span>
-        } @else {
-          <span class="summary-value">
-            {{ totalSensores }}
-          </span>
-        }
-
-        @if (errorSensores) {
-          <small class="summary-error">
-            No se pudieron consultar
-          </small>
-        } @else {
-          <small>
-            Conectados al sistema
-          </small>
-        }
-      </div>
-    </div>
-
-    <div class="summary-card">
-      <div class="summary-icon comunidades">
-        C
-      </div>
-
-      <div class="summary-content">
-        <span class="summary-label">
-          Comunidades
-        </span>
-
-        @if (cargandoComunidades) {
-          <span class="summary-value">
-            ...
-          </span>
-        } @else {
-          <span class="summary-value">
-            {{ totalComunidades }}
-          </span>
-        }
-
-        @if (errorComunidades) {
-          <small class="summary-error">
-            No se pudieron consultar
-          </small>
-        } @else {
-          <small>
-            Registradas actualmente
-          </small>
-        }
-      </div>
-    </div>
-
-    <div class="summary-card">
-      <div class="summary-icon alertas">
-        !
-      </div>
-
-      <div class="summary-content">
-        <span class="summary-label">
-          Alertas activas
-        </span>
-
-        <span class="summary-value">
-          {{ alertasActivas }}
-        </span>
-
-        <small>
-          Requieren monitoreo
-        </small>
-      </div>
-    </div>
-
-    <div class="summary-card">
-      <div class="summary-icon historial">
-        H
-      </div>
-
-      <div class="summary-content">
-        <span class="summary-label">
-          Eventos atendidos
-        </span>
-
-        <span class="summary-value">
-          {{ eventosHistorial }}
-        </span>
-
-        <small>
-          Registrados en historial
-        </small>
-      </div>
-    </div>
-
+  <app-monitoring-map [communities]="visibleCommunities" [loading]="communityLoading()" [error]="!!communityError()" (retry)="refresh()" [alerts]="alerts()" [alertsAvailable]="!alertLoading() && !alertError()" />
+  <section class="chart-card readings-card" aria-labelledby="readings-title">
+    <header><div><span class="eyebrow">MEDICIONES PERSISTIDAS</span><h2 id="readings-title">Evolución de lecturas</h2><p>Una serie por sensor, con su unidad original.</p></div><button (click)="loadReadings()" [disabled]="readingLoading() || !selectedSensor || !!sensorError()">Actualizar lecturas</button></header>
+    <div class="chart-filters"><label for="dashboard-sensor">Sensor<select id="dashboard-sensor" [(ngModel)]="sensorId" (ngModelChange)="loadReadings()" [disabled]="sensorLoading() || !!sensorError()"><option value="">Selecciona un sensor</option>@for (s of visibleSensors; track s.sensorId) { <option [value]="s.sensorId">{{s.name}} · {{s.unit || 'unidad no informada'}}</option> }</select></label><label for="dashboard-period">Periodo dentro de la muestra<select id="dashboard-period" [(ngModel)]="period"><option value="">Todas las últimas 100</option><option value="24">últimas 24 horas</option><option value="168">últimos 7 días</option><option value="720">últimos 30 días</option></select></label></div>
+    @if (sensorError()) { <p role="alert">No se puede elegir un sensor: listado no disponible.</p> }
+    @else if (readingLoading()) { <p class="state" role="status">Consultando lecturas reales...</p> }
+    @else if (readingError()) { <div class="state error" role="alert">{{readingError()}} <button (click)="loadReadings()">Reintentar</button></div> }
+    @else if (!selectedSensor) { <p class="state">No hay un sensor seleccionado en esta vista.</p> }
+    @else if (chart; as graph) {
+      <p class="series-caption"><strong>{{selectedSensor?.name}}</strong> · unidad {{selectedSensor?.unit || 'no informada'}} · {{validReadings.length}} mediciones válidas</p>
+      <svg class="reading-chart" viewBox="0 0 640 235" role="img" aria-labelledby="series-title series-description"><title id="series-title">Lecturas de {{selectedSensor?.name}}</title><desc id="series-description">Valores persistidos ordenados por fecha UTC. Consulta la tabla de mediciones para acceder a los valores exactos.</desc><line x1="50" y1="35" x2="590" y2="35" class="grid"/><line x1="50" y1="112" x2="590" y2="112" class="grid"/><line x1="50" y1="190" x2="590" y2="190" class="grid"/><text x="2" y="39">{{graph.max | number:'1.0-2'}}</text><text x="2" y="194">{{graph.min | number:'1.0-2'}}</text>
+        @if (graph.points.length > 1) { <polyline [attr.points]="graph.line" class="series-line"/> }
+        @for (point of graph.points; track point.reading.sensorReadingId) { <circle [attr.cx]="point.x" [attr.cy]="point.y" r="4" class="series-point"><title>{{point.reading.value}} {{selectedSensor?.unit}} · {{point.reading.timestamp}} UTC</title></circle> }
+        <text x="50" y="222">{{graph.first | date:'dd/MM HH:mm':'UTC'}}</text><text x="590" y="222" text-anchor="end">{{graph.last | date:'dd/MM HH:mm':'UTC'}} UTC</text></svg>
+      <details><summary>Ver valores exactos ({{validReadings.length}})</summary><div class="table-scroll"><table><thead><tr><th>Captura UTC</th><th>Valor</th></tr></thead><tbody>@for (r of validReadings; track r.sensorReadingId) { <tr><td>{{r.timestamp}}</td><td>{{r.value}} {{selectedSensor?.unit}}</td></tr> }</tbody></table></div></details>
+    } @else { <p class="state">{{readings().length ? 'No hay mediciones válidas dentro del periodo seleccionado en esta muestra.' : 'Este sensor no tiene mediciones en la respuesta recibida.'}} No se infiere desconexión.</p> }
+    @if (invalidReadings) { <p class="warning">{{invalidReadings}} registros con valor o fecha incompletos no se dibujaron.</p> }
+    <p class="footnote">Muestra de las últimas 100 lecturas como máximo; no representa el historial completo. No se interpolan ni generan mediciones. {{readingReceived() ? 'Consulta recibida: ' + (readingReceived() | date:'HH:mm:ss') : ''}}</p>
+  </section>
+  <div class="chart-grid">
+    <section class="chart-card" aria-labelledby="sensor-distribution"><h2 id="sensor-distribution">Distribución de sensores</h2><p>Por tipo registrado · vista seleccionada</p>
+      @if (sensorLoading()) { <p role="status">Consultando sensores...</p> } @else if (sensorError()) { <p role="alert">{{sensorError()}}</p> } @else if (!visibleSensors.length) { <p class="state">No hay sensores registrados.</p> } @else { @for (group of distributions; track group.name) { <div class="bar-row"><span>{{group.name}}</span><strong>{{group.count}}</strong><div class="bar-track" aria-hidden="true"><i [style.width.%]="group.width"></i></div></div> } }
+    </section>
+    <section class="chart-card" aria-labelledby="alert-distribution"><h2 id="alert-distribution">Alertas por severidad</h2><p>Solo alertas activas · las resueltas no indican riesgo actual</p>
+      @if (alertLoading()) { <p role="status">Consultando alertas...</p> } @else if (alertError()) { <p role="alert">{{alertError()}}</p> } @else { @for (severity of severities; track severity) { <div class="bar-row"><span>{{severity}}</span><strong>{{severityCount(severity)}}</strong><div class="bar-track" aria-hidden="true"><i [class]="'severity-' + severity.toLowerCase()" [style.width.%]="activeAlerts.length ? severityCount(severity) / activeAlerts.length * 100 : 0"></i></div></div> } @if (!activeAlerts.length) { <p>La API no registra alertas activas en esta vista. Esto no confirma ausencia de riesgo.</p> } }
+      @if (!alertLoading() && !alertError()) {
+        <h3>Distribución por estado</h3>
+        <div class="bar-row"><span>ACTIVAS</span><strong>{{activeAlerts.length}}</strong><div class="bar-track" aria-hidden="true"><i [style.width.%]="visibleAlerts.length ? activeAlerts.length / visibleAlerts.length * 100 : 0"></i></div></div>
+        <div class="bar-row"><span>RESUELTAS</span><strong>{{resolvedAlerts.length}}</strong><div class="bar-track" aria-hidden="true"><i [style.width.%]="visibleAlerts.length ? resolvedAlerts.length / visibleAlerts.length * 100 : 0"></i></div></div>
+      }
+    </section>
   </div>
-
-  <div class="dashboard-section">
-
-    <div class="section-header">
-      <div>
-        <h2>Estado general</h2>
-        <p>
-          Situación actual de ClimateGuard.
-        </p>
-      </div>
-    </div>
-
-    <div class="estado-grid">
-
-      <div class="estado-card">
-        <span class="estado-indicator correcto"></span>
-
-        <div>
-          <strong>Base de datos</strong>
-          <span>Operativa</span>
-        </div>
-      </div>
-
-      <div class="estado-card">
-        <span class="estado-indicator correcto"></span>
-
-        <div>
-          <strong>API ClimateGuard</strong>
-          <span>En funcionamiento</span>
-        </div>
-      </div>
-
-      <div class="estado-card">
-        <span
-          class="estado-indicator"
-          [class.correcto]="alertasActivas === 0"
-          [class.advertencia]="alertasActivas > 0"
-        ></span>
-
-        <div>
-          <strong>Monitoreo</strong>
-
-          <span>
-            @if (alertasActivas > 0) {
-              {{ alertasActivas }} alerta(s) activa(s)
-            } @else {
-              Sin alertas activas
-            }
-          </span>
-        </div>
-      </div>
-
-    </div>
-
-  </div>
-
-  <div class="dashboard-section">
-
-    <div class="section-header">
-      <div>
-        <h2>Actividad reciente</h2>
-        <p>
-          Últimos eventos atendidos por el sistema.
-        </p>
-      </div>
-    </div>
-
-    @if (ultimosEventos.length > 0) {
-
-      <div class="eventos-list">
-
-        @for (evento of ultimosEventos; track evento.id) {
-
-          <div class="evento">
-
-            <div
-              class="evento-severidad"
-              [class]="'evento-severidad severity-' + evento.severity.toLowerCase()"
-            >
-              {{ evento.severity }}
-            </div>
-
-            <div class="evento-content">
-
-              <strong>
-                {{ evento.fenomeno }}
-              </strong>
-
-              <span>
-                {{ evento.sensorName }}
-                ·
-                {{ evento.community }}
-              </span>
-
-            </div>
-
-            <div class="evento-fecha">
-              {{ evento.fecha }}
-            </div>
-
-          </div>
-
-        }
-
-      </div>
-
-    } @else {
-
-      <div class="sin-eventos">
-        No hay eventos recientes registrados.
-      </div>
-
-    }
-
-  </div>
-
+  <section class="chart-card" aria-labelledby="recent-alerts"><h2 id="recent-alerts">Actividad de alertas</h2><p>últimos cinco registros por fecha de creación o resolución.</p>
+    @if (alertError()) { <p role="alert">{{alertError()}}</p> } @else if (alertLoading()) { <p role="status">Consultando actividad...</p> } @else if (!recentAlerts.length) { <p class="state">No hay alertas registradas en esta vista.</p> } @else { <div class="table-scroll"><table><thead><tr><th>Estado / severidad</th><th>Sensor / comunidad</th><th>Descripción</th><th>Actividad UTC</th></tr></thead><tbody>@for (a of recentAlerts; track a.alertId) { <tr><td><strong>{{a.status}}</strong><small>{{a.severity}}</small></td><td>{{a.sensorName || 'Sensor no informado'}}<small>{{alertCommunity(a)}}</small></td><td>{{a.message}}</td><td>{{a.resolvedAt || a.createdAt | date:'dd/MM/yyyy HH:mm:ss':'UTC'}}</td></tr> }</tbody></table></div> }
+    @if (!communityError() && !alertError() && orphanAlerts) { <p class="footnote">{{orphanAlerts}} alertas sin comunidad coincidente en el catálogo actual; se conservan en la vista global.</p> }
+  </section>
 </section>

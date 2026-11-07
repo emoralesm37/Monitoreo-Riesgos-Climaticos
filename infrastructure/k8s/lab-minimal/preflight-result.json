@@ -1,0 +1,34 @@
+{
+  "measuredAt": "2026-11-06T17:53:37.479Z",
+  "host": {
+    "totalMiB": 14021,
+    "availableMiB": 3271,
+    "committedPercent": 60,
+    "diskFreeGiB": 297.34
+  },
+  "docker": {
+    "memoryMiB": 6778,
+    "availableMiB": 5994,
+    "cachedMiB": 371,
+    "cpus": 16,
+    "architecture": "x86_64"
+  },
+  "tools": {
+    "k3d": false,
+    "k3s": false,
+    "kind": false,
+    "kubectl": true
+  },
+  "runningContainers": [
+    ""
+  ],
+  "resourceBlocks": [],
+  "resourceDecision": "RESOURCES_PASS_RECHECK_TOOLS_AND_PINNED_VERSION",
+  "thresholds": {
+    "hostAvailableMiB": 2048,
+    "linuxAvailableMiB": 4096,
+    "diskFreeGiB": 15,
+    "cpus": 2,
+    "rationale": "Lab-only operational margins: capped 3-GiB server plus Linux headroom; preserve host responsiveness. Not vendor minimums."
+  }
+}

@@ -63,6 +63,7 @@
     <div class="subtitle">
         Reporte de Lecturas
         <p>Fecha de generación: {{ generated_at }}</p>
+        <p>Filtros: {% for key, value in parameters.items() %}{{ key }}={{ value }} {% else %}Todos{% endfor %}</p>
         <p>Total de lecturas: {{ readings | length }}</p>
     </div>
 
@@ -71,11 +72,11 @@
             <tr>
                 <th>Sensor</th>
                 <th>Comunidad</th>
-                <th>Fecha</th>
-                <th>Hora</th>
+                <th>Fecha UTC</th>
+                <th>Hora UTC</th>
                 <th>Valor</th>
                 <th>Unidad</th>
-                <th>Estado</th>
+                <th>Evaluación registrada</th>
             </tr>
         </thead>
 
@@ -101,7 +102,7 @@
     </table>
 
     <div class="footer">
-        Documento generado por ClimateGuard Report Service.
+        Documento generado con lecturas persistidas. Evaluación entregada confirma la entrega al servicio de alertas; no representa una clasificación histórica Normal/Crítico.
     </div>
 </body>
 </html>

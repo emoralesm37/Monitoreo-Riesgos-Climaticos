@@ -1,0 +1,19 @@
+{
+  "date": "2026-11-06",
+  "currency": "USD",
+  "hoursPerMonth": 730,
+  "referenceRegion": "us-east-1",
+  "publicDnsIpRegion": "us-east-2",
+  "actualAccountRegionVerified": false,
+  "pricingSources": ["https://aws.amazon.com/ec2/instance-types/t3/", "https://aws.amazon.com/ebs/pricing/", "https://aws.amazon.com/vpc/pricing/"],
+  "rates": {"t3a.largePerHour": 0.0752, "t3a.xlargePerHour": 0.1504, "t3.largePerHour": 0.0835, "t3.xlargePerHour": 0.167, "gp3PerGBMonthAssumption": 0.08, "publicIPv4PerHour": 0.005},
+  "options": [
+    {"name": "8-GiB reference only, same-size root plus new data volume", "instance": "t3a.large", "compute": 54.896, "storageGB": 224, "storage": 17.92, "ipv4": 3.65, "subtotal": 76.466, "recommended": false},
+    {"name": "Recommended separate replacement EC2", "instance": "t3a.xlarge", "vcpu": 4, "memoryGiB": 16, "compute": 109.792, "rootGB": 32, "dataGB": 160, "storage": 15.36, "ipv4": 3.65, "subtotal": 128.802, "recommended": true},
+    {"name": "Resize existing EC2, preserve 64-GB root", "instance": "t3a.xlarge", "compute": 109.792, "rootGB": 64, "dataGB": 160, "storage": 17.92, "ipv4": 3.65, "subtotal": 131.362, "recommended": false},
+    {"name": "Intel alternative, separate replacement", "instance": "t3.xlarge", "compute": 121.91, "rootGB": 32, "dataGB": 160, "storage": 15.36, "ipv4": 3.65, "subtotal": 140.92, "recommended": false}
+  ],
+  "additionalBackupBudgetPerMonth": {"min": 5, "max": 15, "type": "planning allowance, not measured usage"},
+  "excludes": ["taxes", "egress", "CPU surplus credits", "existing deployment retained during migration", "DNS/domain charges", "container registry if later selected", "commercial SQL Server licensing"],
+  "notes": "Reference estimate, not an account quote. Official T3 page consulted shows US East N. Virginia Linux rates; confirm Ohio/current-region and gp3 rates before creating or resizing resources. No Savings Plan commitment or Spot assumed. No EKS/ALB/NAT Gateway required."
+}

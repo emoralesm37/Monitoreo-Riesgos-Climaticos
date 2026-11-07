@@ -28,6 +28,9 @@ public sealed class AppDbContext(
     public DbSet<Alert> Alerts => Set<Alert>();
 
     public DbSet<AlertRule> AlertRules => Set<AlertRule>();
+    public DbSet<ReadingAlertDelivery> ReadingAlertDeliveries => Set<ReadingAlertDelivery>();
+    public DbSet<SensorDevice> SensorDevices => Set<SensorDevice>();
+    public DbSet<PhysicalMeasurement> PhysicalMeasurements => Set<PhysicalMeasurement>();
 
     public DbSet<AuditLogEntry> AuditLogEntries =>
         Set<AuditLogEntry>();
@@ -39,6 +42,27 @@ public sealed class AppDbContext(
         ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<SensorDevice>(e => {
+            e.ToTable("SensorDevices", "dbo"); e.HasKey(x => x.DeviceId);
+            e.Property(x => x.DeviceId).HasMaxLength(64);
+            e.HasOne<Sensor>().WithMany().HasForeignKey(x => x.SensorId).OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<PhysicalMeasurement>(e => {
+            e.ToTable("PhysicalMeasurements", "dbo"); e.HasKey(x => new { x.DeviceId, x.MeasurementId });
+            e.Property(x => x.DeviceId).HasMaxLength(64);e.Property(x => x.MeasurementId).HasMaxLength(128);
+            e.Property(x => x.Fingerprint).HasMaxLength(64);
+            e.HasOne<SensorDevice>().WithMany().HasForeignKey(x => x.DeviceId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(x => x.Reading).WithOne().HasForeignKey<PhysicalMeasurement>(x => x.SensorReadingId).OnDelete(DeleteBehavior.Restrict);
+        });
+        modelBuilder.Entity<ReadingAlertDelivery>(e =>
+        {
+            e.ToTable("ReadingAlertDeliveries", "dbo");
+            e.HasKey(x => x.SensorReadingId);
+            e.Property(x => x.SensorReadingId).ValueGeneratedNever();
+            e.Property(x => x.Payload).IsRequired();
+            e.HasOne(x => x.Reading).WithOne().HasForeignKey<ReadingAlertDelivery>(x => x.SensorReadingId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
 
         modelBuilder.ApplyConfigurationsFromAssembly(
             typeof(AppDbContext).Assembly);

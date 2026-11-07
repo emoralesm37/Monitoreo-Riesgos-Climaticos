@@ -1,0 +1,8 @@
+FROM python:3.12-slim-bookworm
+ARG KUBECTL_VERSION=v1.36.1
+COPY requirements-validation.txt /tmp/requirements-validation.txt
+RUN pip install --no-cache-dir -r /tmp/requirements-validation.txt
+RUN python -c "import urllib.request,hashlib,os; base='https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl'; data=urllib.request.urlopen(base,timeout=60).read(); expected=urllib.request.urlopen(base+'.sha256',timeout=30).read().decode().strip(); assert hashlib.sha256(data).hexdigest()==expected; open('/usr/local/bin/kubectl','wb').write(data); os.chmod('/usr/local/bin/kubectl',0o755)"
+ENV KUBECONFIG=/dev/null PYTHONDONTWRITEBYTECODE=1
+WORKDIR /work/k8s
+CMD ["python", "-m", "unittest", "discover", "-s", "tools", "-p", "test_manifests.py", "-v"]

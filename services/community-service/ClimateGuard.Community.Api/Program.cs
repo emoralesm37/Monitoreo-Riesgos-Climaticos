@@ -8,6 +8,7 @@ using ClimateGuard.Community.Infrastructure.Services.Communities;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+builder.Services.AddHttpClient("SensorDirectory", c => c.Timeout = TimeSpan.FromSeconds(10));
 builder.Services.AddScoped<
     ICommunityService,
     CommunityService>();
@@ -71,6 +72,13 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
+if (args.Contains("--migrate-only"))
+{
+    using var scope = app.Services.CreateScope();
+    await scope.ServiceProvider.GetRequiredService<CommunityDbContext>().Database.MigrateAsync();
+    return;
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -80,6 +88,11 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapGet("/health/database", async (CommunityDbContext db) =>
+{
+    try { return await db.Database.CanConnectAsync() ? Results.Ok(new { status="connected" }) : (IResult)Results.StatusCode(503); }
+    catch { return Results.StatusCode(503); }
+}).AllowAnonymous();
 
 app.MapGet(
     "/health",

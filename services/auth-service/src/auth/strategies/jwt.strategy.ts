@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from '../../users/entities/user.entity';
+import { isUUID } from 'class-validator';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import {
@@ -17,7 +21,7 @@ interface JwtPayload {
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(configService: ConfigService) {
+  constructor(configService: ConfigService, @InjectRepository(User) private readonly users: Repository<User>) {
     super({
       jwtFromRequest:
         ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -34,12 +38,16 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  validate(payload: JwtPayload): AuthenticatedUser {
+  async validate(payload: JwtPayload): Promise<AuthenticatedUser> {
+    if (!isUUID(payload.sub)) throw new UnauthorizedException('Identidad no válida.');
+    const user = await this.users.findOne({ where: { id: payload.sub }, relations: { role: true } });
+    if (!user?.isActive || user.role.name !== payload.role)
+      throw new UnauthorizedException('La identidad o los permisos de la sesión cambiaron.');
     return {
-      userId: payload.sub,
-      email: payload.email,
-      name: payload.name,
-      role: payload.role,
+      userId: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role.name,
     };
   }
 }

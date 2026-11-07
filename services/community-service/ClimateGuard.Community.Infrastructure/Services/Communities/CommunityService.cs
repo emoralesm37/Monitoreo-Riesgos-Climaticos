@@ -221,7 +221,8 @@ public sealed class CommunityService(
                 community.Description,
                 community.IsActive,
                 community.CreatedAt,
-                community.UpdatedAt));
+                community.UpdatedAt,
+                null));
     }
 
     private static string? NormalizeOptionalText(

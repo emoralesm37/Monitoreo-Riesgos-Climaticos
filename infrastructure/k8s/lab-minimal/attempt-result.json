@@ -1,0 +1,46 @@
+{
+  "decision": "BLOCKED_DO_NOT_CREATE_CLUSTER",
+  "resourceBlocks": [
+    "HOST_MEMORY_BELOW_2048_MIB",
+    "LINUX_VM_MEMORY_BELOW_4096_MIB"
+  ],
+  "clusterCreated": false,
+  "clusterStarted": false,
+  "deployed": {
+    "nodes": 0,
+    "pods": 0,
+    "deployments": 0,
+    "services": 0,
+    "jobs": 0,
+    "secrets": 0,
+    "databases": 0
+  },
+  "prepared": {
+    "namespace": "climateguard-lab",
+    "resources": 14,
+    "deployments": 2,
+    "services": 2,
+    "jobs": 1,
+    "requestsMiB": 224,
+    "limitsMiB": 480
+  },
+  "tests": {
+    "resourceGate": 5,
+    "offlineSchema": "PASS",
+    "secretAndStorageReferenceValidation": "PASS",
+    "javascriptSyntax": "PASS",
+    "kubernetesHttp": "NOT_RUN",
+    "kubernetesDns": "NOT_RUN",
+    "kubernetesReadiness": "NOT_RUN"
+  },
+  "existingContainerIdentityUnchanged": true,
+  "existingContainersAfter": [
+    "7b6003d7d8a0|climateguard-reports-local-report-service-1|climateguard-report-service:local|Up 39 minutes (healthy)",
+    "0f67205b538f|climateguard-audit-local-audit-service-1|climateguard-audit-service:local|Up 15 hours (healthy)",
+    "aa424823c77b|climateguard-alerts-integrated-alert-service-1|climateguard-alert-service:local|Up 18 hours (healthy)",
+    "a6691bd468c0|climateguard-mongodb|mongo:7.0|Up 20 hours (healthy)",
+    "1df30b095a5e|cg-alertval-a60ba22-db-1|postgres:17-alpine|Up 26 hours (healthy)",
+    "e7a995098bc9|climateguard-auth-postgres|postgres:17|Up 24 hours",
+    "63d9244601a3|climateguard-sqlserver|mcr.microsoft.com/mssql/server:2022-latest|Up 20 hours (healthy)"
+  ]
+}

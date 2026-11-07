@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -21,4 +21,12 @@
     <ProjectReference Include="..\ClimateGuard.Sensor.Infrastructure\ClimateGuard.Sensor.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="../../../backend/ClimateGuard.Infrastructure/ClimateGuard.Infrastructure.csproj" />
+    <Compile Include="../../../backend/ClimateGuard.Api/Controllers/SensorsController.cs" Link="Compatibility/SensorsController.cs" />
+    <Compile Include="../../../backend/ClimateGuard.Api/Controllers/ReadingEvaluationsController.cs" Link="Compatibility/ReadingEvaluationsController.cs" />
+    <Compile Include="../../../backend/ClimateGuard.Api/Controllers/ReadingReportsController.cs" Link="Compatibility/ReadingReportsController.cs" />
+    <Compile Include="../../../backend/ClimateGuard.Api/Controllers/PhysicalReadingsController.cs" Link="Compatibility/PhysicalReadingsController.cs" />
+    <Compile Include="../../../backend/ClimateGuard.Api/Exceptions/GlobalExceptionHandler.cs" Link="Compatibility/GlobalExceptionHandler.cs" />
+  </ItemGroup>
 </Project>

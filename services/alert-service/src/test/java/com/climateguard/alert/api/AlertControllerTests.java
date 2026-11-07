@@ -28,8 +28,19 @@ class AlertControllerTests {
     @Autowired
     private AlertRepository alertRepository;
 
+    @org.springframework.test.context.bean.override.mockito.MockitoBean
+    private com.climateguard.alert.service.RuleProvider ruleProvider;
+    @Autowired
+    private com.climateguard.alert.repository.ReadingEvaluationRepository receipts;
+
     @BeforeEach
     void cleanDatabase() {
+        receipts.deleteAll();
+        org.mockito.Mockito.when(ruleProvider.get(org.mockito.ArgumentMatchers.anyString())).thenReturn(
+            new com.climateguard.alert.service.RuleProvider.Rule[] {
+                new com.climateguard.alert.service.RuleProvider.Rule(1, 1, "NIVEL_RIO", "m", new java.math.BigDecimal("0"), new java.math.BigDecimal("8"), "Rojo", "Inundacion", "Rio fuera de umbral", true),
+                new com.climateguard.alert.service.RuleProvider.Rule(2, 2, "NIVEL_LLUVIA", "mm", new java.math.BigDecimal("0"), new java.math.BigDecimal("100"), "Naranja", "Inundacion", "Lluvia fuera de umbral", true)
+            });
         alertRepository.deleteAll();
     }
 
@@ -45,12 +56,12 @@ class AlertControllerTests {
             {
               "sensorId": 1,
               "communityId": 1,
-              "sensorName": "Sensor de río",
+              "sensorName": "Sensor de rÃƒÂ­o",
               "communityName": "Comunidad El Progreso",
               "severity": "ROJO",
               "phenomenon": "INUNDACION",
               "triggerValue": 8.75,
-              "message": "Nivel del río fuera del rango seguro"
+              "message": "Nivel del rÃƒÂ­o fuera del rango seguro"
             }
             """;
 
@@ -81,7 +92,7 @@ class AlertControllerTests {
             {
               "severity": "AMARILLO",
               "phenomenon": "TORMENTA",
-              "message": "Ráfagas de viento detectadas"
+              "message": "RÃƒÂ¡fagas de viento detectadas"
             }
             """;
 
@@ -149,9 +160,10 @@ class AlertControllerTests {
 void dangerousReadingGeneratesAlert() throws Exception {
     String body = """
         {
+          "measurementId": "test-river", "sensorTypeId": 1, "unit": "m", "capturedAt": "2026-11-06T00:00:00Z",
           "sensorId": 10,
           "communityId": 1,
-          "sensorName": "Sensor de nivel del río",
+          "sensorName": "Sensor de nivel del rÃƒÂ­o",
           "communityName": "Comunidad El Progreso",
           "readingType": "NIVEL_RIO",
           "value": 9.50
@@ -196,6 +208,7 @@ void dangerousReadingGeneratesAlert() throws Exception {
 void duplicateActiveAlertIsPrevented() throws Exception {
     String body = """
         {
+          "measurementId": "test-rain", "sensorTypeId": 2, "unit": "mm", "capturedAt": "2026-11-06T00:00:00Z",
           "sensorId": 20,
           "communityId": 1,
           "sensorName": "Sensor de lluvia",
@@ -304,5 +317,55 @@ void alertsCanBeFilteredBySeverityAndSensor()
         .andExpect(
             jsonPath("$[0].sensorId").value(30)
         );
+}
+
+private String measurement(String id, int value) {
+    return "{\"measurementId\":\"" + id + "\",\"sensorId\":10,\"sensorTypeId\":1,"
+        + "\"sensorName\":\"Unit sensor\",\"communityId\":1,\"communityName\":\"Unit community\","
+        + "\"readingType\":\"NIVEL_RIO\",\"unit\":\"m\",\"capturedAt\":\"2026-11-06T00:00:00Z\",\"value\":" + value + "}";
+}
+private org.springframework.test.web.servlet.request.RequestPostProcessor administrator() {
+    return jwt().jwt(t -> t.subject("admin-user"))
+        .authorities(new SimpleGrantedAuthority("ROLE_Administrador"));
+}
+@Test void normalReadingDoesNotCreateAnAlert() throws Exception {
+    mockMvc.perform(post("/api/alerts/evaluate").with(administrator())
+        .contentType(MediaType.APPLICATION_JSON).content(measurement("normal", 1)))
+        .andExpect(status().isOk()).andExpect(jsonPath("$.alertGenerated").value(false));
+    org.junit.jupiter.api.Assertions.assertEquals(0, alertRepository.count());
+    org.junit.jupiter.api.Assertions.assertEquals(1, receipts.count());
+}
+@Test void sameIdentifierWithDifferentValueReturns409() throws Exception {
+    mockMvc.perform(post("/api/alerts/evaluate").with(administrator())
+        .contentType(MediaType.APPLICATION_JSON).content(measurement("conflict", 9))).andExpect(status().isOk());
+    mockMvc.perform(post("/api/alerts/evaluate").with(administrator())
+        .contentType(MediaType.APPLICATION_JSON).content(measurement("conflict", 10))).andExpect(status().isConflict());
+    org.junit.jupiter.api.Assertions.assertEquals(1, alertRepository.count());
+}
+@Test void resolvedMeasurementCannotCreateAnotherAlert() throws Exception {
+    String body = measurement("resolved", 9);
+    mockMvc.perform(post("/api/alerts/evaluate").with(administrator())
+        .contentType(MediaType.APPLICATION_JSON).content(body)).andExpect(status().isOk());
+    Alert alert = alertRepository.findAll().get(0); alert.resolve("operator-user"); alertRepository.saveAndFlush(alert);
+    mockMvc.perform(post("/api/alerts/evaluate").with(administrator())
+        .contentType(MediaType.APPLICATION_JSON).content(body))
+        .andExpect(status().isOk()).andExpect(jsonPath("$.duplicatePrevented").value(true))
+        .andExpect(jsonPath("$.alert.status").value("RESUELTA"));
+    org.junit.jupiter.api.Assertions.assertEquals(1, alertRepository.count());
+}
+@Test void noRulesMeansNoFabricatedAlerts() throws Exception {
+    org.mockito.Mockito.when(ruleProvider.get(org.mockito.ArgumentMatchers.anyString()))
+        .thenReturn(new com.climateguard.alert.service.RuleProvider.Rule[0]);
+    mockMvc.perform(post("/api/alerts/evaluate").with(administrator())
+        .contentType(MediaType.APPLICATION_JSON).content(measurement("no-rules", 99)))
+        .andExpect(status().isOk()).andExpect(jsonPath("$.alertGenerated").value(false));
+    org.junit.jupiter.api.Assertions.assertEquals(0, alertRepository.count());
+}
+@Test void incompatibleUnitDoesNotPersistAnAlertOrReceipt() throws Exception {
+    mockMvc.perform(post("/api/alerts/evaluate").with(administrator())
+        .contentType(MediaType.APPLICATION_JSON).content(measurement("bad-unit", 99).replace("\"unit\":\"m\"", "\"unit\":\"cm\"")))
+        .andExpect(status().isUnprocessableEntity());
+    org.junit.jupiter.api.Assertions.assertEquals(0, alertRepository.count());
+    org.junit.jupiter.api.Assertions.assertEquals(0, receipts.count());
 }
 }

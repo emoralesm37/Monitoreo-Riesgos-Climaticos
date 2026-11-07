@@ -11,6 +11,7 @@ client = MongoClient(
     password=settings.mongo_report_password,
     authSource=settings.mongo_database,
     serverSelectionTimeoutMS=5000,
+    tz_aware=True,
 )
 
 

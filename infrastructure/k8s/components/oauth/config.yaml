@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: oauth-settings
+data:
+  OAUTH_FRONTEND_URL: https://climateguard.invalid
+  GOOGLE_CALLBACK_URL: https://climateguard.invalid/api/auth/callback/google
+  GITHUB_CALLBACK_URL: https://climateguard.invalid/api/auth/callback/github

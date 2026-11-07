@@ -1,0 +1,10 @@
+write-kubeconfig-mode: '0600'
+secrets-encryption: true
+default-local-storage-path: /srv/climateguard-demo/pv
+kubelet-arg:
+- system-reserved=cpu=200m,memory=384Mi
+- kube-reserved=cpu=200m,memory=768Mi
+- eviction-hard=memory.available<384Mi,nodefs.available<10%
+- container-log-max-size=10Mi
+- container-log-max-files=3
+data-dir: /srv/climateguard-demo/k3s

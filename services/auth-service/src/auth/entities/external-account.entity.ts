@@ -11,11 +11,12 @@ import {
 import { User } from '../../users/entities/user.entity';
 
 @Entity({ name: 'external_accounts' })
-@Index(
-  'ux_external_accounts_provider_user',
-  ['provider', 'providerUserId'],
-  { unique: true },
-)
+@Index('ux_external_accounts_provider_user', ['provider', 'providerUserId'], {
+  unique: true,
+})
+@Index('ux_external_accounts_user_provider', ['userId', 'provider'], {
+  unique: true,
+})
 @Index('ix_external_accounts_user_id', ['userId'])
 export class ExternalAccount {
   @PrimaryGeneratedColumn('uuid')
