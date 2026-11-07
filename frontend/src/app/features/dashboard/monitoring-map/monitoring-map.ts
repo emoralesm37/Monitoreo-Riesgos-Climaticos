@@ -66,6 +66,9 @@ export class MonitoringMap implements AfterViewInit, OnChanges, OnDestroy {
       L.control.zoom({ position: 'topright' }).addTo(this.map);
       L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
+        // OSM requires an identifying Referer. Send only the origin for tiles;
+        // retain the site's no-referrer policy for OAuth and all other requests.
+        referrerPolicy: 'origin',
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>',
         className: 'climate-map-tiles',
       }).on('tileerror', () => { if (!this.destroyed) this.tilesError.set(true); }).addTo(this.map);

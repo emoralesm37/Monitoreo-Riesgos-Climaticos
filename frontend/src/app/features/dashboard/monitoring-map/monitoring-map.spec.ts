@@ -9,11 +9,11 @@ const fake = vi.hoisted(() => {
   const group = { addTo: vi.fn().mockReturnThis(), clearLayers: vi.fn() };
   const marker = { bindPopup: vi.fn().mockReturnThis(), bindTooltip: vi.fn().mockReturnThis(), addTo: vi.fn().mockReturnThis() };
   const tile = { on: vi.fn().mockReturnThis(), addTo: vi.fn().mockReturnThis() };
-  return { map, group, marker, tile, circleMarker: vi.fn(() => marker), createMap: vi.fn(() => map) };
+  return { map, group, marker, tile, tileLayer: vi.fn(() => tile), circleMarker: vi.fn(() => marker), createMap: vi.fn(() => map) };
 });
 vi.mock('leaflet', () => ({ map: fake.createMap, circleMarker: fake.circleMarker,
   latLngBounds: (coordinates: number[][]) => coordinates,
-  layerGroup: () => fake.group, tileLayer: () => fake.tile,
+  layerGroup: () => fake.group, tileLayer: fake.tileLayer,
   control: { zoom: () => ({ addTo: vi.fn() }) } }));
 
 const community: Comunidad = { communityId: 1, name: 'Comunidad de prueba unitaria', municipality: '',
@@ -41,6 +41,10 @@ describe('MonitoringMap (Leaflet isolated)', () => {
     f.componentRef.setInput('communities', [community, { ...community, communityId: 2, latitude: null }]);
     f.detectChanges(); await f.whenStable(); f.detectChanges();
     await vi.waitFor(() => expect(fake.circleMarker).toHaveBeenCalled());
+    expect(fake.tileLayer).toHaveBeenCalledWith('https://tile.openstreetmap.org/{z}/{x}/{y}.png', expect.objectContaining({
+      referrerPolicy: 'origin',
+      attribution: expect.stringContaining('https://www.openstreetmap.org/copyright'),
+    }));
     expect(f.componentInstance.located.length).toBe(1);
     expect(f.nativeElement.textContent).toContain('registrada: 1');
     expect(fake.circleMarker).toHaveBeenCalledWith([15.2, -90.5], expect.objectContaining({ fillColor: '#1695b2' }));
